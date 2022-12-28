@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Permiso extends Model
 {
+    /**
+     * Variable $table se indica a que tabla de la DB esta relacionada la clase Permiso
+     */
     use HasFactory;
     protected $table="permiso";
     public $timestamps = false;

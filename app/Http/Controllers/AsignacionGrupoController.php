@@ -6,6 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\AsignacionGrupo;
 class AsignacionGrupoController extends Controller
 {
+    /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
+     * $asignacion hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
+     * ELOQUENT se hara cargo de insertar en la DB
+     */
     public function asignarGrupoUsuario(Request $request){
         $validateData=$request->validate([
             'usuario_id'=>'required|int',

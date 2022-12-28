@@ -15,6 +15,14 @@ use Illuminate\Support\Facades\Auth;
 
 class UsuarioController extends Controller
 {
+
+     /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir require que la peticion contenga siete campos, la inidicacion unique
+     * hace una consulta a la db y se asegura de que no exista de lo contrario hara uso de  excepciones.
+     * $user hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
+     * ELOQUENT se hara cargo de insertar en la DB
+     */
     public function register(Request $request) {
 
         try{
@@ -52,6 +60,17 @@ class UsuarioController extends Controller
        
     }
 
+     /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir require que la peticion contenga dos campos, 
+     * $user hace uso de ELOQUENT de laravel con where lo cual obtiene el usuario de la DB en caso existiera comparando el username
+     * 
+     * la condicion $user->estado_usuario==1 valida que el usuario este disponible de lo contrario no autenticara y dara el mensaje indicado
+     * 
+     * Hash::check($validateData['password'], $user->password) metodo de laravel que valida la contraseña guardada en la base de datos
+     * con la recibida en $request, el metodo Hash::check desencripta la contraseña y la compara este metodo no tiene forma de saber cual
+     * es la contraseña ya que laravel incluye este tipo de seguridad
+     */
     public function login(Request $request){
         try{
             $validateData=$request->validate([
@@ -61,10 +80,10 @@ class UsuarioController extends Controller
             $user=User::where("username",$validateData['username'])->first();
             if(isset($user)){
                 if ($user->estado_usuario==1) {
-                    if(Hash::check($validateData['password'], $user->password)){
+                    if(Hash::check($validateData['password'], $user->password)){ //comparacion de contraseñas
                         Auth::login($user);
-                        $proyectos=$this->obtenerProyecto($user->id);
-                        $token = $user->createToken('auth_token')->plainTextToken;
+                        $proyectos=$this->obtenerProyecto($user->id); // llamada a metodo obtener proyecto, metodo visible en la parte inferior de la clase
+                        $token = $user->createToken('auth_token')->plainTextToken;//Creacion del token Bearer
                         return response()->json([
                             'token' => $token,
                             "id"=>$user->id,
@@ -94,6 +113,11 @@ class UsuarioController extends Controller
         
     }
 
+    /**
+     * @param $request recibe la peticion del frontend
+     * Atraves de $request podemos acceder al usuario, ver el token actual y eliminarlo
+     * esto terminara la sesion
+     */
     public function logout(Request $request){
         $request->user()->currentAccessToken()->delete();
 
@@ -102,6 +126,22 @@ class UsuarioController extends Controller
         ],200);
     }
 
+    /**
+     * @param $id recibe el id del usuario para evaluar
+     * 
+     * 
+     * Primera consulta: Uso de ELOQUENT query podemos crear consultas personalizada
+     * en este caso el inner join para obtener lo siguiente
+     * 1. $grupos realiza el inner join entre las tablas Asignacion grupo y usuario para obtener a los grupos que esta incluido el usuario
+     * 
+     * 2.$proyecto: se evalua el segundo inner join entre Proyecto y Grupo para obtener los proyectos que tiene dicho grupo
+     * 
+     * 3.$role: Se evalua el tercer inner join entre rol y asignacion rol para obtener los roles que estan asignados al grupo 
+     * anteriormente encontrado
+     * 
+     * 4. $permisos: una vez obtenido el rol se hace el ultimo inner join para obtener los permisos que estan relacionados a este rol
+     * mediante las tablas asignacion_permiso y Permiso usando el rol obtenido para la comparacion
+     */
     private function obtenerProyecto($id){
         $grupos=AsignacionGrupo::select('grupo_id')
                         ->join('usuario',"asignacion_grupo.usuario_id","usuario.id")

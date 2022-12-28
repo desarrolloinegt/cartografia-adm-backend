@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Proyecto extends Model
 {
+    /**
+     * Variable $table para indicar a que tabla se relaciona la clase Proyecto
+     */
     use HasFactory;
     protected $table="proyecto";
     public $timestamps = false;

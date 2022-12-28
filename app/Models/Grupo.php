@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Grupo extends Model
 {
+    /**
+     * Variable $table indica a que tabla de la DB hace referencia la clase Grupo
+     * El arreglo fillable indica los campos que require una creacion de un nuevo grupo 
+     */
     use HasFactory;
     protected $table="grupo";
     public $timestamps = false;
