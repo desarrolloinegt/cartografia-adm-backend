@@ -13,10 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Rol', function (Blueprint $table) {
+        Schema::create('vehiculo', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('Id', true);
-            $table->string('Nombre', 25)->unique('Nombre_UNIQUE');
+            $table->string('placa', 7)->primary();
+            $table->string('modelo', 25);
+            $table->date('año');
+            $table->integer('equipo_campo_id')->index('fk_Vehiculo_Equipo Campo1_idx');
             $table->tinyInteger('estado');
         });
     }
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Rol');
+        Schema::dropIfExists('vehiculo');
     }
 };

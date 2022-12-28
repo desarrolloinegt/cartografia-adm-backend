@@ -13,16 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Usuario', function (Blueprint $table) {
+        Schema::create('usuario', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('Id', true);
+            $table->integer('id', true);
             $table->string('DPI', 13)->unique('DPI_UNIQUE');
-            $table->string('Nombres', 25);
-            $table->string('Apellidos', 25);
-            $table->string('Email', 45);
-            $table->integer('Codigo_Usuario');
-            $table->tinyInteger('Estado_Usuario');
-            $table->string('Password', 100);
+            $table->string('nombres', 25);
+            $table->string('apellidos', 25);
+            $table->string('email', 45);
+            $table->integer('codigo_usuario');
+            $table->tinyInteger('estado_usuario');
+            $table->string('password', 100);
             $table->string('username', 50)->unique('username_UNIQUE');
         });
     }
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Usuario');
+        Schema::dropIfExists('usuario');
     }
 };

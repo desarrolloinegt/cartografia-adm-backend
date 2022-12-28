@@ -8,12 +8,12 @@ class AsignacionGrupoController extends Controller
 {
     public function asignarGrupoUsuario(Request $request){
         $validateData=$request->validate([
-            'Usuario_Id'=>'required|int',
-            'Grupo_Id'=>'required|int'
+            'usuario_id'=>'required|int',
+            'grupo_id'=>'required|int'
         ]);
         $asignacion=AsignacionGrupo::create([
-            "Usuario_Id"=>$validateData['Usuario_Id'],
-            "Grupo_Id"=>$validateData['Grupo_Id']
+            "usuario_id"=>$validateData['usuario_id'],
+            "grupo_id"=>$validateData['grupo_id']
         ]);
         return response()->json([
             'status'=>true,

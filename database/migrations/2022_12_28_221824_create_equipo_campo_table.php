@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Asignacion Grupo', function (Blueprint $table) {
+        Schema::create('equipo_campo', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('Usuario_Id')->index('fk_Asignacion Grupo_Usuario1_idx');
-            $table->integer('Grupo_Id')->index('fk_Asignacion Grupo_Grupo1_idx');
+            $table->integer('id', true);
+            $table->integer('proyecto_id')->index('fk_Equipo Campo_Proyecto1_idx');
+            $table->integer('usuario_id')->index('fk_Equipo Campo_Usuario1_idx');
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Asignacion Grupo');
+        Schema::dropIfExists('equipo_campo');
     }
 };

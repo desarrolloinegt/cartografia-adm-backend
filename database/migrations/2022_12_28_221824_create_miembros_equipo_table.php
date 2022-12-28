@@ -13,8 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('Municipio', function (Blueprint $table) {
-            $table->foreign(['Departamento_Id1'], 'fk_Municipio_Departamento1')->references(['Id'])->on('Departamento')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+        Schema::create('miembros_equipo', function (Blueprint $table) {
+            $table->comment('');
+            $table->integer('id', true);
+            $table->integer('usuario_id')->index('fk_Miembros Equipo_Usuario1_idx');
         });
     }
 
@@ -25,8 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('Municipio', function (Blueprint $table) {
-            $table->dropForeign('fk_Municipio_Departamento1');
-        });
+        Schema::dropIfExists('miembros_equipo');
     }
 };

@@ -9,10 +9,10 @@ class AsignacionGrupo extends Model
 {
     use HasFactory;
 
-    protected $table="Asignacion Grupo";
+    protected $table="asignacion_grupo";
     public $timestamps = false;
     protected $fillable = [
-        'Usuario_Id',
-        'Grupo_Id'
+        'usuario_id',
+        'grupo_id'
     ];
 }

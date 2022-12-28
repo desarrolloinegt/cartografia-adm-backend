@@ -13,10 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Asignacion UPM', function (Blueprint $table) {
-            $table->comment('');
-            $table->integer('UPM_Id')->index('fk_Asignacion UPM_UPM1_idx');
-            $table->integer('Proyecto_Id')->index('fk_Asignacion UPM_Proyecto1_idx');
+        Schema::table('miembros_equipo', function (Blueprint $table) {
+            $table->foreign(['usuario_id'], 'fk_Miembros Equipo_Usuario1')->references(['id'])->on('usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -27,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Asignacion UPM');
+        Schema::table('miembros_equipo', function (Blueprint $table) {
+            $table->dropForeign('fk_Miembros Equipo_Usuario1');
+        });
     }
 };

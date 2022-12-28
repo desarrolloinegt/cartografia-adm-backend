@@ -13,10 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Asignacion Permisos', function (Blueprint $table) {
+        Schema::create('proyecto', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('Rol_Id')->index('fk_Asignacion Permisos_Rol1_idx');
-            $table->integer('Permiso_Id')->index('fk_Asignacion Permisos_Permiso1_idx');
+            $table->integer('id', true);
+            $table->date('año');
+            $table->tinyInteger('estado_proyecto');
+            $table->integer('encuesta_id')->index('fk_Proyecto_Encuesta1_idx');
+            $table->string('nombre', 100)->unique('nombre_UNIQUE');
         });
     }
 
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Asignacion Permisos');
+        Schema::dropIfExists('proyecto');
     }
 };

@@ -9,10 +9,10 @@ class AsignacionRol extends Model
 {
     use HasFactory;
 
-    protected $table="Asignacion Rol";
+    protected $table="asignacion_rol";
     public $timestamps = false;
     protected $fillable = [
-        'Rol_Id',
-        'Grupo_Id'
+        'rol_id',
+        'grupo_id'
     ];
 }

@@ -13,12 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Permiso', function (Blueprint $table) {
+        Schema::create('encuesta', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('Id', true);
-            $table->string('Nombre', 45)->unique('Nombre_UNIQUE');
-            $table->tinyInteger('estado');
-            $table->string('alias', 100);
+            $table->integer('id', true);
+            $table->string('nombre', 100)->unique('Nombre_UNIQUE');
+            $table->string('descripcion', 200);
         });
     }
 
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Permiso');
+        Schema::dropIfExists('encuesta');
     }
 };

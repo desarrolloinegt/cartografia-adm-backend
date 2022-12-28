@@ -20,22 +20,22 @@ class UsuarioController extends Controller
         try{
 
             $validateData=$request->validate([
-                'DPI'=>'required|max:13|min:13|unique:Usuario',
-                'Nombres'=>'required|string|max:25',
-                'Apellidos'=>'required|string|max:25',
-                'Email'=>'required|email|min:13|unique:Usuario',
-                'Codigo_Usuario'=>'required|max:5',
+                'DPI'=>'required|max:13|min:13|unique:usuario',
+                'nombres'=>'required|string|max:25',
+                'apellidos'=>'required|string|max:25',
+                'email'=>'required|email|min:13|unique:usuario',
+                'codigo_usuario'=>'required|max:5',
                 'password'=>'required|min:8',
-                'username'=>'required|unique:Usuario'
+                'username'=>'required|unique:usuario'
             ]);
     
             $user=User::create([
                 'DPI'=>$validateData['DPI'],
-                'Nombres'=>$validateData['Nombres'],
-                'Apellidos'=>$validateData['Apellidos'],
-                'Email'=>$validateData['Email'],
-                'Codigo_Usuario'=>$validateData['Codigo_Usuario'],
-                'Estado_Usuario'=>1,
+                'nombres'=>$validateData['nombres'],
+                'apellidos'=>$validateData['apellidos'],
+                'email'=>$validateData['email'],
+                'codigo_usuario'=>$validateData['codigo_usuario'],
+                'estado_usuario'=>1,
                 'password'=>Hash::make($validateData['password']),
                 'username'=>($validateData['username'])
             ]);
@@ -60,14 +60,14 @@ class UsuarioController extends Controller
             ]);
             $user=User::where("username",$validateData['username'])->first();
             if(isset($user)){
-                if ($user->Estado_Usuario==1) {
-                    if(Hash::check($validateData['password'], $user->Password)){
+                if ($user->estado_usuario==1) {
+                    if(Hash::check($validateData['password'], $user->password)){
                         Auth::login($user);
-                        $proyectos=$this->obtenerProyecto($user->Id);
+                        $proyectos=$this->obtenerProyecto($user->id);
                         $token = $user->createToken('auth_token')->plainTextToken;
                         return response()->json([
                             'token' => $token,
-                            "id"=>$user->Id,
+                            "id"=>$user->id,
                             "usuario"=>$user->username,
                             "proyectos"=>$proyectos,
                         ],200); 
@@ -103,31 +103,31 @@ class UsuarioController extends Controller
     }
 
     private function obtenerProyecto($id){
-        $grupos=AsignacionGrupo::select('Grupo_Id')
-                        ->join('Usuario',"Asignacion Grupo.Usuario_Id","Usuario.Id")
-                        ->where('Usuario.Id',$id)
+        $grupos=AsignacionGrupo::select('grupo_id')
+                        ->join('usuario',"asignacion_grupo.usuario_id","usuario.id")
+                        ->where('usuario.id',$id)
                         ->get();
         $json=[];
         foreach($grupos as $grupo){
-            $proyecto=Proyecto::select('Proyecto.Id AS ID_PROYECTO','Proyecto.nombre AS NOMBRE_PROYECTO')
-                ->join('Grupo',"Proyecto.Id","Grupo.Proyecto_Id")
-                ->where('Grupo.Id',$grupo->Grupo_Id)
+            $proyecto=Proyecto::select('proyecto.id AS id_proyecto','proyecto.nombre AS nombre_proyecto')
+                ->join('grupo',"proyecto.id","grupo.proyecto_id")
+                ->where('grupo.id',$grupo->grupo_id)
                 ->get();
-            $role=Role::select('Rol.Id','Nombre AS Role')
-                ->join('Asignacion Rol',"Rol.Id","Asignacion Rol.Rol_Id")
-                ->where('Asignacion Rol.Grupo_Id',$grupo->Grupo_Id)
+            $role=Role::select('rol.id','nombre AS rol')
+                ->join('asignacion_rol',"rol.id","asignacion_rol.rol_id")
+                ->where('asignacion_rol.grupo_id',$grupo->grupo_id)
                 ->get();
             $permisos=[];
             foreach($role as $rol){
-                $permisos=Permiso::select('Id','alias')
-                    ->join('Asignacion Permisos','Asignacion Permisos.Permiso_Id','Permiso.Id')
-                    ->where('Asignacion Permisos.Rol_Id',$rol->Id)
+                $permisos=Permiso::select('id','alias')
+                    ->join('asignacion_permisos','asignacion_permisos.permiso_id','permiso.id')
+                    ->where('asignacion_permisos.rol_id',$rol->id)
                     ->get();
             }
            
             $data =[
-                'proyecto'=>strtolower($proyecto),
-                "roles"=>strtolower($role),
+                'proyecto'=>$proyecto,
+                "roles"=>$role,
                 "permisos"=>($permisos)
             ];    
             array_push($json,$data); 

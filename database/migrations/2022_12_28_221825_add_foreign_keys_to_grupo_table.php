@@ -13,13 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Vehiculo', function (Blueprint $table) {
-            $table->comment('');
-            $table->string('Placa', 7)->primary();
-            $table->string('Modelo', 25);
-            $table->date('Año');
-            $table->integer('Equipo Campo_Id')->index('fk_Vehiculo_Equipo Campo1_idx');
-            $table->tinyInteger('estado');
+        Schema::table('grupo', function (Blueprint $table) {
+            $table->foreign(['proyecto_id'], 'fk_Grupo_Proyecto1')->references(['id'])->on('proyecto')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -30,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Vehiculo');
+        Schema::table('grupo', function (Blueprint $table) {
+            $table->dropForeign('fk_Grupo_Proyecto1');
+        });
     }
 };

@@ -13,10 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Asignacion Equipo', function (Blueprint $table) {
-            $table->comment('');
-            $table->integer('Equipo Campo_Id')->index('fk_Asignacion Equipo_Equipo Campo1_idx');
-            $table->integer('Miembros Equipo_Id')->index('fk_Asignacion Equipo_Miembros Equipo1_idx');
+        Schema::table('vehiculo', function (Blueprint $table) {
+            $table->foreign(['equipo_campo_id'], 'fk_Vehiculo_Equipo Campo1')->references(['id'])->on('equipo_campo')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -27,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Asignacion Equipo');
+        Schema::table('vehiculo', function (Blueprint $table) {
+            $table->dropForeign('fk_Vehiculo_Equipo Campo1');
+        });
     }
 };

@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('Asignacion UPM', function (Blueprint $table) {
-            $table->foreign(['Proyecto_Id'], 'fk_Asignacion UPM_Proyecto1')->references(['Id'])->on('Proyecto')->onUpdate('NO ACTION')->onDelete('NO ACTION');
-            $table->foreign(['UPM_Id'], 'fk_Asignacion UPM_UPM1')->references(['Id'])->on('UPM')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+        Schema::table('asignacion_upm', function (Blueprint $table) {
+            $table->foreign(['proyecto_id'], 'fk_Asignacion UPM_Proyecto1')->references(['id'])->on('proyecto')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['upm_id'], 'fk_Asignacion UPM_UPM1')->references(['id'])->on('upm')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('Asignacion UPM', function (Blueprint $table) {
+        Schema::table('asignacion_upm', function (Blueprint $table) {
             $table->dropForeign('fk_Asignacion UPM_Proyecto1');
             $table->dropForeign('fk_Asignacion UPM_UPM1');
         });

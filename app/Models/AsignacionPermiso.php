@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class AsignacionPermiso extends Model
 {
     use HasFactory;
-    protected $table="Asignacion Permisos";
+    protected $table="asignacion_permisos";
     public $timestamps = false;
     protected $fillable = [
-        'Rol_Id',
-        'Permiso_Id'
+        'rol_id',
+        'permiso_id'
     ];
 }

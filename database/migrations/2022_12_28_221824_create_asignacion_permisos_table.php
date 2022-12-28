@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Departamento', function (Blueprint $table) {
+        Schema::create('asignacion_permisos', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('Id', true);
-            $table->string('Nombre', 50)->unique('Nombre_UNIQUE');
+            $table->integer('rol_id')->index('fk_Asignacion Permisos_Rol1_idx');
+            $table->integer('permiso_id')->index('fk_Asignacion Permisos_Permiso1_idx');
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Departamento');
+        Schema::dropIfExists('asignacion_permisos');
     }
 };

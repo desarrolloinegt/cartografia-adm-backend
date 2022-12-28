@@ -13,13 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('UPM', function (Blueprint $table) {
+        Schema::create('permiso', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('Id', true);
-            $table->string('Descripcion', 200)->nullable();
-            $table->integer('Municipio_Id')->index('fk_UPM_Municipio1_idx');
+            $table->integer('id', true);
+            $table->string('nombre', 45)->unique('Nombre_UNIQUE');
             $table->tinyInteger('estado');
-            $table->string('nombre', 100)->unique('nombre_UNIQUE');
+            $table->string('alias', 100);
         });
     }
 
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('UPM');
+        Schema::dropIfExists('permiso');
     }
 };

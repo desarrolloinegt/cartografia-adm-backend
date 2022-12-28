@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
-    protected $table="Rol";
+    protected $table="rol";
     public $timestamps = false;
     protected $fillable = [
-        'Nombre',
+        'nombre',
         'estado'
     ];
 }

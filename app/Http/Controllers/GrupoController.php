@@ -9,15 +9,15 @@ class GrupoController extends Controller
 {
     public function createGroup(Request $request){
         $validateData=$request->validate([
-            'Nombre'=>'required|string|unique:Grupo',
-            'Descripcion'=>'',
-            'Proyecto_Id'=>'required|int',
+            'nombre'=>'required|string|unique:grupo',
+            'descripcion'=>'',
+            'proyecto_id'=>'required|int',
         ]);
         $role=Grupo::create([
-            "Nombre"=>$validateData['Nombre'],
-            "Descripcion"=>$validateData['Descripcion'],
+            "nombre"=>$validateData['nombre'],
+            "descripcion"=>$validateData['descripcion'],
             "estado"=>1,
-            "Proyecto_Id"=>$validateData['Proyecto_Id']
+            "proyecto_id"=>$validateData['proyecto_id']
         ]);
         return response()->json([
             'status'=>true,

@@ -13,10 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Asignacion Rol', function (Blueprint $table) {
-            $table->comment('');
-            $table->integer('Rol_Id')->index('fk_Asignacion Rol_Rol1_idx');
-            $table->integer('Grupo_Id')->index('fk_Asignacion Rol_Grupo1_idx');
+        Schema::table('proyecto', function (Blueprint $table) {
+            $table->foreign(['encuesta_id'], 'fk_Proyecto_Encuesta1')->references(['id'])->on('encuesta')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -27,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Asignacion Rol');
+        Schema::table('proyecto', function (Blueprint $table) {
+            $table->dropForeign('fk_Proyecto_Encuesta1');
+        });
     }
 };

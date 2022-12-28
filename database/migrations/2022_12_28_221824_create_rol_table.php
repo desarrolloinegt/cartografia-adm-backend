@@ -13,8 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('UPM', function (Blueprint $table) {
-            $table->foreign(['Municipio_Id'], 'fk_UPM_Municipio1')->references(['Id'])->on('Municipio')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+        Schema::create('rol', function (Blueprint $table) {
+            $table->comment('');
+            $table->integer('id', true);
+            $table->string('nombre', 25)->unique('Nombre_UNIQUE');
+            $table->tinyInteger('estado');
         });
     }
 
@@ -25,8 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('UPM', function (Blueprint $table) {
-            $table->dropForeign('fk_UPM_Municipio1');
-        });
+        Schema::dropIfExists('rol');
     }
 };

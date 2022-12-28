@@ -9,12 +9,12 @@ class AsignacionPermisoController extends Controller
 {
     public function asignarPermisoRol(Request $request){
         $validateData=$request->validate([
-            'Rol_Id'=>'required|int',
-            'Permiso_Id'=>'required|int'
+            'rol_id'=>'required|int',
+            'permiso_id'=>'required|int'
         ]);
         $asignacion=AsignacionPermiso::create([
-            "Rol_Id"=>$validateData['Rol_Id'],
-            "Permiso_Id"=>$validateData['Permiso_Id']
+            "rol_id"=>$validateData['rol_id'],
+            "permiso_id"=>$validateData['permiso_id']
         ]);
         return response()->json([
             'status'=>true,

@@ -9,12 +9,12 @@ class AsignacionRolController extends Controller
 {
     public function asignarRolGrupo(Request $request){
         $validateData=$request->validate([
-            'Rol_Id'=>'required|int',
-            'Grupo_Id'=>'required|int'
+            'rol_id'=>'required|int',
+            'grupo_id'=>'required|int'
         ]);
         $asignacion=AsignacionRol::create([
-            "Rol_Id"=>$validateData['Rol_Id'],
-            "Grupo_Id"=>$validateData['Grupo_Id']
+            "rol_id"=>$validateData['rol_id'],
+            "grupo_id"=>$validateData['grupo_id']
         ]);
         return response()->json([
             'status'=>true,

@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('Grupo', function (Blueprint $table) {
-            $table->foreign(['Proyecto_Id'], 'fk_Grupo_Proyecto1')->references(['Id'])->on('Proyecto')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+        Schema::table('municipio', function (Blueprint $table) {
+            $table->foreign(['departamento_id'], 'fk_Municipio_Departamento1')->references(['id'])->on('departamento')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('Grupo', function (Blueprint $table) {
-            $table->dropForeign('fk_Grupo_Proyecto1');
+        Schema::table('municipio', function (Blueprint $table) {
+            $table->dropForeign('fk_Municipio_Departamento1');
         });
     }
 };

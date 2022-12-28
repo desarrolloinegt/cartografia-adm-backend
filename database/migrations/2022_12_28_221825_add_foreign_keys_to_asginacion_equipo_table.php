@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('Asignacion Equipo', function (Blueprint $table) {
-            $table->foreign(['Equipo Campo_Id'], 'fk_Asignacion Equipo_Equipo Campo1')->references(['Id'])->on('Equipo Campo')->onUpdate('NO ACTION')->onDelete('NO ACTION');
-            $table->foreign(['Miembros Equipo_Id'], 'fk_Asignacion Equipo_Miembros Equipo1')->references(['Id'])->on('Miembros Equipo')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+        Schema::table('asginacion_equipo', function (Blueprint $table) {
+            $table->foreign(['equipo_campo_id'], 'fk_Asignacion Equipo_Equipo Campo1')->references(['id'])->on('equipo_campo')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['miembros_equipo_id'], 'fk_Asignacion Equipo_Miembros Equipo1')->references(['id'])->on('miembros_equipo')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('Asignacion Equipo', function (Blueprint $table) {
+        Schema::table('asginacion_equipo', function (Blueprint $table) {
             $table->dropForeign('fk_Asignacion Equipo_Equipo Campo1');
             $table->dropForeign('fk_Asignacion Equipo_Miembros Equipo1');
         });
