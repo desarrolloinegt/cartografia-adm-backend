@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('Modelo', 25);
             $table->date('Año');
             $table->integer('Equipo Campo_Id')->index('fk_Vehiculo_Equipo Campo1_idx');
+            $table->tinyInteger('estado');
         });
     }
 

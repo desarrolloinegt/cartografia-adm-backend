@@ -16,7 +16,7 @@ return [
     */
 
     'paths' => ['api/*', 'sanctum/csrf-cookie','registro','rol','grupo',"asignarPermiso",
-    "asignarGrupo"],
+    "asignarGrupo",'login'],
 
     'allowed_methods' => ['*'],
 
@@ -30,6 +30,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

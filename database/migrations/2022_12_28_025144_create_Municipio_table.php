@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Departamento', function (Blueprint $table) {
+        Schema::create('Municipio', function (Blueprint $table) {
             $table->comment('');
             $table->integer('Id', true);
-            $table->string('Nombre', 50);
+            $table->string('Nombre', 50)->unique('Nombre_UNIQUE');
+            $table->integer('Departamento_Id1')->index('fk_Municipio_Departamento1_idx');
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Departamento');
+        Schema::dropIfExists('Municipio');
     }
 };

@@ -12,6 +12,8 @@ class Grupo extends Model
     public $timestamps = false;
     protected $fillable = [
         'Nombre',
-        'Descripcion'
+        'Descripcion',
+        'estado',
+        'Proyecto_Id'
     ];
 }

@@ -11,7 +11,10 @@ class RoleController extends Controller
         $validateData=$request->validate([
             'Nombre'=>'required|string|unique:Rol'
         ]);
-        $role=Role::create(["Nombre"=>$validateData['Nombre']]);
+        $role=Role::create([
+            "Nombre"=>$validateData['Nombre'],
+            "estado"=>1
+        ]);
         return response()->json([
             'status'=>true,
             'message'=>'rol creado correctamente'

@@ -13,10 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('Permiso', function (Blueprint $table) {
+        Schema::create('Grupo', function (Blueprint $table) {
             $table->comment('');
             $table->integer('Id', true);
-            $table->string('Nombre', 25);
+            $table->string('Nombre', 100)->unique('Nombre_UNIQUE');
+            $table->string('Descripcion', 400);
+            $table->tinyInteger('estado');
+            $table->integer('Proyecto_Id')->index('fk_Grupo_Proyecto1_idx');
         });
     }
 
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Permiso');
+        Schema::dropIfExists('Grupo');
     }
 };
