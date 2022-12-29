@@ -174,4 +174,91 @@ class UsuarioController extends Controller
         }  
         return $json;
     }
+
+
+      /**
+     * @param $request recibe la peticion del frontend
+     * A traves de ELOQUENT podemos usar el metodo select y seleccionar los campos necesarios con la condicion de que el estado
+     * sea 1, es decir este activo      
+     */
+    public function obtenerUsuarios(){
+        $users=User::select("id","nombres","apellidos","email","codigo_usuario")
+            ->where("estado_usuario",1)
+            ->get();
+        return response()->json($users);    
+    }
+
+
+    /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir requiee que la peticion contenga los datos que necesitamos para editar el usuario
+     * A traves de ELOQUENT podemos usar el metodo find y seleccionar el rol que corresponde el id
+     * 
+     * Al obtener el rol podemos hacer uso de sus variables y asignarle el valor obtenido en el validateData
+     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL      
+     */
+
+     public function modificarUsuario(Request $request){
+        $validateData=$request->validate([
+            'id'=>'required|int',
+            'DPI'=>'required|max:13|min:13|unique:usuario',
+            'nombres'=>'required|string|max:25',
+            'apellidos'=>'required|string|max:25',
+            'email'=>'required|email|min:13|unique:usuario',
+            'codigo_usuario'=>'required|max:5',
+            'password'=>'required|min:8',
+            'username'=>'required|unique:usuario'
+        ]);
+        $user=User::find($validateData['id']);
+        if(isset($user)){
+            $user->nombres=$validateData['nombres'];
+            $user->apellidos=$validateData['apellidos'];
+            $user->email=$validateData['email'];
+            $user->codigo_usuario=$validateData['codigo_usuario'];
+            $user->username=$validateData['username'];
+            $user->DPI=$validateData['DPI'];
+            $user->save();
+            return response()->json([
+                'status'=>true,
+                'message'=>'Usuario modificado correctamente'
+            ],200);
+        } else{
+            return response()->json([
+                'status'=>false,
+                'message'=>'Dato no encontrado'
+            ],404);
+        }
+    }
+    /**
+     * @param $id recibe el id en la peticion GET
+     * A traves de ELOQUENT podemos usar el metodo find y seleccionar el Usuario que corresponde el id
+     * 
+     * Al obtener el usuario podemos hacer uso de sus variables y asignarle el valor 0 al estado del usuario
+     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL      
+     */
+
+     public function desactivarUsuario(int $id){
+        try{
+            $user=User::find($id);
+            if(isset($user)){
+                $user->estado_usuario=0;
+                $user->save();
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'Usuario desactivado correctamente'
+                ],200);
+            } else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'ERROR, dato no encontrado'
+                ],404); 
+            }
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+        
+    }
 }

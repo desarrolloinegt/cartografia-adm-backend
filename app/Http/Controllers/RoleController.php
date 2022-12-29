@@ -33,7 +33,7 @@ class RoleController extends Controller
      * A traves de ELOQUENT podemos usar el metodo select y seleccionar el id y nombre del role con la condicion de que el estado
      * sea 1, es decir este activo      
      */
-    public function obtenerRoles(Request $request){
+    public function obtenerRoles(){
         $roles=Role::select("id","nombre")
             ->where("estado",1)
             ->get();
