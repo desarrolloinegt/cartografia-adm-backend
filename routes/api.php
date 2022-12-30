@@ -10,6 +10,7 @@ use App\Http\Controllers\AsignacionPermisoController;
 use App\Http\Controllers\AsignacionRolController;
 use App\Http\Controllers\AsignacionGrupoController;
 use App\Http\Controllers\EncuestaController;
+use App\Http\Controllers\ProyectoController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -45,13 +46,17 @@ Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignarPermis
 Route::post('/asignarRol',[AsignacionRolController::class,'asignarRolGrupo']);
 Route::post('/asignarGrupo',[AsignacionGrupoController::class,'asignarGrupoUsuario']);
 
-//Encuestas
+//Encuesta
 Route::post('/encuesta',[EncuestaController::class,'crearEncuesta']);
 Route::post('/encuesta/edit',[EncuestaController::class,'modificarEncuesta']);
 Route::get('/encuestas',[EncuestaController::class,'obtenerEncuestas']);
 Route::delete('/encuesta/{id}',[EncuestaController::class,'eliminarEncuesta']);
 
-
+//Proyecto
+Route::post('/proyecto',[ProyectoController::class,'crearProyecto']);
+Route::post('/proyecto/edit',[ProyectoController::class,'modificarProyecto']);
+Route::get('/proyectos',[ProyectoController::class,'obtenerProyectos']);
+Route::get('/proyecto/{id}',[ProyectoController::class,'desactivarProyecto']);
 //
 Route::post('/permiso',[PermisoController::class,'createPermiso']);
 Route::post('/grupo',[GrupoController::class,'createGroup']);

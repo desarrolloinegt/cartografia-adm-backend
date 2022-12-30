@@ -13,4 +13,10 @@ class Proyecto extends Model
     use HasFactory;
     protected $table="proyecto";
     public $timestamps = false;
+    protected $fillable = [
+        'nombre',
+        'fecha',
+        'estado_proyecto',
+        'encuesta_id'
+    ];
 }
