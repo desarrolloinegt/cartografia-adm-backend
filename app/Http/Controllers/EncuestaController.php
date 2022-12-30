@@ -54,7 +54,7 @@ class EncuestaController extends Controller
     public function modificarEncuesta(Request $request){
         $validateData=$request->validate([
             'id'=>'required|int',
-            'nombre'=>'required|string|unique:encuesta',
+            'nombre'=>'required|string',
             'descripcion'=>'required|string'
         ]);
         $encuesta=Encuesta::find($validateData['id']);

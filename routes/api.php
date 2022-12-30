@@ -57,9 +57,17 @@ Route::post('/proyecto',[ProyectoController::class,'crearProyecto']);
 Route::post('/proyecto/edit',[ProyectoController::class,'modificarProyecto']);
 Route::get('/proyectos',[ProyectoController::class,'obtenerProyectos']);
 Route::get('/proyecto/{id}',[ProyectoController::class,'desactivarProyecto']);
-//
-Route::post('/permiso',[PermisoController::class,'createPermiso']);
+
+
+//Grupo
 Route::post('/grupo',[GrupoController::class,'createGroup']);
+Route::get('/grupos',[GrupoController::class,'obtenerGrupos']);
+Route::post('/grupo/edit',[GrupoController::class,'modificarGrupo']);
+Route::get('/grupo/{id}',[GrupoController::class,'desactivarGrupo']);
+
+
+Route::post('/permiso',[PermisoController::class,'createPermiso']);
+
 
 
 Route::group(['middleware' => ['auth:sanctum','ability:admin']], function() {
