@@ -84,12 +84,11 @@ class ProyectoController extends Controller
 
     /**
      * @param $id recibe el id en la peticion GET
-     * A traves de ELOQUENT podemos usar el metodo find y seleccionar la encuesta que corresponde el id
+     * A traves de ELOQUENT podemos usar el metodo find y seleccionar el proyecto que corresponde el id
      * 
-     * Al obtener la encuesta podemos hacer uso de ELOQUENT con el metodo delete que hace referencia al DELETE de SQL
-     * 
-     * antes de eliminar la encuesta se verifica si la encuesta es usada en algun proyecto, si no es usada podra ser eliminada
-     * de lo contraria no se podra eliminar      
+     * Al obtener el proyecto podemos hacer uso de ELOQUENT y obtener su variable estado_proyecto y asignarle 0
+     * El metodo save() de ELOQUENT es equivalente al UPDATE de SQL
+     *      
      */
 
     public function desactivarProyecto(int $id){
