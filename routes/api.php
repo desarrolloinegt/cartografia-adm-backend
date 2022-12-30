@@ -9,6 +9,7 @@ use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\AsignacionPermisoController;
 use App\Http\Controllers\AsignacionRolController;
 use App\Http\Controllers\AsignacionGrupoController;
+use App\Http\Controllers\EncuestaController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,6 +45,14 @@ Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignarPermis
 Route::post('/asignarRol',[AsignacionRolController::class,'asignarRolGrupo']);
 Route::post('/asignarGrupo',[AsignacionGrupoController::class,'asignarGrupoUsuario']);
 
+//Encuestas
+Route::post('/encuesta',[EncuestaController::class,'crearEncuesta']);
+Route::post('/encuesta/edit',[EncuestaController::class,'modificarEncuesta']);
+Route::get('/encuestas',[EncuestaController::class,'obtenerEncuestas']);
+Route::delete('/encuesta/{id}',[EncuestaController::class,'eliminarEncuesta']);
+
+
+//
 Route::post('/permiso',[PermisoController::class,'createPermiso']);
 Route::post('/grupo',[GrupoController::class,'createGroup']);
 
