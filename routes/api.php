@@ -11,6 +11,7 @@ use App\Http\Controllers\AsignacionRolController;
 use App\Http\Controllers\AsignacionGrupoController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\UPMController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -36,6 +37,7 @@ Route::post('/rol/edit',[RoleController::class,'modificarRol']);
 //usuario
 Route::post('/login',[UsuarioController::class,'login']);
 Route::post('/registro',[UsuarioController::class,'register']);
+Route::post('/usuario/edit',[UsuarioController::class,'modificarUsuario']);
 Route::get('/usuario/{id}',[UsuarioController::class,'desactivarUsuario']);
 Route::get('/usuarios',[UsuarioController::class,'obtenerUsuarios']);
 Route::post('/logout',[UsuarioController::class,'logout'])->middleware('auth:sanctum');
@@ -66,8 +68,11 @@ Route::post('/grupo/edit',[GrupoController::class,'modificarGrupo']);
 Route::get('/grupo/{id}',[GrupoController::class,'desactivarGrupo']);
 
 
-Route::post('/permiso',[PermisoController::class,'createPermiso']);
-
+//UPM
+Route::post('/upm',[UPMController::class,'crearUpm']);
+Route::get('/upms',[UPMController::class,'obtenerUpms']);
+Route::post('/upm/edit',[UPMController::class,'modificarUpm']);
+Route::get('/upm/{id}',[UPMController::class,'desactivarUpm']);
 
 
 Route::group(['middleware' => ['auth:sanctum','ability:admin']], function() {

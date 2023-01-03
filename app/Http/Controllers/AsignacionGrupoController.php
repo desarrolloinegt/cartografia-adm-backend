@@ -26,4 +26,8 @@ class AsignacionGrupoController extends Controller
             'message'=>'Grupo asignado correctamente'
         ],200);
     }
+
+    public function asignacionMasiva(Request $request){
+
+    }
 }

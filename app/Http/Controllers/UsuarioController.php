@@ -182,13 +182,11 @@ class UsuarioController extends Controller
      * sea 1, es decir este activo      
      */
     public function obtenerUsuarios(){
-        $users=User::select("id","nombres","apellidos","email","codigo_usuario")
+        $users=User::select("id","DPI","nombres","apellidos","username","email","codigo_usuario")
             ->where("estado_usuario",1)
             ->get();
         return response()->json($users);    
     }
-
-
     /**
      * @param $request recibe la peticion del frontend
      * $validateData valida los campos, es decir requiee que la peticion contenga los datos que necesitamos para editar el usuario
@@ -201,13 +199,12 @@ class UsuarioController extends Controller
      public function modificarUsuario(Request $request){
         $validateData=$request->validate([
             'id'=>'required|int',
-            'DPI'=>'required|max:13|min:13|unique:usuario',
+            'DPI'=>'required|max:13|min:13',
             'nombres'=>'required|string|max:25',
             'apellidos'=>'required|string|max:25',
-            'email'=>'required|email|min:13|unique:usuario',
+            'email'=>'required|email|min:13',
             'codigo_usuario'=>'required|max:5',
-            'password'=>'required|min:8',
-            'username'=>'required|unique:usuario'
+            'username'=>'required'
         ]);
         $user=User::find($validateData['id']);
         if(isset($user)){
@@ -258,7 +255,6 @@ class UsuarioController extends Controller
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
-        }
-        
+        }  
     }
 }
