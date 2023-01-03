@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\AsignacionRol;
+use App\Models\Role;
+use App\Models\Grupo;
 
 class AsignacionRolController extends Controller
 {
@@ -18,13 +20,31 @@ class AsignacionRolController extends Controller
             'rol_id'=>'required|int',
             'grupo_id'=>'required|int'
         ]);
-        $asignacion=AsignacionRol::create([
-            "rol_id"=>$validateData['rol_id'],
-            "grupo_id"=>$validateData['grupo_id']
-        ]);
-        return response()->json([
-            'status'=>true,
-            'message'=>'Rol asignado correctamente'
-        ],200);
+       
+
+        $grupo=Grupo::find($validateData['grupo_id']);
+        $rol=Role::find($validateData['rol_id']);
+        if(isset($grupo) && isset($rol)){
+            if($grupo->estado==1 && $rol->estado==1){
+                $asignacion=AsignacionRol::create([
+                    "rol_id"=>$validateData['rol_id'],
+                    "grupo_id"=>$validateData['grupo_id']
+                ]);
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'Rol asignado a grupo correctamente'
+                ],200);
+            } else {
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Datos no disponibles'
+                ],401);
+            }
+        }else{
+            return response()->json([
+                'status'=>false,
+                'message'=>'Datos no encontrados'
+            ],404);
+        }       
     }
 }

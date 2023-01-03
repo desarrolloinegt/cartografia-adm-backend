@@ -43,10 +43,17 @@ Route::get('/usuarios',[UsuarioController::class,'obtenerUsuarios']);
 Route::post('/logout',[UsuarioController::class,'logout'])->middleware('auth:sanctum');
 
 
-//asginaciones
+//asginaciones grupo
+
+Route::post('/asignarGrupoUsuario',[AsignacionGrupoController::class,'asignarGrupoUsuario']);
+Route::post('/asignacionGrupoUsuario/eliminar',[AsignacionGrupoController::class,'eliminarAsignacion']);
+Route::post('/asignarGruposUsuarios',[AsignacionGrupoController::class,'asignacionMasiva']);
+
+
+//asgingaciones rol
 Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignarPermisoRol']);
 Route::post('/asignarRol',[AsignacionRolController::class,'asignarRolGrupo']);
-Route::post('/asignarGrupo',[AsignacionGrupoController::class,'asignarGrupoUsuario']);
+
 
 //Encuesta
 Route::post('/encuesta',[EncuestaController::class,'crearEncuesta']);
