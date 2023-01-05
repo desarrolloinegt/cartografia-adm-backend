@@ -85,6 +85,7 @@ class UsuarioController extends Controller
                         $proyectos=$this->obtenerProyecto($user->id); // llamada a metodo obtener proyecto, metodo visible en la parte inferior de la clase
                         $token = $user->createToken('auth_token')->plainTextToken;//Creacion del token Bearer
                         return response()->json([
+                            'status'=>true,
                             'token' => $token,
                             "id"=>$user->id,
                             "usuario"=>$user->username,
@@ -103,6 +104,11 @@ class UsuarioController extends Controller
                         "message"=>"Usuario no disponible",
                     ],401); 
                 }
+            } else{
+                return response()->json([
+                    "status"=>false,
+                    "message"=>"Usuario no encontrado",
+                ],404);
             }
         }catch(\Throwable $th){
             return response()->json([
@@ -120,7 +126,6 @@ class UsuarioController extends Controller
      */
     public function logout(Request $request){
         $request->user()->currentAccessToken()->delete();
-
         return response()->json([
             "message"=>"Sesion terminada"
         ],200);

@@ -12,6 +12,8 @@ use App\Http\Controllers\AsignacionGrupoController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\UPMController;
+use App\Http\Controllers\DepartamentoController;
+use App\Http\Controllers\MunicipioController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -81,6 +83,9 @@ Route::get('/upms',[UPMController::class,'obtenerUpms']);
 Route::post('/upm/edit',[UPMController::class,'modificarUpm']);
 Route::get('/upm/{id}',[UPMController::class,'desactivarUpm']);
 
+//Municipio y Departamento
+Route::get('/municipios',[MunicipioController::class,'obtenerMunicipios']);
+Route::get('/departamentos',[DepartamentoController::class,'obtenerDepartamentos']);
 
 Route::group(['middleware' => ['auth:sanctum','ability:admin']], function() {
     
