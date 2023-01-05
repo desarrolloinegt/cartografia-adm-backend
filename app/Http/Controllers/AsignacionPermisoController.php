@@ -28,4 +28,33 @@ class AsignacionPermisoController extends Controller
             'message'=>'Permiso asignado correctamente'
         ],200);
     }
+
+    /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
+     * $asignacion hace uso de ELOQUENT de laravel con el metodo where y solo es necesario pasarle los campos validados
+     * ELOQUENT se hara cargo de eliminar en la DB con el metodo delete
+     */
+    public function eliminarAsignacion(Request $request){
+        $validateData=$request->validate([
+            'rol_id'=>'required|int',
+            'permiso_id'=>'required|int'
+        ]);
+        $matchThese = ['rol_id' =>$validateData['rol_id'], 'permiso_id' => $validateData['permiso_id']];
+        $asignacion=AsignacionPermiso::where($matchThese)
+            ->first();
+        if(isset($asignacion)){
+            AsignacionPermiso::where($matchThese)
+            ->delete();
+            return response()->json([
+                'status'=>true,
+                'message'=>'Asignacion de rol y permiso eliminada'
+            ],200);
+        } else{
+            return response()->json([
+                'status'=>true,
+                'message'=>'Datos no encontrados'
+            ],404);
+        }    
+    }
 }

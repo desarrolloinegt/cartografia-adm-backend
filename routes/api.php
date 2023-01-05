@@ -35,6 +35,8 @@ Route::get('/roles',[RoleController::class,'obtenerRoles']);
 Route::get('/rol/{id}',[RoleController::class,'desactivarRol']);
 Route::post('/rol/edit',[RoleController::class,'modificarRol']);
 
+//permiso
+Route::get('/permisos',[PermisoController::class,'obtenerPermisos']);
 
 //usuario
 Route::post('/login',[UsuarioController::class,'login']);
@@ -54,7 +56,9 @@ Route::post('/asignarGruposUsuarios',[AsignacionGrupoController::class,'asignaci
 
 //asgingaciones rol
 Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignarPermisoRol']);
+Route::post('/asignacionRolPermiso/eliminar',[AsignacionPermisoController::class,'eliminarAsignacion']);
 Route::post('/asignarRol',[AsignacionRolController::class,'asignarRolGrupo']);
+Route::post('/asignacionGrupoRol/eliminar',[AsignacionRolController::class,'eliminarAsignacion']);
 
 
 //Encuesta
