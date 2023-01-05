@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\AsignacionPermiso;
+use App\Models\Role;
+use App\Models\Permiso;
 
 class AsignacionPermisoController extends Controller
 {
@@ -57,4 +59,59 @@ class AsignacionPermisoController extends Controller
             ],404);
         }    
     }
+
+
+    public function store($validateData){
+        $rol=Role::find($validateData['rol_id']);
+        $permiso=Permiso::find($validateData['permiso_id']);
+        if(isset($rol) && isset($permiso)){
+            if($rol->estado==1 && $permiso->estado==1){
+                try{
+                    $asignacion=AsignacionPermiso::create([
+                        "rol_id"=>$validateData['rol_id'],
+                        "permiso_id"=>$validateData['permiso_id']
+                    ]);
+                    return response()->json([
+                        'status'=>true,
+                        'message'=>'Permiso asignado a Rol correctamente'
+                    ],200);
+                }catch(\Throwable $th) {
+                    return response()->json([
+                        'status'=>false,
+                        'message'=>$th->getMessage()
+                    ],500);
+                }
+                
+            } else {
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Datos no disponibles'
+                ],401);
+            }
+        }else{
+            return response()->json([
+                'status'=>false,
+                'message'=>'Datos no encontrados'
+            ],404);
+        }       
+    }
+    public function asignacionMasiva(Request $request){
+        $array = $request->all();
+        $responses=[];
+        foreach($array as $asignacion => $item){
+            $validateData=Validator::make($item,[
+                'rol_id'=>'required|int',
+                'permiso_id'=>'required|int'
+            ]);
+            if($validateData->fails()){
+            }else{
+                //var_dump($item['grupo_id']);
+                array_push($responses,$this->store($item));
+                
+            }
+           
+        }
+        return response()->json($responses);
+    }
+
 }
