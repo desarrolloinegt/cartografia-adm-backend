@@ -13,10 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('miembros_equipo', function (Blueprint $table) {
+        Schema::create('vehiculo', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('id', true);
-            $table->integer('usuario_id')->index('fk_Miembros Equipo_Usuario1_idx');
+            $table->string('placa', 7)->primary();
+            $table->string('modelo', 25);
+            $table->date('año');
+            $table->tinyInteger('estado');
         });
     }
 
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('miembros_equipo');
+        Schema::dropIfExists('vehiculo');
     }
 };

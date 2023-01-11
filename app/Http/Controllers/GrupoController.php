@@ -19,12 +19,14 @@ class GrupoController extends Controller
             'nombre'=>'required|string|unique:grupo',
             'descripcion'=>'',
             'proyecto_id'=>'required|int',
+            'jerarquia'=>'required|int'
         ]);
         $grupo=Grupo::create([
             "nombre"=>$validateData['nombre'],
             "descripcion"=>$validateData['descripcion'],
             "estado"=>1,
-            "proyecto_id"=>$validateData['proyecto_id']
+            "proyecto_id"=>$validateData['proyecto_id'],
+            'jerarquia'=>$validateData['jerarquia']
         ]);
         return response()->json([
             'status'=>true,
@@ -60,12 +62,14 @@ class GrupoController extends Controller
             'nombre'=>'required|string',
             'descripcion'=>'',
             'proyecto_id'=>'required|int',
+            'jerarquia'=>'required|int'
         ]);
         $grupo=Grupo::find($validateData['id']);
         if(isset($grupo)){
             $grupo->nombre=$validateData['nombre'];
             $grupo->descripcion=$validateData['descripcion'];
             $grupo->proyecto_id=$validateData['proyecto_id'];
+            $grupo->jerarquia=$validateData['jerarquia'];
             $grupo->save();
             return response()->json([
                 'status'=>true,

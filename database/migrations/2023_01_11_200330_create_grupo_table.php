@@ -13,10 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('asignacion_grupo', function (Blueprint $table) {
+        Schema::create('grupo', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('usuario_id')->index('fk_Asignacion Grupo_Usuario1_idx');
-            $table->integer('grupo_id')->index('fk_Asignacion Grupo_Grupo1_idx');
+            $table->integer('id', true);
+            $table->string('nombre', 100)->unique('Nombre_UNIQUE');
+            $table->string('descripcion', 400);
+            $table->tinyInteger('estado');
+            $table->integer('proyecto_id')->index('fk_Grupo_Proyecto1_idx');
+            $table->integer('jerarquia');
         });
     }
 
@@ -27,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('asignacion_grupo');
+        Schema::dropIfExists('grupo');
     }
 };

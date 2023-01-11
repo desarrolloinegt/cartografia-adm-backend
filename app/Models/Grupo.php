@@ -18,6 +18,7 @@ class Grupo extends Model
         'nombre',
         'descripcion',
         'estado',
-        'proyecto_id'
+        'proyecto_id',
+        'jerarquia'
     ];
 }

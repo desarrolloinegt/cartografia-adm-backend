@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('miembros_equipo', function (Blueprint $table) {
-            $table->foreign(['usuario_id'], 'fk_Miembros Equipo_Usuario1')->references(['id'])->on('usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['cartografo'], 'fk_Miembros Equipo_Usuario1')->references(['id'])->on('usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['supervisor'], 'fk_miembros_equipo_equipo_campo1')->references(['supervisor'])->on('equipo_campo')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('miembros_equipo', function (Blueprint $table) {
             $table->dropForeign('fk_Miembros Equipo_Usuario1');
+            $table->dropForeign('fk_miembros_equipo_equipo_campo1');
         });
     }
 };

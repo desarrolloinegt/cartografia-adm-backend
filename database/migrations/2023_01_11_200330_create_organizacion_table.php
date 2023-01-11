@@ -13,11 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('equipo_campo', function (Blueprint $table) {
+        Schema::create('organizacion', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('id', true);
-            $table->integer('proyecto_id')->index('fk_Equipo Campo_Proyecto1_idx');
-            $table->integer('usuario_id')->index('fk_Equipo Campo_Usuario1_idx');
+            $table->integer('usuario_superior')->index('fk_organizacion_usuario1_idx');
+            $table->integer('usuario_inferior')->index('fk_organizacion_usuario2_idx');
+
+            $table->primary(['usuario_superior', 'usuario_inferior']);
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('equipo_campo');
+        Schema::dropIfExists('organizacion');
     }
 };

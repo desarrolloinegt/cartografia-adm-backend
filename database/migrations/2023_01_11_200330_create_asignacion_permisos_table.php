@@ -13,13 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('vehiculo', function (Blueprint $table) {
+        Schema::create('asignacion_permisos', function (Blueprint $table) {
             $table->comment('');
-            $table->string('placa', 7)->primary();
-            $table->string('modelo', 25);
-            $table->date('año');
-            $table->integer('equipo_campo_id')->index('fk_Vehiculo_Equipo Campo1_idx');
-            $table->tinyInteger('estado');
+            $table->integer('rol_id')->index('fk_Asignacion Permisos_Rol1_idx');
+            $table->integer('permiso_Id')->index('fk_Asignacion Permisos_Permiso1_idx');
+
+            $table->primary(['rol_id', 'permiso_Id']);
         });
     }
 
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('vehiculo');
+        Schema::dropIfExists('asignacion_permisos');
     }
 };
