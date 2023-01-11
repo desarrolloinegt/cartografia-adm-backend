@@ -85,8 +85,8 @@ class UsuarioController extends Controller
                         $proyectos=$this->obtenerProyecto($user->id); // llamada a metodo obtener proyecto, metodo visible en la parte inferior de la clase
                         $token = $user->createToken('auth_token')->plainTextToken;//Creacion del token Bearer
                         return response()->json([
-                            'status'=>true,
-                            'token' => $token,
+                            "status"=>true,
+                            "token" => $token,
                             "id"=>$user->id,
                             "usuario"=>$user->username,
                             "proyectos"=>$proyectos,
@@ -111,10 +111,10 @@ class UsuarioController extends Controller
                 ],404);
             }
         }catch(\Throwable $th){
-            return response()->json([
+           /* return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
-            ], 500);
+            ], 500);*/
         }
         
     }

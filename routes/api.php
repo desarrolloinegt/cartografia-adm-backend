@@ -24,6 +24,7 @@ use App\Http\Controllers\MunicipioController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::post('/login',[UsuarioController::class,'login']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -39,7 +40,7 @@ Route::post('/rol/edit',[RoleController::class,'modificarRol']);
 Route::get('/permisos',[PermisoController::class,'obtenerPermisos']);
 
 //usuario
-Route::post('/login',[UsuarioController::class,'login']);
+
 Route::post('/registro',[UsuarioController::class,'register']);
 Route::post('/usuario/edit',[UsuarioController::class,'modificarUsuario']);
 Route::get('/usuario/{id}',[UsuarioController::class,'desactivarUsuario']);
@@ -57,7 +58,7 @@ Route::post('/asignarGruposUsuarios',[AsignacionGrupoController::class,'asignaci
 //asgingaciones rol
 Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignarPermisoRol']);
 Route::post('/asignacionRolPermiso/eliminar',[AsignacionPermisoController::class,'eliminarAsignacion']);
-Route::post('/asignarRol',[AsignacionRolController::class,'asignarRolGrupo']);
+Route::post('/asignarGrupoRol',[AsignacionRolController::class,'asignarRolGrupo']);
 Route::post('/asignacionGrupoRol/eliminar',[AsignacionRolController::class,'eliminarAsignacion']);
 
 
@@ -91,7 +92,7 @@ Route::get('/upm/{id}',[UPMController::class,'desactivarUpm']);
 Route::get('/municipios',[MunicipioController::class,'obtenerMunicipios']);
 Route::get('/departamentos',[DepartamentoController::class,'obtenerDepartamentos']);
 
-Route::group(['middleware' => ['auth:sanctum','ability:admin']], function() {
+Route::group(['middleware' => ['auth:sanctum']], function() {
     
 });
 
