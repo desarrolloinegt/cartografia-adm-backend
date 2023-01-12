@@ -45,9 +45,9 @@ RUN apt-get update \
 
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.1
 
-RUN groupadd --force -g $WWWGROUP sail
+RUN groupadd --force -g 1000 sail
 
-RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
+RUN useradd -ms /bin/bash --no-user-group -g 1000 -u 1337 sail
 
 ADD . /var/www/html/
 
