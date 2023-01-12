@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [ ! -z "$WWWUSER" ]; then
-    usermod -u $WWWUSER sail
+if [ ! -z "1000" ]; then
+    usermod -u 1000 sail
 fi
 
 if [ ! -d /.composer ]; then
@@ -11,7 +11,7 @@ fi
 chmod -R ugo+rw /.composer
 
 if [ $# -gt 0 ]; then
-    exec gosu $WWWUSER "$@"
+    exec gosu 1000 "$@"
 else
     exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 fi
