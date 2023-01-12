@@ -51,6 +51,8 @@ RUN useradd -ms /bin/bash --no-user-group -g 1000 -u 1337 sail
 
 ADD . /var/www/html/
 
+COPY start-container /usr/local/bin/
+ 
 RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 8000
