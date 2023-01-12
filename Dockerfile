@@ -51,6 +51,10 @@ RUN useradd -ms /bin/bash --no-user-group -g 1000 -u 1337 sail
 
 ADD . /var/www/html/
 
+RUN composer install \
+    && yarn \
+    && yarn run prod \
+    && npm run prod
 
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
