@@ -42,7 +42,7 @@ Route::get('/permisos',[PermisoController::class,'obtenerPermisos']);
 //usuario
 
 Route::post('/registro',[UsuarioController::class,'register']);
-Route::post('/usuario/edit',[UsuarioController::class,'modificarUsuario']);
+Route::patch('/usuario/edit',[UsuarioController::class,'modificarUsuario']);
 Route::get('/usuario/{id}',[UsuarioController::class,'desactivarUsuario']);
 Route::get('/usuarios',[UsuarioController::class,'obtenerUsuarios']);
 Route::post('/logout',[UsuarioController::class,'logout'])->middleware('auth:sanctum');

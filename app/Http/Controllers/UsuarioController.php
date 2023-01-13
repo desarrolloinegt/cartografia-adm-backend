@@ -202,34 +202,46 @@ class UsuarioController extends Controller
      */
 
      public function modificarUsuario(Request $request){
-        $validateData=$request->validate([
-            'id'=>'required|int',
-            'DPI'=>'required|max:13|min:13',
-            'nombres'=>'required|string|max:25',
-            'apellidos'=>'required|string|max:25',
-            'email'=>'required|email|min:13',
-            'codigo_usuario'=>'required|max:5',
-            'username'=>'required'
-        ]);
-        $user=User::find($validateData['id']);
-        if(isset($user)){
-            $user->nombres=$validateData['nombres'];
-            $user->apellidos=$validateData['apellidos'];
-            $user->email=$validateData['email'];
-            $user->codigo_usuario=$validateData['codigo_usuario'];
-            $user->username=$validateData['username'];
-            $user->DPI=$validateData['DPI'];
-            $user->save();
+        try{
+            $validateData=$request->validate([
+                'id'=>'required|int',
+                'DPI'=>'required|max:13|min:13',
+                'nombres'=>'required|string|max:25',
+                'apellidos'=>'required|string|max:25',
+                'email'=>'required|email|min:13',
+                'codigo_usuario'=>'required|max:5',
+                'username'=>'required',
+                'password'=>'nullable|min:8'
+            ]);
+            $user=User::find($validateData['id']);
+            if(isset($user)){
+                $user->nombres=$validateData['nombres'];
+                $user->apellidos=$validateData['apellidos'];
+                $user->email=$validateData['email'];
+                $user->codigo_usuario=$validateData['codigo_usuario'];
+                $user->username=$validateData['username'];
+                $user->DPI=$validateData['DPI'];
+                if($validateData['password']){
+                    $user->password=Hash::make($validateData['password']);
+                }
+                $user->save();
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'Usuario modificado correctamente'
+                ],200);
+            } else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Dato no encontrado'
+                ],404);
+            }
+        }catch(\Throwable $th){
             return response()->json([
-                'status'=>true,
-                'message'=>'Usuario modificado correctamente'
-            ],200);
-        } else{
-            return response()->json([
-                'status'=>false,
-                'message'=>'Dato no encontrado'
-            ],404);
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
         }
+
     }
     /**
      * @param $id recibe el id en la peticion GET
