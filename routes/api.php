@@ -34,7 +34,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/rol',[RoleController::class,'createRole']);
 Route::get('/roles',[RoleController::class,'obtenerRoles']);
 Route::get('/rol/{id}',[RoleController::class,'desactivarRol']);
-Route::post('/rol/edit',[RoleController::class,'modificarRol']);
+Route::patch('/rol/edit',[RoleController::class,'modificarRol']);
 
 //permiso
 Route::get('/permisos',[PermisoController::class,'obtenerPermisos']);
@@ -56,7 +56,8 @@ Route::post('/asignarGruposUsuarios',[AsignacionGrupoController::class,'asignaci
 
 
 //asgingaciones rol
-Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignarPermisoRol']);
+Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignacionMasiva']);
+Route::get('/asignacionesRolPermiso',[AsignacionPermisoController::class,'obtenerRolPermiso']);
 Route::post('/asignacionRolPermiso/eliminar',[AsignacionPermisoController::class,'eliminarAsignacion']);
 Route::post('/asignarGrupoRol',[AsignacionRolController::class,'asignarRolGrupo']);
 Route::post('/asignacionGrupoRol/eliminar',[AsignacionRolController::class,'eliminarAsignacion']);

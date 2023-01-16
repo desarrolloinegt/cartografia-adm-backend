@@ -161,21 +161,27 @@ class UsuarioController extends Controller
             $role=Role::select('rol.id','nombre AS rol')
                 ->join('asignacion_rol',"rol.id","asignacion_rol.rol_id")
                 ->where('asignacion_rol.grupo_id',$grupo->grupo_id)
-                ->get();
+                ->where('rol.estado',1)
+                ->get();   
             $permisos=[];
-            foreach($role as $rol){
-                $permisos=Permiso::select('id','alias')
+            $status=false;
+                foreach($role as $rol){
+                    $status=true;
+                    $permisos=Permiso::select('id','alias')
                     ->join('asignacion_permisos','asignacion_permisos.permiso_id','permiso.id')
                     ->where('asignacion_permisos.rol_id',$rol->id)
                     ->get();
-            }
-           
-            $data =[
-                'proyecto'=>$proyecto,
-                "roles"=>$role,
-                "permisos"=>($permisos)
-            ];    
-            array_push($json,$data); 
+                    
+                }
+                if($status==true){
+                    $data =[
+                        'proyecto'=>$proyecto,
+                        "roles"=>$role,
+                        "permisos"=>($permisos)
+                    ];    
+                    array_push($json,$data);   
+                }
+                    
         }  
         return $json;
     }

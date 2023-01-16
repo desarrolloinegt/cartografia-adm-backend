@@ -13,27 +13,6 @@ class AsignacionPermisoController extends Controller
     /**
      * @param $request recibe la peticion del frontend
      * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
-     * $asignacion hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
-     * ELOQUENT se hara cargo de insertar en la DB
-     */
-    public function asignarPermisoRol(Request $request){
-        $validateData=$request->validate([
-            'rol_id'=>'required|int',
-            'permiso_id'=>'required|int'
-        ]);
-        $asignacion=AsignacionPermiso::create([
-            "rol_id"=>$validateData['rol_id'],
-            "permiso_id"=>$validateData['permiso_id']
-        ]);
-        return response()->json([
-            'status'=>true,
-            'message'=>'Permiso asignado correctamente'
-        ],200);
-    }
-
-    /**
-     * @param $request recibe la peticion del frontend
-     * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
      * $asignacion hace uso de ELOQUENT de laravel con el metodo where y solo es necesario pasarle los campos validados
      * ELOQUENT se hara cargo de eliminar en la DB con el metodo delete
      */
@@ -60,58 +39,67 @@ class AsignacionPermisoController extends Controller
         }    
     }
 
+    /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
+     * $asignacion hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
+     * ELOQUENT se hara cargo de insertar en la DB
+    */
 
-    public function store($validateData){
-        $rol=Role::find($validateData['rol_id']);
-        $permiso=Permiso::find($validateData['permiso_id']);
-        if(isset($rol) && isset($permiso)){
-            if($rol->estado==1 && $permiso->estado==1){
-                try{
+    public function asignacionMasiva(Request $request){
+        try{
+            $erros=[];
+            $validateData=$request->validate([
+                'rol_id'=>'required|int',
+                'permisos'=>'array|required',
+                'permisos.*'=>'int'
+            ]);
+            $rol=Role::find($validateData['rol_id']);
+            $arrayPermisos=$validateData['permisos'];
+            if(isset($rol)){
+                foreach($arrayPermisos as $permiso){
                     $asignacion=AsignacionPermiso::create([
-                        "rol_id"=>$validateData['rol_id'],
-                        "permiso_id"=>$validateData['permiso_id']
-                    ]);
-                    return response()->json([
-                        'status'=>true,
-                        'message'=>'Permiso asignado a Rol correctamente'
-                    ],200);
-                }catch(\Throwable $th) {
-                    return response()->json([
-                        'status'=>false,
-                        'message'=>$th->getMessage()
-                    ],500);
+                        "rol_id"=>$rol->id,
+                        "permiso_id"=>$permiso
+                    ]);             
                 }
-                
             } else {
                 return response()->json([
-                    'status'=>false,
-                    'message'=>'Datos no disponibles'
-                ],401);
-            }
-        }else{
+                    'status' => false,
+                    'message' => "Rol no Econtrado"
+                ], 404);
+            }   
             return response()->json([
-                'status'=>false,
-                'message'=>'Datos no encontrados'
-            ],404);
-        }       
-    }
-    public function asignacionMasiva(Request $request){
-        $array = $request->all();
-        $responses=[];
-        foreach($array as $asignacion => $item){
-            $validateData=Validator::make($item,[
-                'rol_id'=>'required|int',
-                'permiso_id'=>'required|int'
-            ]);
-            if($validateData->fails()){
-            }else{
-                //var_dump($item['grupo_id']);
-                array_push($responses,$this->store($item));
-                
-            }
-           
+                'status'=>true,
+                'message'=>'Permiso asignado correctamente'
+            ],200);  
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
         }
-        return response()->json($responses);
     }
-
+    public function obtenerRolPermiso(){
+        try{
+            $asignacionArray=[];
+            $permisos=[];
+            $asginaciones= AsignacionPermiso::selectRaw('rol.id AS rol_id,rol.nombre, GROUP_CONCAT(permiso.alias) AS permisos')
+                ->join('rol','asignacion_permisos.rol_id','rol.id')
+                ->join('permiso','asignacion_permisos.permiso_id','permiso.id')
+                ->where('permiso.estado',1)
+                ->where('rol.estado',1)
+                ->groupBy('asignacion_permisos.rol_id')
+                ->get();
+            foreach ($asginaciones as $asginacion) {
+                $asginacion->permisos =explode(",", $asginacion->permisos);
+            }
+            return response()->json($asginaciones);
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Role;
+use App\Http\Controllers\AsignacionPermisoController;
+use App\Models\AsignacionPermiso;
 
 class RoleController extends Controller
 {
@@ -24,6 +26,7 @@ class RoleController extends Controller
         ]);
         return response()->json([
             'status'=>true,
+            'id_rol'=>$role->id,
             'message'=>'rol creado correctamente'
         ],200);
     }
@@ -51,16 +54,26 @@ class RoleController extends Controller
 
     public function modificarRol(Request $request){
         $validateData=$request->validate([
-            'id'=>'required|int',
-            'nombre'=>'required|string'
+            'rol_id'=>'required|int',
+            'nombre'=>'required|string',
+            'permisos'=>'nullable|array',
+            'permisos.*'=>'int'
         ]);
-        $rol=Role::find($validateData['id']);
+        $rol=Role::find($validateData['rol_id']);
         if(isset($rol)){
-            $rol->nombre=$validateData['nombre'];
-            $rol->save();
+            if($validateData['permisos']){
+                AsignacionPermiso::where('rol_id',$validateData['rol_id'])->delete();
+                $asignacion=new AsignacionPermisoController();
+                $asignacion->asignacionMasiva($request);
+                $rol->nombre=$validateData['nombre'];
+                $rol->save();
+            }else{
+                $rol->nombre=$validateData['nombre'];
+                $rol->save();
+            }
             return response()->json([
                 'status'=>true,
-                'message'=>'rol modificado correctamente'
+                'message'=>'Rol modificado correctamente'
             ],200);
         } else{
             return response()->json([
