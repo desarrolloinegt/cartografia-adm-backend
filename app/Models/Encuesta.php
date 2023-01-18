@@ -13,6 +13,7 @@ class Encuesta extends Model
     public $timestamps = false;
     protected $fillable = [
         'nombre',
-        'descripcion'
+        'descripcion',
+        'estado'
     ];
 }

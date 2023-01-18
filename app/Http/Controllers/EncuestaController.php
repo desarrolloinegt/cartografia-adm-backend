@@ -22,7 +22,8 @@ class EncuestaController extends Controller
         ]);
         $encuesta=Encuesta::create([
             "nombre"=>$validateData['nombre'],
-            "descripcion"=>$validateData['descripcion']
+            "descripcion"=>$validateData['descripcion'],
+            "estado"=>1
         ]);
         return response()->json([
             'status'=>true,

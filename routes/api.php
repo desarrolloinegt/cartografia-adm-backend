@@ -70,7 +70,7 @@ Route::post('/asginarUpmsProyecto',[AsignacionUpmController::class,'asignacionMa
 
 //Encuesta
 Route::post('/encuesta',[EncuestaController::class,'crearEncuesta']);
-Route::post('/encuesta/edit',[EncuestaController::class,'modificarEncuesta']);
+Route::patch('/encuesta/edit',[EncuestaController::class,'modificarEncuesta']);
 Route::get('/encuestas',[EncuestaController::class,'obtenerEncuestas']);
 Route::get('/encuesta/{id}',[EncuestaController::class,'desactivarEncuesta']);
 
