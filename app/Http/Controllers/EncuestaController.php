@@ -37,6 +37,7 @@ class EncuestaController extends Controller
      */
     public function obtenerEncuestas(){
         $encuestas=Encuesta::select("id","nombre","descripcion")
+            ->where('estado',1)
             ->get();
         return response()->json($encuestas);    
     }
