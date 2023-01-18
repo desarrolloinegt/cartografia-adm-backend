@@ -36,8 +36,7 @@ class UPMController extends Controller
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
-        }
-        
+        }   
     }
 
     /**
@@ -64,28 +63,36 @@ class UPMController extends Controller
      */
 
     public function modificarUpm(Request $request){
-        $validateData=$request->validate([
-            'id'=>'required|int',
-            'descripcion'=>'required|string|max:200',
-            'municipio_id'=>'required|int',
-            'nombre'=>'|required|string|'
-        ]);
-        $upm=UPM::find($validateData['id']);
-        if(isset($upm)){
-            $upm->nombre=$validateData['nombre'];
-            $upm->descripcion=$validateData['descripcion'];
-            $upm->municipio_id=$validateData['municipio_id'];
-            $upm->save();
+        try{
+            $validateData=$request->validate([
+                'id'=>'required|int',
+                'descripcion'=>'required|string|max:200',
+                'municipio_id'=>'required|int',
+                'nombre'=>'|required|string|'
+            ]);
+            $upm=UPM::find($validateData['id']);
+            if(isset($upm)){
+                $upm->nombre=$validateData['nombre'];
+                $upm->descripcion=$validateData['descripcion'];
+                $upm->municipio_id=$validateData['municipio_id'];
+                $upm->save();
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'UPM modificado correctamente'
+                ],200);
+            } else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Dato no encontrado'
+                ],404);
+            }
+        }catch(\Throwable $th){
             return response()->json([
-                'status'=>true,
-                'message'=>'UPM modificado correctamente'
-            ],200);
-        } else{
-            return response()->json([
-                'status'=>false,
-                'message'=>'Dato no encontrado'
-            ],404);
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
         }
+        
     }
 
     /**
@@ -117,7 +124,6 @@ class UPMController extends Controller
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
-        }
-        
+        }    
     }
 }
