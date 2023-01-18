@@ -82,7 +82,7 @@ class UsuarioController extends Controller
                 if ($user->estado_usuario==1) {
                     if(Hash::check($validateData['password'], $user->password)){ //comparacion de contraseñas
                         Auth::login($user);
-                        $proyectos=$this->obtenerProyecto($user->id); // llamada a metodo obtener proyecto, metodo visible en la parte inferior de la clase
+                        //$proyectos=$this->obtenerProyecto($user->id); // llamada a metodo obtener proyecto, metodo visible en la parte inferior de la clase
                         //$token = $user->createToken('auth_token')->plainTextToken;//Creacion del token Bearer
                         return response()->json([
                             "status"=>true,
