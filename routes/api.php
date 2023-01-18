@@ -67,7 +67,7 @@ Route::post('/asignacionGrupoRol/eliminar',[AsignacionRolController::class,'elim
 Route::post('/encuesta',[EncuestaController::class,'crearEncuesta']);
 Route::post('/encuesta/edit',[EncuestaController::class,'modificarEncuesta']);
 Route::get('/encuestas',[EncuestaController::class,'obtenerEncuestas']);
-Route::delete('/encuesta/{id}',[EncuestaController::class,'eliminarEncuesta']);
+Route::get('/encuesta/{id}',[EncuestaController::class,'desactivarEncuesta']);
 
 //Proyecto
 Route::post('/proyecto',[ProyectoController::class,'crearProyecto']);

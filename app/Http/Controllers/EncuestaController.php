@@ -84,24 +84,16 @@ class EncuestaController extends Controller
      * de lo contraria no se podra eliminar      
      */
 
-    public function eliminarEncuesta(int $id){
+    public function desactivarEncuesta(int $id){
         try{
             $encuesta=Encuesta::find($id);
             if(isset($encuesta)){
-                
-                if($this->verificarUsoEncuesta($id)){
-                    return response()->json([
-                        'status'=>false,
-                        'message'=>'Esta encuesta se encuentra en uso, no se puede eliminar'
-                    ],400); 
-                } else{
-                    $encuesta->delete();
-                    return response()->json([
-                        'status'=>true,
-                        'message'=>'Encuesta eliminada correctamente'
-                    ],200);
-                }
-                
+                $encuesta->estado=0;
+                $proyecto->save();
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'Encuesta desactivada correctamente'
+                ],200);       
             } else{
                 return response()->json([
                     'status'=>false,
@@ -117,18 +109,4 @@ class EncuestaController extends Controller
     }
 
 
-    /**
-     * @param $id recibe el id de la encuesta
-     * A traves de ELOQUENT podemos usar el metodo where y seleccionar el proyecto que corresponde el id
-     * 
-     * Al obtener el proyecto verificas si encontro alguna referncia de la encuesta, si es el caso se devuelve true   
-     */
-    public function verificarUsoEncuesta(int $id){
-        $proyecto=Proyecto::where('encuesta_id',$id)->first();
-        if(isset($proyecto)){
-            return true;
-        }else {
-            return false;
-        }
-    }
 }

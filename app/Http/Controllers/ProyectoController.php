@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Proyecto;
-
+use App\Models\Encuesta;
 class ProyectoController extends Controller
 {
     /**
@@ -15,24 +15,46 @@ class ProyectoController extends Controller
      * ELOQUENT se hara cargo de insertar en la DB
      */
     public function crearProyecto(Request $request){
-        $validateData=$request->validate([
-            'nombre'=>'required|string|unique:proyecto',
-            'fecha'=>'required|date',
-            'encuesta_id'=>'required|int'
-        ]);
-        $date = $validateData['fecha'];
-        $newDate = new \DateTime($date); 
-        $newDate->format('YYYY-mm-dd');
-        $proyecto=Proyecto::create([
-            "nombre"=>$validateData['nombre'],
-            "fecha"=>$newDate,
-            "encuesta_id"=>$validateData['encuesta_id'],
-            "estado_proyecto"=>1
-        ]);
-        return response()->json([
-            'status'=>true,
-            'message'=>'Proyecto creado correctamente'
-        ],200);
+        try{
+            $validateData=$request->validate([
+                'nombre'=>'required|string|unique:proyecto',
+                'fecha'=>'required|date',
+                'encuesta_id'=>'required|int'
+            ]);
+            $encuesta=Encuesta::where('id',$validateData['encuesta_id']);
+            if(isset($encuesta)){
+                if($encuesta->estado==1){
+                    $date = $validateData['fecha'];
+                    $newDate = new \DateTime($date); 
+                    $newDate->format('YYYY-mm-dd');
+                    $proyecto=Proyecto::create([
+                        "nombre"=>$validateData['nombre'],
+                        "fecha"=>$newDate,
+                        "encuesta_id"=>$validateData['encuesta_id'],
+                        "estado_proyecto"=>1
+                    ]);
+                    return response()->json([
+                        'status'=>true,
+                        'message'=>'Proyecto creado correctamente'
+                    ],200);
+                } else{
+                    return response()->json([
+                        'status'=>false,
+                        'message'=>'Encuesta no disponible'
+                    ],201);
+                }
+            }else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Dato no encontrado'
+                ],404);
+            }  
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }   
     }
 
     /**
