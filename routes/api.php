@@ -45,6 +45,7 @@ Route::post('/registro',[UsuarioController::class,'register']);
 Route::patch('/usuario/edit',[UsuarioController::class,'modificarUsuario']);
 Route::get('/usuario/{id}',[UsuarioController::class,'desactivarUsuario']);
 Route::get('/usuarios',[UsuarioController::class,'obtenerUsuarios']);
+Route::get('/projectsAssing/{id}',[UsuarioController::class,'obtenerProyecto']);
 Route::post('/logout',[UsuarioController::class,'logout'])->middleware('auth:sanctum');
 
 

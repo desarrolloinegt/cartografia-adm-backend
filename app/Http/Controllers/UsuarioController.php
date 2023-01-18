@@ -83,13 +83,13 @@ class UsuarioController extends Controller
                     if(Hash::check($validateData['password'], $user->password)){ //comparacion de contraseñas
                         Auth::login($user);
                         $proyectos=$this->obtenerProyecto($user->id); // llamada a metodo obtener proyecto, metodo visible en la parte inferior de la clase
-                        $token = $user->createToken('auth_token')->plainTextToken;//Creacion del token Bearer
+                        //$token = $user->createToken('auth_token')->plainTextToken;//Creacion del token Bearer
                         return response()->json([
                             "status"=>true,
                             "token" => $token,
                             "id"=>$user->id,
                             "usuario"=>$user->username,
-                            "proyectos"=>$proyectos,
+                            //"proyectos"=>$proyectos,
                         ],200); 
                     } else{
                         return response()->json([
@@ -147,7 +147,7 @@ class UsuarioController extends Controller
      * 4. $permisos: una vez obtenido el rol se hace el ultimo inner join para obtener los permisos que estan relacionados a este rol
      * mediante las tablas asignacion_permiso y Permiso usando el rol obtenido para la comparacion
      */
-    private function obtenerProyecto($id){
+    public function obtenerProyecto($id){
         $grupos=AsignacionGrupo::select('grupo_id')
                         ->join('usuario',"asignacion_grupo.usuario_id","usuario.id")
                         ->where('usuario.id',$id)
@@ -183,7 +183,7 @@ class UsuarioController extends Controller
                 }
                     
         }  
-        return $json;
+        return reponse()->json([$json],200);
     }
 
 
