@@ -40,13 +40,12 @@ class UPMController extends Controller
     }
 
     /**
-     * @param $request recibe la peticion del frontend
      * A traves de ELOQUENT podemos usar el metodo select y seleccionar el id, nombre,descripcion y 
      * con el JOIN obtenemos el nombre del municipio del upm con la condicion de que el estado
      * sea 1, es decir este activo      
      */
     public function obtenerUpms(){
-        $upms=UPM::select("id","nombre","descripcion","municipio.nombre AS municipio")
+        $upms=UPM::select("upm.id","upm.nombre","upm.descripcion","municipio.nombre AS municipio")
             ->join('municipio','municipio.id','upm.municipio_id')
             ->where("estado",1)
             ->get();

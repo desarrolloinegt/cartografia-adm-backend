@@ -11,29 +11,29 @@ class AsignacionUpmController extends Controller
     public function asignacionMasiva(Request $request){
         try{
             $validateData=$request->validate([
-                'upm_id'=>'required|int',
-                'proyectos'=>'array|required',
-                'proyectos.*'=>'int'
+                'upms'=>'array|required',
+                'umps.*'=>'int',
+                'proyecto_id'=>'required|int'
             ]);
-            $upm=UPM::find($validateData['upm_id']);
-            $arrayProyectos=$validateData['proyectos'];
-            if(isset($upm)){
-                foreach($arrayProyectos as $proyecto){
+            $proyecto=Proyecto::find($validateData['proyecto_id']);
+            $arrayUpms=$validateData['upms'];
+            if(isset($proyecto)){
+                foreach($arrayUpms as $upm){
                     $asignacion=AsignacionUpm::create([
-                        "upm_id"=>$upm->id,
-                        "proyecto_id"=>$proyecto
+                        "upm_id"=>$upm,
+                        "proyecto_id"=>$proyecto->id
                     ]);             
                 }
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'UPMs asignados correctamente'
+                ],200); 
             } else {
                 return response()->json([
                     'status' => false,
                     'message' => "Upm no Econtrado"
                 ], 404);
-            }   
-            return response()->json([
-                'status'=>true,
-                'message'=>'UPMs asignados correctamente'
-            ],200);  
+            }    
         }catch(\Throwable $th){
             return response()->json([
                 'status' => false,

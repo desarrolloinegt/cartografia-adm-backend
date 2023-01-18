@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('encuesta', function (Blueprint $table) {
             $table->comment('');
             $table->integer('id', true);
+            $table->tinyInteger('estado');
             $table->string('nombre', 100)->unique('Nombre_UNIQUE');
             $table->string('descripcion', 200);
         });

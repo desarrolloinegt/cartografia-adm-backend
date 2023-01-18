@@ -14,6 +14,7 @@ use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\UPMController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\MunicipioController;
+use App\Http\Controllers\AsignacionUpmController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -62,6 +63,9 @@ Route::get('/asignacionesRolPermiso',[AsignacionPermisoController::class,'obtene
 Route::post('/asignacionRolPermiso/eliminar',[AsignacionPermisoController::class,'eliminarAsignacion']);
 Route::post('/asignarGrupoRol',[AsignacionRolController::class,'asignarRolGrupo']);
 Route::post('/asignacionGrupoRol/eliminar',[AsignacionRolController::class,'eliminarAsignacion']);
+
+//Asginacions upms
+Route::post('/asginarUpmsProyecto',[AsignacionUpmController::class,'asignacionMasiva']);
 
 
 //Encuesta

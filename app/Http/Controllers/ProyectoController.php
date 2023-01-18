@@ -21,9 +21,9 @@ class ProyectoController extends Controller
                 'fecha'=>'required|date',
                 'encuesta_id'=>'required|int'
             ]);
-            $encuesta=Encuesta::where('id',$validateData['encuesta_id']);
+            $encuesta=Encuesta::find($validateData['encuesta_id']);
             if(isset($encuesta)){
-                if($encuesta->estado==1){
+                if($encuesta->estado){
                     $date = $validateData['fecha'];
                     $newDate = new \DateTime($date); 
                     $newDate->format('YYYY-mm-dd');
@@ -35,7 +35,8 @@ class ProyectoController extends Controller
                     ]);
                     return response()->json([
                         'status'=>true,
-                        'message'=>'Proyecto creado correctamente'
+                        'message'=>'Proyecto creado correctamente',
+                        'id'=>$proyecto->id, 
                     ],200);
                 } else{
                     return response()->json([
