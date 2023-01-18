@@ -90,7 +90,7 @@ class EncuestaController extends Controller
             $encuesta=Encuesta::find($id);
             if(isset($encuesta)){
                 $encuesta->estado=0;
-                $proyecto->save();
+                $encuesta->save();
                 return response()->json([
                     'status'=>true,
                     'message'=>'Encuesta desactivada correctamente'

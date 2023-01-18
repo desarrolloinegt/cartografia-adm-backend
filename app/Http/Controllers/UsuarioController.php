@@ -16,36 +16,37 @@ use Illuminate\Support\Facades\Auth;
 class UsuarioController extends Controller
 {
 
-     /**
+    /**
      * @param $request recibe la peticion del frontend
      * $validateData valida los campos, es decir require que la peticion contenga siete campos, la inidicacion unique
      * hace una consulta a la db y se asegura de que no exista de lo contrario hara uso de  excepciones.
      * $user hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
      * ELOQUENT se hara cargo de insertar en la DB
      */
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
 
-        try{
+        try {
 
-            $validateData=$request->validate([
-                'DPI'=>'required|max:13|min:13|unique:usuario',
-                'nombres'=>'required|string|max:25',
-                'apellidos'=>'required|string|max:25',
-                'email'=>'required|email|min:13|unique:usuario',
-                'codigo_usuario'=>'required|max:5',
-                'password'=>'required|min:8',
-                'username'=>'required|unique:usuario'
+            $validateData = $request->validate([
+                'DPI' => 'required|max:13|min:13|unique:usuario',
+                'nombres' => 'required|string|max:25',
+                'apellidos' => 'required|string|max:25',
+                'email' => 'required|email|min:13|unique:usuario',
+                'codigo_usuario' => 'required|max:5',
+                'password' => 'required|min:8',
+                'username' => 'required|unique:usuario'
             ]);
-    
-            $user=User::create([
-                'DPI'=>$validateData['DPI'],
-                'nombres'=>$validateData['nombres'],
-                'apellidos'=>$validateData['apellidos'],
-                'email'=>$validateData['email'],
-                'codigo_usuario'=>$validateData['codigo_usuario'],
-                'estado_usuario'=>1,
-                'password'=>Hash::make($validateData['password']),
-                'username'=>($validateData['username'])
+
+            $user = User::create([
+                'DPI' => $validateData['DPI'],
+                'nombres' => $validateData['nombres'],
+                'apellidos' => $validateData['apellidos'],
+                'email' => $validateData['email'],
+                'codigo_usuario' => $validateData['codigo_usuario'],
+                'estado_usuario' => 1,
+                'password' => Hash::make($validateData['password']),
+                'username' => ($validateData['username'])
             ]);
             return response()->json([
                 'status' => true,
@@ -57,10 +58,10 @@ class UsuarioController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
-       
+
     }
 
-     /**
+    /**
      * @param $request recibe la peticion del frontend
      * $validateData valida los campos, es decir require que la peticion contenga dos campos, 
      * $user hace uso de ELOQUENT de laravel con where lo cual obtiene el usuario de la DB en caso existiera comparando el username
@@ -71,52 +72,53 @@ class UsuarioController extends Controller
      * con la recibida en $request, el metodo Hash::check desencripta la contraseña y la compara este metodo no tiene forma de saber cual
      * es la contraseña ya que laravel incluye este tipo de seguridad
      */
-    public function login(Request $request){
-        try{
-            $validateData=$request->validate([
-                'username'=>'required|string',
-                'password'=>'required|string'
+    public function login(Request $request)
+    {
+        try {
+            $validateData = $request->validate([
+                'username' => 'required|string',
+                'password' => 'required|string'
             ]);
-            $user=User::where("username",$validateData['username'])->first();
-            if(isset($user)){
-                if ($user->estado_usuario==1) {
-                    if(Hash::check($validateData['password'], $user->password)){ //comparacion de contraseñas
+            $user = User::where("username", $validateData['username'])->first();
+            if (isset($user)) {
+                if ($user->estado_usuario == 1) {
+                    if (Hash::check($validateData['password'], $user->password)) { //comparacion de contraseñas
                         Auth::login($user);
                         //$proyectos=$this->obtenerProyecto($user->id); // llamada a metodo obtener proyecto, metodo visible en la parte inferior de la clase
-                        $token = $user->createToken('auth_token')->plainTextToken;//Creacion del token Bearer
+                        $token = $user->createToken('auth_token')->plainTextToken; //Creacion del token Bearer
                         return response()->json([
-                            "status"=>true,
+                            "status" => true,
                             "token" => $token,
-                            "id"=>$user->id,
-                            "usuario"=>$user->username,
+                            "id" => $user->id,
+                            "usuario" => $user->username,
                             //"proyectos"=>$proyectos,
-                        ],200); 
-                    } else{
+                        ], 200);
+                    } else {
                         return response()->json([
-                            "status"=>false,
-                            "message"=>"Contraseña incorrecta",
-                        ],401); 
+                            "status" => false,
+                            "message" => "Contraseña incorrecta",
+                        ], 401);
                     }
-                    
+
                 } else {
                     return response()->json([
-                        "status"=>false,
-                        "message"=>"Usuario no disponible",
-                    ],401); 
+                        "status" => false,
+                        "message" => "Usuario no disponible",
+                    ], 401);
                 }
-            } else{
+            } else {
                 return response()->json([
-                    "status"=>false,
-                    "message"=>"Usuario no encontrado",
-                ],404);
+                    "status" => false,
+                    "message" => "Usuario no encontrado",
+                ], 404);
             }
-        }catch(\Throwable $th){
-           /* return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
+        } catch (\Throwable $th) {
+            /* return response()->json([
+            'status' => false,
+            'message' => $th->getMessage()
             ], 500);*/
         }
-        
+
     }
 
     /**
@@ -124,11 +126,12 @@ class UsuarioController extends Controller
      * Atraves de $request podemos acceder al usuario, ver el token actual y eliminarlo
      * esto terminara la sesion
      */
-    public function logout(Request $request){
+    public function logout(Request $request)
+    {
         $request->user()->currentAccessToken()->delete();
         return response()->json([
-            "message"=>"Sesion terminada"
-        ],200);
+            "message" => "Sesion terminada"
+        ], 200);
     }
 
     /**
@@ -147,56 +150,67 @@ class UsuarioController extends Controller
      * 4. $permisos: una vez obtenido el rol se hace el ultimo inner join para obtener los permisos que estan relacionados a este rol
      * mediante las tablas asignacion_permiso y Permiso usando el rol obtenido para la comparacion
      */
-    public function obtenerProyecto($id){
-        $grupos=AsignacionGrupo::select('grupo_id')
-                        ->join('usuario',"asignacion_grupo.usuario_id","usuario.id")
-                        ->where('usuario.id',$id)
-                        ->get();
-        $json=[];
-        foreach($grupos as $grupo){
-            $proyecto=Proyecto::select('proyecto.id AS id_proyecto','proyecto.nombre AS nombre_proyecto')
-                ->join('grupo',"proyecto.id","grupo.proyecto_id")
-                ->where('grupo.id',$grupo->grupo_id)
+    public function obtenerProyecto($id)
+    {
+        try {
+            $grupos = AsignacionGrupo::select('grupo_id')
+                ->join('usuario', "asignacion_grupo.usuario_id", "usuario.id")
+                ->where('usuario.id', $id)
                 ->get();
-            $role=Role::select('rol.id','nombre AS rol')
-                ->join('asignacion_rol',"rol.id","asignacion_rol.rol_id")
-                ->where('asignacion_rol.grupo_id',$grupo->grupo_id)
-                ->where('rol.estado',1)
-                ->get();   
-            $permisos=[];
-            $status=false;
-                foreach($role as $rol){
-                    $status=true;
-                    $permisos=Permiso::select('id','alias')
-                    ->join('asignacion_permisos','asignacion_permisos.permiso_id','permiso.id')
-                    ->where('asignacion_permisos.rol_id',$rol->id)
+            $json = [];
+            foreach ($grupos as $grupo) {
+                $proyecto = Proyecto::select('proyecto.id AS id_proyecto', 'proyecto.nombre AS nombre_proyecto')
+                    ->join('grupo', "proyecto.id", "grupo.proyecto_id")
+                    ->where('grupo.id', $grupo->grupo_id)
                     ->get();
-                    
+                $role = Role::select('rol.id', 'nombre')
+                    ->join('asignacion_rol', "rol.id", "asignacion_rol.rol_id")
+                    ->where('asignacion_rol.grupo_id', $grupo->grupo_id)
+                    ->where('rol.estado', 1)
+                    ->get();
+                $permisos = [];
+                $status = false;
+                foreach ($role as $rol) {
+                    $status = true;
+                    $permisos = Permiso::select('id', 'alias')
+                        ->join('asignacion_permisos', 'asignacion_permisos.permiso_id', 'permiso.id')
+                        ->where('asignacion_permisos.rol_id', $rol->id)
+                        ->get();
                 }
-                if($status==true){
-                    $data =[
-                        'proyecto'=>$proyecto,
-                        "roles"=>$role,
-                        "permisos"=>($permisos)
-                    ];    
-                    array_push($json,$data);   
+                if ($status == true) {
+                    $data = [
+                        'proyecto' => $proyecto,
+                        "roles" => $role,
+                        "permisos" => $permisos
+                    ];
+                    array_push($json, $data);
                 }
-                    
-        }  
-        return reponse()->json([$json],200);
+
+            }
+            return response($json);
+            /*return response()->json(
+                [$json], 200);*/
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
     }
 
 
-      /**
+    /**
      * @param $request recibe la peticion del frontend
      * A traves de ELOQUENT podemos usar el metodo select y seleccionar los campos necesarios con la condicion de que el estado
      * sea 1, es decir este activo      
      */
-    public function obtenerUsuarios(){
-        $users=User::select("id","DPI","nombres","apellidos","username","email","codigo_usuario")
-            ->where("estado_usuario",1)
+    public function obtenerUsuarios()
+    {
+        $users = User::select("id", "DPI", "nombres", "apellidos", "username", "email", "codigo_usuario")
+            ->where("estado_usuario", 1)
             ->get();
-        return response()->json($users);    
+        return response()->json($users);
     }
     /**
      * @param $request recibe la peticion del frontend
@@ -207,41 +221,42 @@ class UsuarioController extends Controller
      * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL      
      */
 
-     public function modificarUsuario(Request $request){
-        try{
-            $validateData=$request->validate([
-                'id'=>'required|int',
-                'DPI'=>'required|max:13|min:13',
-                'nombres'=>'required|string|max:25',
-                'apellidos'=>'required|string|max:25',
-                'email'=>'required|email|min:13',
-                'codigo_usuario'=>'required|max:5',
-                'username'=>'required',
-                'password'=>'nullable|min:8'
+    public function modificarUsuario(Request $request)
+    {
+        try {
+            $validateData = $request->validate([
+                'id' => 'required|int',
+                'DPI' => 'required|max:13|min:13',
+                'nombres' => 'required|string|max:25',
+                'apellidos' => 'required|string|max:25',
+                'email' => 'required|email|min:13',
+                'codigo_usuario' => 'required|max:5',
+                'username' => 'required',
+                'password' => 'nullable|min:8'
             ]);
-            $user=User::find($validateData['id']);
-            if(isset($user)){
-                $user->nombres=$validateData['nombres'];
-                $user->apellidos=$validateData['apellidos'];
-                $user->email=$validateData['email'];
-                $user->codigo_usuario=$validateData['codigo_usuario'];
-                $user->username=$validateData['username'];
-                $user->DPI=$validateData['DPI'];
-                if($validateData['password']){
-                    $user->password=Hash::make($validateData['password']);
+            $user = User::find($validateData['id']);
+            if (isset($user)) {
+                $user->nombres = $validateData['nombres'];
+                $user->apellidos = $validateData['apellidos'];
+                $user->email = $validateData['email'];
+                $user->codigo_usuario = $validateData['codigo_usuario'];
+                $user->username = $validateData['username'];
+                $user->DPI = $validateData['DPI'];
+                if ($validateData['password']) {
+                    $user->password = Hash::make($validateData['password']);
                 }
                 $user->save();
                 return response()->json([
-                    'status'=>true,
-                    'message'=>'Usuario modificado correctamente'
-                ],200);
-            } else{
+                    'status' => true,
+                    'message' => 'Usuario modificado correctamente'
+                ], 200);
+            } else {
                 return response()->json([
-                    'status'=>false,
-                    'message'=>'Dato no encontrado'
-                ],404);
+                    'status' => false,
+                    'message' => 'Dato no encontrado'
+                ], 404);
             }
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
@@ -257,27 +272,28 @@ class UsuarioController extends Controller
      * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL      
      */
 
-     public function desactivarUsuario(int $id){
-        try{
-            $user=User::find($id);
-            if(isset($user)){
-                $user->estado_usuario=0;
+    public function desactivarUsuario(int $id)
+    {
+        try {
+            $user = User::find($id);
+            if (isset($user)) {
+                $user->estado_usuario = 0;
                 $user->save();
                 return response()->json([
-                    'status'=>true,
-                    'message'=>'Usuario desactivado correctamente'
-                ],200);
-            } else{
+                    'status' => true,
+                    'message' => 'Usuario desactivado correctamente'
+                ], 200);
+            } else {
                 return response()->json([
-                    'status'=>false,
-                    'message'=>'ERROR, dato no encontrado'
-                ],404); 
+                    'status' => false,
+                    'message' => 'ERROR, dato no encontrado'
+                ], 404);
             }
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
-        }  
+        }
     }
 }
