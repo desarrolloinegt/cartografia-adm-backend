@@ -20,19 +20,17 @@ class ProyectoController extends Controller
         try{
             $validateData=$request->validate([
                 'nombre'=>'required|string|unique:proyecto',
-                'fecha'=>'required|date',
+                'year'=>'required|max:4|min:4',
                 'encuesta_id'=>'required|int'
             ]);
             $encuesta=Encuesta::find($validateData['encuesta_id']);
             if(isset($encuesta)){
                 if($encuesta->estado){
-                    $date = $validateData['fecha'];
-                    $newDate = new \DateTime($date); 
-                    $newDate->format('YYYY-mm-dd');
                     $proyecto=Proyecto::create([
                         "nombre"=>$validateData['nombre'],
-                        "fecha"=>$newDate,
+                        "year"=>$validateData['year'],
                         "encuesta_id"=>$validateData['encuesta_id'],
+                        "progreso"=>0,
                         "estado_proyecto"=>1
                     ]);
                     return response()->json([
@@ -66,7 +64,7 @@ class ProyectoController extends Controller
      * sea 1, es decir este activo      
      */
     public function obtenerProyectos(){
-        $proyectos=Proyecto::select("proyecto.id","proyecto.nombre","proyecto.fecha","encuesta.nombre AS encuesta")
+        $proyectos=Proyecto::select("proyecto.id","proyecto.nombre","proyecto.year","encuesta.nombre AS encuesta","proyecto.progreso")
             ->join('encuesta','proyecto.encuesta_id','encuesta.id')
             ->where("proyecto.estado_proyecto",1)
             ->get();
@@ -86,7 +84,7 @@ class ProyectoController extends Controller
         $validateData=$request->validate([
             'proyecto_id'=>'required|int',
             'nombre'=>'required|string',
-            'fecha'=>'required|string',
+            'year'=>'required|min:4|max:4',
             'encuesta_id'=>'required|int',
             'upms'=>'nullable|array',
             'upms.*'=>'int'
@@ -98,12 +96,12 @@ class ProyectoController extends Controller
                 $asignacion=new AsignacionUpmController();
                 $asignacion->asignacionMasiva($request);
                 $proyecto->nombre=$validateData['nombre'];
-                $proyecto->fecha=$validateData['fecha'];
+                $proyecto->year=$validateData['year'];
                 $proyecto->encuesta_id=$validateData['encuesta_id'];
                 $proyecto->save();
             }else{
                 $proyecto->nombre=$validateData['nombre'];
-                $proyecto->fecha=$validateData['fecha'];
+                $proyecto->year=$validateData['year'];
                 $proyecto->encuesta_id=$validateData['encuesta_id'];
                 $proyecto->save();
             }
@@ -137,6 +135,30 @@ class ProyectoController extends Controller
                 return response()->json([
                     'status'=>true,
                     'message'=>'Proyecto desactivado correctamente'
+                ],200);               
+            } else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'ERROR, dato no encontrado'
+                ],404); 
+            }
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        } 
+    }
+
+    public function finalizarProyecto(int $id){
+        try{
+            $proyecto=Proyecto::find($id);
+            if(isset($proyecto)){
+                $proyecto->progreso=1;
+                $proyecto->save();
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'Proyecto Finalizado'
                 ],200);               
             } else{
                 return response()->json([

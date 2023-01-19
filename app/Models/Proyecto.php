@@ -15,7 +15,8 @@ class Proyecto extends Model
     public $timestamps = false;
     protected $fillable = [
         'nombre',
-        'fecha',
+        'year',
+        'progreso',
         'estado_proyecto',
         'encuesta_id'
     ];
