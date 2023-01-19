@@ -66,6 +66,7 @@ Route::post('/asignacionGrupoRol/eliminar',[AsignacionRolController::class,'elim
 
 //Asginacions upms
 Route::post('/asginarUpmsProyecto',[AsignacionUpmController::class,'asignacionMasiva']);
+Route::get('/obtenerUpmsProyecto',[AsignacionUpmController::class,'obtenerUpmsProyecto']);
 
 
 //Encuesta
@@ -76,7 +77,7 @@ Route::get('/encuesta/{id}',[EncuestaController::class,'desactivarEncuesta']);
 
 //Proyecto
 Route::post('/proyecto',[ProyectoController::class,'crearProyecto']);
-Route::post('/proyecto/edit',[ProyectoController::class,'modificarProyecto']);
+Route::patch('/proyecto/edit',[ProyectoController::class,'modificarProyecto']);
 Route::get('/proyectos',[ProyectoController::class,'obtenerProyectos']);
 Route::get('/proyecto/{id}',[ProyectoController::class,'desactivarProyecto']);
 

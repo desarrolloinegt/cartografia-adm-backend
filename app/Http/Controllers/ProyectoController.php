@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Proyecto;
 use App\Models\Encuesta;
+use App\Models\AsignacionUpm;
+use App\Http\Controllers\AsignacionUpmController;
 class ProyectoController extends Controller
 {
     /**
@@ -82,17 +84,29 @@ class ProyectoController extends Controller
 
     public function modificarProyecto(Request $request){
         $validateData=$request->validate([
-            'id'=>'required|int',
+            'proyecto_id'=>'required|int',
             'nombre'=>'required|string',
             'fecha'=>'required|string',
-            'encuesta_id'=>'required|int'
+            'encuesta_id'=>'required|int',
+            'upms'=>'nullable|array',
+            'upms.*'=>'int'
         ]);
-        $proyecto=Proyecto::find($validateData['id']);
+        $proyecto=Proyecto::find($validateData['proyecto_id']);
         if(isset($proyecto)){
-            $proyecto->nombre=$validateData['nombre'];
-            $proyecto->fecha=$validateData['fecha'];
-            $proyecto->encuesta_id=$validateData['encuesta_id'];
-            $proyecto->save();
+            if($validateData['upms']){
+                AsignacionUpm::where('proyecto_id',$validateData['proyecto_id'])->delete();
+                $asignacion=new AsignacionUpmController();
+                $asignacion->asignacionMasiva($request);
+                $proyecto->nombre=$validateData['nombre'];
+                $proyecto->fecha=$validateData['fecha'];
+                $proyecto->encuesta_id=$validateData['encuesta_id'];
+                $proyecto->save();
+            }else{
+                $proyecto->nombre=$validateData['nombre'];
+                $proyecto->fecha=$validateData['fecha'];
+                $proyecto->encuesta_id=$validateData['encuesta_id'];
+                $proyecto->save();
+            }
             return response()->json([
                 'status'=>true,
                 'message'=>'Proyecto modificado correctamente'
