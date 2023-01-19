@@ -15,6 +15,7 @@ use App\Http\Controllers\UPMController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\MunicipioController;
 use App\Http\Controllers\AsignacionUpmController;
+use App\Http\Controllers\VehiculoController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -94,6 +95,13 @@ Route::post('/upm',[UPMController::class,'crearUpm']);
 Route::get('/upms',[UPMController::class,'obtenerUpms']);
 Route::post('/upm/edit',[UPMController::class,'modificarUpm']);
 Route::get('/upm/{id}',[UPMController::class,'desactivarUpm']);
+
+//Vehiculo
+Route::post('/vehiculo',[VehiculoController::class,'crearVehiculo']);
+Route::patch('/vehiculo/edit',[VehiculoController::class,'modificarVehiculo']);
+Route::get('/vehiculos',[VehiculoController::class,'obtenerVehiculos']);
+Route::get('/vehiculo/{id}',[VehiculoController::class,'desactivarVehiculo']);
+
 
 //Municipio y Departamento
 Route::get('/municipios',[MunicipioController::class,'obtenerMunicipios']);
