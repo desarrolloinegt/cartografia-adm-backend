@@ -46,7 +46,7 @@ class AsignacionUpmController extends Controller
         try{
             $upmArray=[];
             $permisos=[];
-            $asginaciones= AsignacionUpm::selectRaw('proyecto.id,proyecto.nombre,proyecto.fecha,encuesta.nombre AS encuesta ,GROUP_CONCAT(upm.nombre) AS upms')
+            $asginaciones= AsignacionUpm::selectRaw('proyecto.id,proyecto.nombre,proyecto.year,encuesta.nombre AS encuesta,proyecto.progreso ,GROUP_CONCAT(upm.nombre) AS upms')
                 ->join('proyecto','asignacion_upm.proyecto_id','proyecto.id')
                 ->join('upm','asignacion_upm.upm_id','upm.id')
                 ->join('encuesta','proyecto.encuesta_id','encuesta.id')
