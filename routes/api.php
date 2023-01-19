@@ -81,7 +81,7 @@ Route::post('/proyecto',[ProyectoController::class,'crearProyecto']);
 Route::patch('/proyecto/edit',[ProyectoController::class,'modificarProyecto']);
 Route::get('/proyectos',[ProyectoController::class,'obtenerProyectos']);
 Route::get('/proyecto/{id}',[ProyectoController::class,'desactivarProyecto']);
-
+Route::get('/finalizarProyecto/{id}',[ProyectoController::class,'finalizarProyecto']);
 
 //Grupo
 Route::post('/grupo',[GrupoController::class,'createGroup']);
