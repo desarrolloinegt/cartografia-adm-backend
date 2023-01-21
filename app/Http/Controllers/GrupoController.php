@@ -15,23 +15,31 @@ class GrupoController extends Controller
      * ELOQUENT se hara cargo de insertar en la DB
      */
     public function createGroup(Request $request){
-        $validateData=$request->validate([
-            'nombre'=>'required|string|unique:grupo',
-            'descripcion'=>'',
-            'proyecto_id'=>'required|int',
-            'jerarquia'=>'required|int'
-        ]);
-        $grupo=Grupo::create([
-            "nombre"=>$validateData['nombre'],
-            "descripcion"=>$validateData['descripcion'],
-            "estado"=>1,
-            "proyecto_id"=>$validateData['proyecto_id'],
-            'jerarquia'=>$validateData['jerarquia']
-        ]);
-        return response()->json([
-            'status'=>true,
-            'message'=>'Grupo creado correctamente'
-        ],200);
+        try{
+            $validateData=$request->validate([
+                'nombre'=>'required|string|unique:grupo',
+                'descripcion'=>'',
+                'proyecto_id'=>'required|int',
+                'jerarquia'=>'required|int'
+            ]);
+            $grupo=Grupo::create([
+                "nombre"=>$validateData['nombre'],
+                "descripcion"=>$validateData['descripcion'],
+                "estado"=>1,
+                "proyecto_id"=>$validateData['proyecto_id'],
+                'jerarquia'=>$validateData['jerarquia']
+            ]);
+            return response()->json([
+                'status'=>true,
+                'message'=>'Grupo creado correctamente'
+            ],200);
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+       
     }
 
     /**
@@ -40,7 +48,7 @@ class GrupoController extends Controller
      * sea 1, es decir este activo      
      */
     public function obtenerGrupos(){
-        $grupos=Grupo::select("grupo.id","grupo.nombre","grupo.descripcion","proyecto.nombre AS proyecto")
+        $grupos=Grupo::select("grupo.id","grupo.nombre","grupo.descripcion","grupo.jerarquia","proyecto.nombre AS proyecto","proyecto.id AS proyecto_id")
             ->join('proyecto','grupo.proyecto_id','proyecto.id')
             ->where("grupo.estado",1)
             ->get();
@@ -57,30 +65,38 @@ class GrupoController extends Controller
      */
 
     public function modificarGrupo(Request $request){
-        $validateData=$request->validate([
-            'id'=>'required|int',
-            'nombre'=>'required|string',
-            'descripcion'=>'',
-            'proyecto_id'=>'required|int',
-            'jerarquia'=>'required|int'
-        ]);
-        $grupo=Grupo::find($validateData['id']);
-        if(isset($grupo)){
-            $grupo->nombre=$validateData['nombre'];
-            $grupo->descripcion=$validateData['descripcion'];
-            $grupo->proyecto_id=$validateData['proyecto_id'];
-            $grupo->jerarquia=$validateData['jerarquia'];
-            $grupo->save();
+        try{
+            $validateData=$request->validate([
+                'id'=>'required|int',
+                'nombre'=>'required|string',
+                'descripcion'=>'',
+                'proyecto_id'=>'required|int',
+                'jerarquia'=>'required|int'
+            ]);
+            $grupo=Grupo::find($validateData['id']);
+            if(isset($grupo)){
+                $grupo->nombre=$validateData['nombre'];
+                $grupo->descripcion=$validateData['descripcion'];
+                $grupo->proyecto_id=$validateData['proyecto_id'];
+                $grupo->jerarquia=$validateData['jerarquia'];
+                $grupo->save();
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'Grupo modificado correctamente'
+                ],200);
+            } else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Dato no encontrado'
+                ],404);
+            }
+        }catch(\Throwable $th){
             return response()->json([
-                'status'=>true,
-                'message'=>'Grupo modificado correctamente'
-            ],200);
-        } else{
-            return response()->json([
-                'status'=>false,
-                'message'=>'Dato no encontrado'
-            ],404);
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
         }
+       
     }
 
     /**

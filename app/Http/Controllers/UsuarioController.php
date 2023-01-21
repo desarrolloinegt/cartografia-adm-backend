@@ -212,6 +212,13 @@ class UsuarioController extends Controller
             ->get();
         return response()->json($users);
     }
+
+    public function obtenerUsuariosList(){
+        $users = User::select("id", "username")
+            ->where("estado_usuario", 1)
+            ->get();
+        return response()->json($users);
+    }
     /**
      * @param $request recibe la peticion del frontend
      * $validateData valida los campos, es decir requiee que la peticion contenga los datos que necesitamos para editar el usuario

@@ -17,17 +17,20 @@ class AsignacionRolController extends Controller
      */
     public function asignarRolGrupo(Request $request){
         $validateData=$request->validate([
-            'rol_id'=>'required|int',
+            'roles'=>'required|array',
+            'roles.*'=>'int',
             'grupo_id'=>'required|int'
         ]);
         $grupo=Grupo::find($validateData['grupo_id']);
-        $rol=Role::find($validateData['rol_id']);
-        if(isset($grupo) && isset($rol)){
-            if($grupo->estado==1 && $rol->estado==1){
-                $asignacion=AsignacionRol::create([
-                    "rol_id"=>$validateData['rol_id'],
-                    "grupo_id"=>$validateData['grupo_id']
-                ]);
+        $arrayRoles=$validateData['roles'];
+        if(isset($grupo)){
+            if($grupo->estado==1){
+                foreach($arrayRoles as $rol){
+                    $asignacion=AsignacionRol::create([
+                        "grupo_id"=>$grupo->id,
+                        "rol_id"=>$rol
+                    ]);             
+                }
                 return response()->json([
                     'status'=>true,
                     'message'=>'Rol asignado a grupo correctamente'
@@ -73,5 +76,48 @@ class AsignacionRolController extends Controller
                 'message'=>'Datos no encontrados'
             ],404);
         }    
+    }
+
+    public function modificarGruposRoles(Request $request){
+        $validateData=$request->validate([
+            'roles'=>'required|array',
+            'roles.*'=>'int',
+            'grupo_id'=>'required|int'
+        ]);
+        $grupo=Grupo::find($validateData['grupo_id']);
+        if(isset($grupo)) {
+            AsignacionRol::where('grupo_id',$validateData['grupo_id'])->delete();
+            $this->asignarRolGrupo($request);
+            return response()->json([
+                'status'=>true,
+                'message'=>'Grupo modificado correctamente'
+            ],200);
+        } else {
+            return response()->json([
+                'status'=>false,
+                'message'=>'Dato no encontrado'
+            ],404);
+        }
+    }
+
+    public function obtenerGruposRoles(){
+        try{
+            $asginaciones= AsignacionRol::selectRaw('grupo.id,grupo.nombre, GROUP_CONCAT(rol.nombre) AS roles')
+                ->join('rol','asignacion_rol.rol_id','rol.id')
+                ->join('grupo','asignacion_rol.grupo_id','grupo.id')
+                ->where('rol.estado',1)
+                ->where('grupo.estado',1)
+                ->groupBy('asignacion_rol.grupo_id')
+                ->get();
+            foreach ($asginaciones as $asginacion) {
+                $asginacion->roles =explode(",", $asginacion->roles);
+            }
+            return response()->json($asginaciones);
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 }

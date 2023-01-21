@@ -47,23 +47,29 @@ Route::post('/registro',[UsuarioController::class,'register']);
 Route::patch('/usuario/edit',[UsuarioController::class,'modificarUsuario']);
 Route::get('/usuario/{id}',[UsuarioController::class,'desactivarUsuario']);
 Route::get('/usuarios',[UsuarioController::class,'obtenerUsuarios']);
+Route::get('/usuariosList',[UsuarioController::class,'obtenerUsuariosList']);
 Route::get('/projectsAssing/{id}',[UsuarioController::class,'obtenerProyecto']);
 Route::post('/logout',[UsuarioController::class,'logout'])->middleware('auth:sanctum');
 
 
-//asginaciones grupo
+//asginaciones grupo usuario
 
 Route::post('/asignarGrupoUsuario',[AsignacionGrupoController::class,'asignarGrupoUsuario']);
 Route::post('/asignacionGrupoUsuario/eliminar',[AsignacionGrupoController::class,'eliminarAsignacion']);
 Route::post('/asignarGruposUsuarios',[AsignacionGrupoController::class,'asignacionMasiva']);
+Route::get('/obtenerGrupoUsuarios',[AsignacionGrupoController::class,'obtenerGrupoUsuarios']);
+Route::patch('/asignacionGrupoUsuario/edit',[AsignacionGrupoController::class,'modificarGrupoUsuarios']);
 
-
-//asgingaciones rol
+//asgingaciones rol Permiso
 Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignacionMasiva']);
 Route::get('/asignacionesRolPermiso',[AsignacionPermisoController::class,'obtenerRolPermiso']);
 Route::post('/asignacionRolPermiso/eliminar',[AsignacionPermisoController::class,'eliminarAsignacion']);
+
+
+//asgingaciones rol Grupo
+Route::get('/obtenerGruposRoles',[AsignacionRolController::class,'obtenerGruposRoles']);
 Route::post('/asignarGrupoRol',[AsignacionRolController::class,'asignarRolGrupo']);
-Route::post('/asignacionGrupoRol/eliminar',[AsignacionRolController::class,'eliminarAsignacion']);
+Route::patch('/asignacionGrupoRol/edit',[AsignacionRolController::class,'modificarGruposRoles']);
 
 //Asginacions upms
 Route::post('/asginarUpmsProyecto',[AsignacionUpmController::class,'asignacionMasiva']);
@@ -86,7 +92,7 @@ Route::get('/finalizarProyecto/{id}',[ProyectoController::class,'finalizarProyec
 //Grupo
 Route::post('/grupo',[GrupoController::class,'createGroup']);
 Route::get('/grupos',[GrupoController::class,'obtenerGrupos']);
-Route::post('/grupo/edit',[GrupoController::class,'modificarGrupo']);
+Route::patch('/grupo/edit',[GrupoController::class,'modificarGrupo']);
 Route::get('/grupo/{id}',[GrupoController::class,'desactivarGrupo']);
 
 
