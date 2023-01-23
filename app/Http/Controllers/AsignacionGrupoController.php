@@ -175,4 +175,20 @@ class AsignacionGrupoController extends Controller
             ], 500);
         }
     }
+    public function obtenerGrupoSinUsuarios()
+    {
+        try {
+            $asginaciones = Grupo::select('grupo.id','grupo.nombre')
+                ->leftJoin('asignacion_grupo', 'asignacion_grupo.grupo_id', 'grupo.id')
+                ->whereNull('asignacion_grupo.grupo_id')
+                ->where('grupo.estado', 1)
+                ->get();
+            return response()->json($asginaciones,200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
 }

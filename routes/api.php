@@ -58,6 +58,7 @@ Route::post('/asignarGrupoUsuario',[AsignacionGrupoController::class,'asignarGru
 Route::post('/asignacionGrupoUsuario/eliminar',[AsignacionGrupoController::class,'eliminarAsignacion']);
 Route::post('/asignarGruposUsuarios',[AsignacionGrupoController::class,'asignacionMasiva']);
 Route::get('/obtenerGrupoUsuarios',[AsignacionGrupoController::class,'obtenerGrupoUsuarios']);
+Route::get('/obtenerGrupoSinUsuarios',[AsignacionGrupoController::class,'obtenerGrupoSinUsuarios']);
 Route::patch('/asignacionGrupoUsuario/edit',[AsignacionGrupoController::class,'modificarGrupoUsuarios']);
 
 //asgingaciones rol Permiso
@@ -70,6 +71,7 @@ Route::post('/asignacionRolPermiso/eliminar',[AsignacionPermisoController::class
 Route::get('/obtenerGruposRoles',[AsignacionRolController::class,'obtenerGruposRoles']);
 Route::post('/asignarGrupoRol',[AsignacionRolController::class,'asignarRolGrupo']);
 Route::patch('/asignacionGrupoRol/edit',[AsignacionRolController::class,'modificarGruposRoles']);
+Route::get('/obtenerGrupoSinRol',[AsignacionRolController::class,'obtenerGrupoSinRol']);
 
 //Asginacions upms
 Route::post('/asginarUpmsProyecto',[AsignacionUpmController::class,'asignacionMasiva']);
