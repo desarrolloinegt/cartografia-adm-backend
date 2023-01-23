@@ -22,6 +22,7 @@ class UsuarioController extends Controller
      * hace una consulta a la db y se asegura de que no exista de lo contrario hara uso de  excepciones.
      * $user hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
      * ELOQUENT se hara cargo de insertar en la DB
+     * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request)
     {
@@ -71,6 +72,7 @@ class UsuarioController extends Controller
      * Hash::check($validateData['password'], $user->password) metodo de laravel que valida la contraseña guardada en la base de datos
      * con la recibida en $request, el metodo Hash::check desencripta la contraseña y la compara este metodo no tiene forma de saber cual
      * es la contraseña ya que laravel incluye este tipo de seguridad
+     * @return \Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
     {
@@ -84,14 +86,12 @@ class UsuarioController extends Controller
                 if ($user->estado_usuario == 1) {
                     if (Hash::check($validateData['password'], $user->password)) { //comparacion de contraseñas
                         Auth::login($user);
-                        //$proyectos=$this->obtenerProyecto($user->id); // llamada a metodo obtener proyecto, metodo visible en la parte inferior de la clase
                         $token = $user->createToken('auth_token')->plainTextToken; //Creacion del token Bearer
                         return response()->json([
                             "status" => true,
                             "token" => $token,
                             "id" => $user->id,
                             "usuario" => $user->username,
-                            //"proyectos"=>$proyectos,
                         ], 200);
                     } else {
                         return response()->json([
@@ -113,10 +113,10 @@ class UsuarioController extends Controller
                 ], 404);
             }
         } catch (\Throwable $th) {
-            /* return response()->json([
+             return response()->json([
             'status' => false,
             'message' => $th->getMessage()
-            ], 500);*/
+            ], 500);
         }
 
     }
@@ -125,6 +125,7 @@ class UsuarioController extends Controller
      * @param $request recibe la peticion del frontend
      * Atraves de $request podemos acceder al usuario, ver el token actual y eliminarlo
      * esto terminara la sesion
+     * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request)
     {
@@ -149,6 +150,7 @@ class UsuarioController extends Controller
      * 
      * 4. $permisos: una vez obtenido el rol se hace el ultimo inner join para obtener los permisos que estan relacionados a este rol
      * mediante las tablas asignacion_permiso y Permiso usando el rol obtenido para la comparacion
+     * @return \Illuminate\Http\JsonResponse
      */
     public function obtenerProyecto($id)
     {
@@ -162,6 +164,7 @@ class UsuarioController extends Controller
                 $proyecto = Proyecto::select('proyecto.id AS id_proyecto', 'proyecto.nombre AS nombre_proyecto')
                     ->join('grupo', "proyecto.id", "grupo.proyecto_id")
                     ->where('grupo.id', $grupo->grupo_id)
+                    ->where('proyecto.estado_proyecto',1)
                     ->get();
                 $role = Role::select('rol.id', 'nombre')
                     ->join('asignacion_rol', "rol.id", "asignacion_rol.rol_id")
@@ -188,8 +191,6 @@ class UsuarioController extends Controller
 
             }
             return response($json);
-            /*return response()->json(
-                [$json], 200);*/
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -203,21 +204,23 @@ class UsuarioController extends Controller
     /**
      * @param $request recibe la peticion del frontend
      * A traves de ELOQUENT podemos usar el metodo select y seleccionar los campos necesarios con la condicion de que el estado
-     * sea 1, es decir este activo      
+     * sea 1, es decir este activo    
+     * @return \Illuminate\Http\JsonResponse  
      */
     public function obtenerUsuarios()
     {
         $users = User::select("id", "DPI", "nombres", "apellidos", "username", "email", "codigo_usuario")
             ->where("estado_usuario", 1)
             ->get();
-        return response()->json($users);
+        return response()->json($users,200);
     }
 
-    public function obtenerUsuariosList(){
+    public function obtenerUsuariosList()
+    {
         $users = User::select("id", "username")
             ->where("estado_usuario", 1)
             ->get();
-        return response()->json($users);
+        return response()->json($users,200);
     }
     /**
      * @param $request recibe la peticion del frontend
@@ -225,7 +228,8 @@ class UsuarioController extends Controller
      * A traves de ELOQUENT podemos usar el metodo find y seleccionar el rol que corresponde el id
      * 
      * Al obtener el rol podemos hacer uso de sus variables y asignarle el valor obtenido en el validateData
-     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL      
+     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL 
+     * @return \Illuminate\Http\JsonResponse     
      */
 
     public function modificarUsuario(Request $request)
@@ -276,7 +280,8 @@ class UsuarioController extends Controller
      * A traves de ELOQUENT podemos usar el metodo find y seleccionar el Usuario que corresponde el id
      * 
      * Al obtener el usuario podemos hacer uso de sus variables y asignarle el valor 0 al estado del usuario
-     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL      
+     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL 
+     * @return \Illuminate\Http\JsonResponse     
      */
 
     public function desactivarUsuario(int $id)

@@ -14,33 +14,37 @@ class EncuestaController extends Controller
      * hace una consulta a la db y se asegura de que no exista de lo contrario hara uso de  excepciones.
      * $encuesta hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
      * ELOQUENT se hara cargo de insertar en la DB
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function crearEncuesta(Request $request){
-        $validateData=$request->validate([
-            'nombre'=>'required|string|unique:encuesta',
-            'descripcion'=>'required|string'
+    public function crearEncuesta(Request $request)
+    {
+        $validateData = $request->validate([
+            'nombre' => 'required|string|unique:encuesta',
+            'descripcion' => 'required|string'
         ]);
-        $encuesta=Encuesta::create([
-            "nombre"=>$validateData['nombre'],
-            "descripcion"=>$validateData['descripcion'],
-            "estado"=>1
+        $encuesta = Encuesta::create([
+            "nombre" => $validateData['nombre'],
+            "descripcion" => $validateData['descripcion'],
+            "estado" => 1
         ]);
         return response()->json([
-            'status'=>true,
-            'message'=>'Encuesta creada correctamente'
-        ],200);
+            'status' => true,
+            'message' => 'Encuesta creada correctamente'
+        ], 200);
     }
 
     /**
      * @param $request recibe la peticion del frontend
-     * A traves de ELOQUENT podemos usar el metodo select y seleccionar el id y nombre del role con la condicion de que el estado
+     * A traves de ELOQUENT podemos usar el metodo select y seleccionar el id, nombre y descripcion de la encuesta con la condicion de que el estado
      * sea 1, es decir este activo      
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function obtenerEncuestas(){
-        $encuestas=Encuesta::select("id","nombre","descripcion")
-            ->where('estado',1)
+    public function obtenerEncuestas()
+    {
+        $encuestas = Encuesta::select("id", "nombre", "descripcion")
+            ->where('estado', 1)
             ->get();
-        return response()->json($encuestas);    
+        return response()->json($encuestas);
     }
 
     /**
@@ -50,29 +54,31 @@ class EncuestaController extends Controller
      * A traves de ELOQUENT podemos usar el metodo find y seleccionar la encuesta que corresponde el id
      * 
      * Al obtener la encuesta podemos hacer uso de sus variables y asignarle el valor obtenido en el validateData
-     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL      
+     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL 
+     * @return \Illuminate\Http\JsonResponse     
      */
 
-    public function modificarEncuesta(Request $request){
-        $validateData=$request->validate([
-            'id'=>'required|int',
-            'nombre'=>'required|string',
-            'descripcion'=>'required|string'
+    public function modificarEncuesta(Request $request)
+    {
+        $validateData = $request->validate([
+            'id' => 'required|int',
+            'nombre' => 'required|string',
+            'descripcion' => 'required|string'
         ]);
-        $encuesta=Encuesta::find($validateData['id']);
-        if(isset($encuesta)){
-            $encuesta->nombre=$validateData['nombre'];
-            $encuesta->descripcion=$validateData['descripcion'];
+        $encuesta = Encuesta::find($validateData['id']);
+        if (isset($encuesta)) {
+            $encuesta->nombre = $validateData['nombre'];
+            $encuesta->descripcion = $validateData['descripcion'];
             $encuesta->save();
             return response()->json([
-                'status'=>true,
-                'message'=>'Encuesta modificada correctamente'
-            ],200);
-        } else{
+                'status' => true,
+                'message' => 'Encuesta modificada correctamente'
+            ], 200);
+        } else {
             return response()->json([
-                'status'=>false,
-                'message'=>'Dato no encontrado'
-            ],404);
+                'status' => false,
+                'message' => 'Dato no encontrado'
+            ], 404);
         }
     }
 
@@ -84,30 +90,32 @@ class EncuestaController extends Controller
      * 
      * antes de eliminar la encuesta se verifica si la encuesta es usada en algun proyecto, si no es usada podra ser eliminada
      * de lo contraria no se podra eliminar      
+     * @return \Illuminate\Http\JsonResponse
      */
 
-    public function desactivarEncuesta(int $id){
-        try{
-            $encuesta=Encuesta::find($id);
-            if(isset($encuesta)){
-                $encuesta->estado=0;
+    public function desactivarEncuesta(int $id)
+    {
+        try {
+            $encuesta = Encuesta::find($id);
+            if (isset($encuesta)) {
+                $encuesta->estado = 0;
                 $encuesta->save();
                 return response()->json([
-                    'status'=>true,
-                    'message'=>'Encuesta desactivada correctamente'
-                ],200);       
-            } else{
+                    'status' => true,
+                    'message' => 'Encuesta desactivada correctamente'
+                ], 200);
+            } else {
                 return response()->json([
-                    'status'=>false,
-                    'message'=>'ERROR, dato no encontrado'
-                ],404); 
+                    'status' => false,
+                    'message' => 'ERROR, dato no encontrado'
+                ], 404);
             }
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
-        } 
+        }
     }
 
 

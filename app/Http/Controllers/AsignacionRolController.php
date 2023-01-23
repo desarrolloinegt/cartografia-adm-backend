@@ -11,9 +11,11 @@ class AsignacionRolController extends Controller
 {
     /**
      * @param $request recibe la peticion del frontend
-     * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
+     * $validateData valida los campos, es decir require que la peticion contenga un campo entero y un array de enteros
+     * Foreach para recorrer el array que es un array de ids de roles
      * $asignacion hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
      * ELOQUENT se hara cargo de insertar en la DB
+     * @return \Illuminate\Http\JsonResponse
      */
     public function asignarRolGrupo(Request $request)
     {
@@ -55,6 +57,7 @@ class AsignacionRolController extends Controller
      * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
      * $asignacion hace uso de ELOQUENT de laravel con el metodo where y solo es necesario pasarle los campos validados
      * ELOQUENT se hara cargo de eliminar en la DB con el metodo delete
+     * @return \Illuminate\Http\JsonResponse
      */
     public function eliminarAsignacion(Request $request)
     {
@@ -80,6 +83,14 @@ class AsignacionRolController extends Controller
         }
     }
 
+    /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir require que la peticion contenga un campos  entero y un arreglo de enteros
+     * $grupo obtenemos la verificacion si el grupo existe o no
+     * Para asignar nuevos roles al grupo eliminamos los anteriores y se crean de nuevo
+     * y se llama a la funcion asignarRolGrupo(), esta se encarga de crear las nuevas asignaciones
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function modificarGruposRoles(Request $request)
     {
         $validateData = $request->validate([
@@ -103,6 +114,11 @@ class AsignacionRolController extends Controller
         }
     }
 
+    /**
+     * Con esta funcion se obtine una tabla con el grupo y los roles que tiene ese grupo
+     * siempre que el grupo y rol esten activos y se agrupa los roles por el grupo
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function obtenerGruposRoles()
     {
         try {
@@ -125,15 +141,20 @@ class AsignacionRolController extends Controller
         }
     }
 
+    /**
+     * Con esta funcion se obtine una tabla con el grupo que no tiene roles asignados
+     * siempre que el grupo y rol esten activos
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function obtenerGrupoSinRol()
     {
         try {
-            $asginaciones = Grupo::select('grupo.id','grupo.nombre')
+            $asginaciones = Grupo::select('grupo.id', 'grupo.nombre')
                 ->leftJoin('asignacion_rol', 'asignacion_rol.grupo_id', 'grupo.id')
                 ->whereNull('asignacion_rol.grupo_id')
                 ->where('grupo.estado', 1)
                 ->get();
-            return response()->json($asginaciones,200);
+            return response()->json($asginaciones, 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,

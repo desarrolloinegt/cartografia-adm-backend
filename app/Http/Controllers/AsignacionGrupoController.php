@@ -12,9 +12,11 @@ class AsignacionGrupoController extends Controller
 {
     /**
      * @param $request recibe la peticion del frontend
-     * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
+     * $validateData valida los campos, es decir require que la peticion contenga un campo entero y un array de enteros
+     * Foreach para recorrer el arrlego de enteros referente a un array de ids de usuarios
      * $asignacion hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
      * ELOQUENT se hara cargo de insertar en la DB
+     * @return \Illuminate\Http\JsonResponse
      */
     public function asignarGrupoUsuario(Request $request)
     {
@@ -27,11 +29,11 @@ class AsignacionGrupoController extends Controller
         $arrayUsuarios = $validateData['usuarios'];
         if (isset($grupo)) {
             if ($grupo->estado == 1) {
-                foreach($arrayUsuarios as $usuario){
-                    $asignacion=AsignacionGrupo::create([
-                        "grupo_id"=>$grupo->id,
-                        "usuario_id"=>$usuario
-                    ]);             
+                foreach ($arrayUsuarios as $usuario) {
+                    $asignacion = AsignacionGrupo::create([
+                        "grupo_id" => $grupo->id,
+                        "usuario_id" => $usuario
+                    ]);
                 }
                 return response()->json([
                     'status' => true,
@@ -107,6 +109,14 @@ class AsignacionGrupoController extends Controller
         return response()->json($responses);
     }
 
+    /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir require que la peticion contenga dos campos y ambos sean enteros
+     * $matchThese se utilizar para crear las validaciones que necesitamos para poder eliminar una asignacion
+     * $asignacion hace uso de ELOQUENT de laravel con el metodo where y first y obtiene la asignacion en caso existiera
+     * ELOQUENT se hara cargo de eliminar con el metodo delete
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function eliminarAsignacion(Request $request)
     {
         $validateData = $request->validate([
@@ -132,6 +142,14 @@ class AsignacionGrupoController extends Controller
         }
     }
 
+    /**
+     * @param $request recibe la peticion del frontend
+     * $validateData valida los campos, es decir require que la peticion contenga un campos  entero y un arreglo de enteros
+     * $grupo obtenemos la verificacion si el grupo existe o no
+     * Para asignar nuevos usuarios al grupo eliminamos los anteriores y se crean de nuevo
+     * y se llama a la funcion asignarGrupoUsuario(), esta se encarga de crear las nuevas asignaciones
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function modificarGrupoUsuarios(Request $request)
     {
         $validateData = $request->validate([
@@ -154,6 +172,12 @@ class AsignacionGrupoController extends Controller
             ], 404);
         }
     }
+
+    /**
+     * Con esta funcion se obtine una tabla con el grupo y los usuarios que tiene ese grupo
+     * siempre que el grupo y usuarios esten activos y se agrupa los usuarios por el grupo
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function obtenerGrupoUsuarios()
     {
         try {
@@ -175,15 +199,21 @@ class AsignacionGrupoController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Con esta funcion se obtine una tabla con el grupo que no tiene usuarios asignados
+     * siempre que el grupo y usuarios esten activos
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function obtenerGrupoSinUsuarios()
     {
         try {
-            $asginaciones = Grupo::select('grupo.id','grupo.nombre')
+            $asginaciones = Grupo::select('grupo.id', 'grupo.nombre')
                 ->leftJoin('asignacion_grupo', 'asignacion_grupo.grupo_id', 'grupo.id')
                 ->whereNull('asignacion_grupo.grupo_id')
                 ->where('grupo.estado', 1)
                 ->get();
-            return response()->json($asginaciones,200);
+            return response()->json($asginaciones, 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
