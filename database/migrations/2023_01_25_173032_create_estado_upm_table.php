@@ -13,12 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('asignacion_upm', function (Blueprint $table) {
+        Schema::create('estado_upm', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('upm_id')->index('fk_Asignacion UPM_UPM1_idx');
-            $table->integer('proyecto_id')->index('fk_Asignacion UPM_Proyecto1_idx');
-
-            $table->primary(['upm_id', 'proyecto_id']);
+            $table->integer('cod_estado', true);
+            $table->string('nombre', 100);
+            $table->string('descripcion', 200)->nullable();
         });
     }
 
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('asignacion_upm');
+        Schema::dropIfExists('estado_upm');
     }
 };

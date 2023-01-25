@@ -18,6 +18,7 @@ class Proyecto extends Model
         'year',
         'progreso',
         'estado_proyecto',
-        'encuesta_id'
+        'encuesta_id',
+        'descripcion'
     ];
 }

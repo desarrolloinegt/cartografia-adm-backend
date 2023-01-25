@@ -13,12 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('vehiculo', function (Blueprint $table) {
+        Schema::create('asignacion_upm', function (Blueprint $table) {
             $table->comment('');
-            $table->string('placa', 7)->primary();
-            $table->string('modelo', 25);
-            $table->date('año');
-            $table->tinyInteger('estado');
+            $table->integer('upm_id')->index('fk_Asignacion UPM_UPM1_idx');
+            $table->integer('proyecto_id')->index('fk_Asignacion UPM_Proyecto1_idx');
+            $table->integer('estado_upm_cod_estado')->index('fk_asignacion_upm_estado_upm1_idx');
+
+            $table->primary(['upm_id', 'proyecto_id']);
         });
     }
 
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('vehiculo');
+        Schema::dropIfExists('asignacion_upm');
     }
 };

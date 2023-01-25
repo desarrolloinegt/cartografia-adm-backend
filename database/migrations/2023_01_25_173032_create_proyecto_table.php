@@ -16,10 +16,12 @@ return new class extends Migration
         Schema::create('proyecto', function (Blueprint $table) {
             $table->comment('');
             $table->integer('id', true);
-            $table->date('fecha');
+            $table->year('year');
             $table->tinyInteger('estado_proyecto');
             $table->integer('encuesta_id')->index('fk_Proyecto_Encuesta1_idx');
             $table->string('nombre', 100)->unique('nombre_UNIQUE');
+            $table->integer('progreso');
+            $table->string('descripcion', 200)->nullable();
         });
     }
 

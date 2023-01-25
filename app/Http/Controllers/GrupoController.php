@@ -22,14 +22,13 @@ class GrupoController extends Controller
                 'nombre' => 'required|string|unique:grupo',
                 'descripcion' => '',
                 'proyecto_id' => 'required|int',
-                'jerarquia' => 'required|int'
             ]);
             $grupo = Grupo::create([
                 "nombre" => $validateData['nombre'],
                 "descripcion" => $validateData['descripcion'],
                 "estado" => 1,
                 "proyecto_id" => $validateData['proyecto_id'],
-                'jerarquia' => $validateData['jerarquia']
+                'jerarquia' => 0
             ]);
             return response()->json([
                 'status' => true,
@@ -77,7 +76,6 @@ class GrupoController extends Controller
                 'nombre' => 'required|string',
                 'descripcion' => '',
                 'proyecto_id' => 'required|int',
-                'jerarquia' => 'required|int'
             ]);
             $grupo = Grupo::find($validateData['id']);
             if (isset($grupo)) {

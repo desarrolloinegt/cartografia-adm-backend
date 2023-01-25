@@ -24,6 +24,7 @@ class ProyectoController extends Controller
             $validateData = $request->validate([
                 'nombre' => 'required|string|unique:proyecto',
                 'year' => 'required|max:4|min:4',
+                'descripcion'=>'string',
                 'encuesta_id' => 'required|int'
             ]);
             $encuesta = Encuesta::find($validateData['encuesta_id']);
@@ -33,6 +34,7 @@ class ProyectoController extends Controller
                         "nombre" => $validateData['nombre'],
                         "year" => $validateData['year'],
                         "encuesta_id" => $validateData['encuesta_id'],
+                        "descripcion"=>$validateData['descripcion'],
                         "progreso" => 0,
                         "estado_proyecto" => 1
                     ]);
@@ -69,7 +71,7 @@ class ProyectoController extends Controller
      */
     public function obtenerProyectos()
     {
-        $proyectos = Proyecto::select("proyecto.id", "proyecto.nombre", "proyecto.year", "encuesta.nombre AS encuesta", "proyecto.progreso")
+        $proyectos = Proyecto::select("proyecto.id", "proyecto.nombre", "proyecto.year", "encuesta.nombre AS encuesta", "proyecto.progreso","proyecto.descripcion")
             ->join('encuesta', 'proyecto.encuesta_id', 'encuesta.id')
             ->where("proyecto.estado_proyecto", 1)
             ->get();

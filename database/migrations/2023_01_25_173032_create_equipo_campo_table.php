@@ -13,10 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('asignacion_rol', function (Blueprint $table) {
+        Schema::create('equipo_campo', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('rol_id')->index('fk_Asignacion Rol_Rol1_idx');
-            $table->integer('grupo_id')->index('fk_Asignacion Rol_Grupo1_idx');
+            $table->integer('proyecto_id')->index('fk_Equipo Campo_Proyecto1_idx');
+            $table->integer('supervisor')->index('fk_Equipo Campo_Usuario1_idx');
+            $table->integer('vehiculo_id')->nullable()->index('fk_equipo_campo_vehiculo1_idx');
+
+            $table->primary(['supervisor']);
         });
     }
 
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('asignacion_rol');
+        Schema::dropIfExists('equipo_campo');
     }
 };

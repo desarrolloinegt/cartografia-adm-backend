@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table('equipo_campo', function (Blueprint $table) {
             $table->foreign(['proyecto_id'], 'fk_Equipo Campo_Proyecto1')->references(['id'])->on('proyecto')->onUpdate('NO ACTION')->onDelete('NO ACTION');
             $table->foreign(['supervisor'], 'fk_Equipo Campo_Usuario1')->references(['id'])->on('usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
-            $table->foreign(['vehiculo_placa'], 'fk_equipo_campo_vehiculo1')->references(['placa'])->on('vehiculo')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['vehiculo_id'], 'fk_equipo_campo_vehiculo1')->references(['id'])->on('vehiculo')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
