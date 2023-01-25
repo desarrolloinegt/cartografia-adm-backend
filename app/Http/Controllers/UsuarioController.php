@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Grupo;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Permiso;
@@ -9,7 +10,6 @@ use App\Models\Role;
 use App\Models\Proyecto;
 use App\Models\AsignacionGrupo;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
@@ -113,9 +113,9 @@ class UsuarioController extends Controller
                 ], 404);
             }
         } catch (\Throwable $th) {
-             return response()->json([
-            'status' => false,
-            'message' => $th->getMessage()
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
             ], 500);
         }
 
@@ -155,51 +155,61 @@ class UsuarioController extends Controller
     public function obtenerProyecto($id)
     {
         try {
-            $grupos = AsignacionGrupo::select('grupo_id')
+            $proyectos = AsignacionGrupo::selectRaw('proyecto.nombre')
                 ->join('usuario', "asignacion_grupo.usuario_id", "usuario.id")
+                ->join('grupo', 'asignacion_grupo.grupo_id', 'grupo.id')
+                ->join('proyecto', 'proyecto.id', 'grupo.proyecto_id')
                 ->where('usuario.id', $id)
+                ->groupBy('proyecto.nombre')
                 ->get();
-            $json = [];
-            foreach ($grupos as $grupo) {
-                $proyecto = Proyecto::select('proyecto.id AS id_proyecto', 'proyecto.nombre AS nombre_proyecto')
-                    ->join('grupo', "proyecto.id", "grupo.proyecto_id")
-                    ->where('grupo.id', $grupo->grupo_id)
-                    ->where('proyecto.estado_proyecto',1)
-                    ->get();
-                $role = Role::select('rol.id', 'nombre')
-                    ->join('asignacion_rol', "rol.id", "asignacion_rol.rol_id")
-                    ->where('asignacion_rol.grupo_id', $grupo->grupo_id)
-                    ->where('rol.estado', 1)
-                    ->get();
-                $permisos = [];
-                $status = false;
-                foreach ($role as $rol) {
-                    $status = true;
-                    $permisos = Permiso::select('id', 'alias')
-                        ->join('asignacion_permisos', 'asignacion_permisos.permiso_id', 'permiso.id')
-                        ->where('asignacion_permisos.rol_id', $rol->id)
-                        ->get();
-                }
-                if ($status == true) {
-                    $data = [
-                        'proyecto' => $proyecto,
-                        "roles" => $role,
-                        "permisos" => $permisos
-                    ];
-                    array_push($json, $data);
-                }
-
-            }
-            return response($json);
+            return response()->json($proyectos, 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
         }
-
     }
 
+    public function obtenerPermisos(Request $request)
+    {
+        try {
+            $permisosList = array();
+            $validateData = $request->validate([
+                'proyecto' => 'required|string',
+                'usuario_id' => 'required|int'
+            ]);
+            $grupos = Grupo::select('grupo.id')
+                ->join('asignacion_grupo', 'asignacion_grupo.grupo_id', 'grupo.id')
+                ->join('usuario', 'usuario.id', 'asignacion_grupo.usuario_id')
+                ->join('proyecto','proyecto.id','grupo.proyecto_id')
+                ->where('usuario.id', $validateData['usuario_id'])
+                ->where('proyecto.nombre',$validateData['proyecto'])
+                ->get();
+            foreach ($grupos as $grupo) {
+                $role = Role::select('rol.id')
+                    ->join('asignacion_rol', "rol.id", "asignacion_rol.rol_id")
+                    ->where('asignacion_rol.grupo_id', $grupo->id)
+                    ->where('rol.estado', 1)
+                    ->get();
+                foreach ($role as $rol) {
+                    $permisos = Permiso::select('alias')
+                        ->join('asignacion_permisos', 'asignacion_permisos.permiso_id', 'permiso.id')
+                        ->where('asignacion_permisos.rol_id', $rol->id)
+                        ->get();
+                    foreach($permisos as $permiso){
+                        array_push($permisosList,$permiso->alias);
+                    }    
+                }
+            }
+            return response()->json($permisosList, 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
 
     /**
      * @param $request recibe la peticion del frontend
@@ -212,7 +222,7 @@ class UsuarioController extends Controller
         $users = User::select("id", "DPI", "nombres", "apellidos", "username", "email", "codigo_usuario")
             ->where("estado_usuario", 1)
             ->get();
-        return response()->json($users,200);
+        return response()->json($users, 200);
     }
 
     public function obtenerUsuariosList()
@@ -220,7 +230,7 @@ class UsuarioController extends Controller
         $users = User::select("id", "username")
             ->where("estado_usuario", 1)
             ->get();
-        return response()->json($users,200);
+        return response()->json($users, 200);
     }
     /**
      * @param $request recibe la peticion del frontend

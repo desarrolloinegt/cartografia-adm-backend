@@ -49,6 +49,7 @@ Route::get('/usuario/{id}',[UsuarioController::class,'desactivarUsuario']);
 Route::get('/usuarios',[UsuarioController::class,'obtenerUsuarios']);
 Route::get('/usuariosList',[UsuarioController::class,'obtenerUsuariosList']);
 Route::get('/projectsAssing/{id}',[UsuarioController::class,'obtenerProyecto']);
+Route::post('/obtenerPermisos',[UsuarioController::class,'obtenerPermisos']);
 Route::post('/logout',[UsuarioController::class,'logout'])->middleware('auth:sanctum');
 
 
