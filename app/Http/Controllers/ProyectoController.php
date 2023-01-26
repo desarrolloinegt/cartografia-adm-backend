@@ -90,40 +90,38 @@ class ProyectoController extends Controller
 
     public function modificarProyecto(Request $request)
     {
-        $validateData = $request->validate([
-            'proyecto_id' => 'required|int',
-            'nombre' => 'required|string',
-            'year' => 'required|min:4|max:4',
-            'encuesta_id' => 'required|int',
-            'upms' => 'nullable|array',
-            'upms.*' => 'int'
-        ]);
-        $proyecto = Proyecto::find($validateData['proyecto_id']);
-        if (isset($proyecto)) {
-            if ($validateData['upms']) {
-                AsignacionUpm::where('proyecto_id', $validateData['proyecto_id'])->delete();
-                $asignacion = new AsignacionUpmController();
-                $asignacion->asignacionMasiva($request);
-                $proyecto->nombre = $validateData['nombre'];
-                $proyecto->year = $validateData['year'];
-                $proyecto->encuesta_id = $validateData['encuesta_id'];
-                $proyecto->save();
+        try{
+            $validateData = $request->validate([
+                'proyecto_id' => 'required|int',
+                'nombre' => 'required|string',
+                'year' => 'required|min:4|max:4',
+                'encuesta_id' => 'required|int',
+                'descripcion' => '',
+            ]);
+            $proyecto = Proyecto::find($validateData['proyecto_id']);
+            if (isset($proyecto)) {
+                    $proyecto->nombre = $validateData['nombre'];
+                    $proyecto->year = $validateData['year'];
+                    $proyecto->encuesta_id = $validateData['encuesta_id'];
+                    $proyecto->descripcion = $validateData['descripcion'];
+                    $proyecto->save();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Proyecto modificado correctamente'
+                ], 200);
             } else {
-                $proyecto->nombre = $validateData['nombre'];
-                $proyecto->year = $validateData['year'];
-                $proyecto->encuesta_id = $validateData['encuesta_id'];
-                $proyecto->save();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Dato no encontrado'
+                ], 404);
             }
-            return response()->json([
-                'status' => true,
-                'message' => 'Proyecto modificado correctamente'
-            ], 200);
-        } else {
+        }catch(\Throwable $th){
             return response()->json([
                 'status' => false,
-                'message' => 'Dato no encontrado'
-            ], 404);
+                'message' => $th->getMessage()
+            ], 500);
         }
+        
     }
 
     /**

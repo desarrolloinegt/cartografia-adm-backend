@@ -82,7 +82,6 @@ class GrupoController extends Controller
                 $grupo->nombre = $validateData['nombre'];
                 $grupo->descripcion = $validateData['descripcion'];
                 $grupo->proyecto_id = $validateData['proyecto_id'];
-                $grupo->jerarquia = $validateData['jerarquia'];
                 $grupo->save();
                 return response()->json([
                     'status' => true,
