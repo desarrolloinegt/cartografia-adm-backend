@@ -13,4 +13,8 @@ class Permiso extends Model
     use HasFactory;
     protected $table="permiso";
     public $timestamps = false;
+    protected $fillable = [
+        'alias',
+        'estado'
+    ];
 }

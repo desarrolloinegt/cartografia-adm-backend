@@ -13,12 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('permiso', function (Blueprint $table) {
+        Schema::create('asignacion_permisos', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('id', true);
-            $table->string('nombre', 45)->unique('Nombre_UNIQUE');
-            $table->tinyInteger('estado');
-            $table->string('alias', 100);
+            $table->integer('rol_id')->index('fk_Asignacion Permisos_Rol1_idx');
+            $table->integer('permiso_id')->index('fk_Asignacion Permisos_Permiso1_idx');
+
+            $table->primary(['rol_id', 'permiso_id']);
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('permiso');
+        Schema::dropIfExists('asignacion_permisos');
     }
 };

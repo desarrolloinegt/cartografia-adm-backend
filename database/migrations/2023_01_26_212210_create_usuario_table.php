@@ -17,8 +17,8 @@ return new class extends Migration
             $table->comment('');
             $table->integer('id', true);
             $table->string('DPI', 13)->unique('DPI_UNIQUE');
-            $table->string('nombres', 25);
-            $table->string('apellidos', 25);
+            $table->string('nombres', 50);
+            $table->string('apellidos', 50);
             $table->string('email', 45);
             $table->integer('codigo_usuario');
             $table->tinyInteger('estado_usuario');

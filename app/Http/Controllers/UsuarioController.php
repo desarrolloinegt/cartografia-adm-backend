@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Permiso;
 use App\Models\Role;
+use App\Models\AsignacionAdministrador;
 use App\Models\Proyecto;
 use App\Models\AsignacionGrupo;
 use App\Http\Controllers\Controller;
@@ -121,6 +122,22 @@ class UsuarioController extends Controller
 
     }
 
+    public function obtenerPermisosAdmin($id){
+        $permisosList = [];
+        $permisosAdmin = AsignacionAdministrador::select('permiso.alias')
+            ->join('usuario','usuario.id','asignacion_administrador.usuario_id')
+            ->join('rol','rol.id','asignacion_administrador.rol_id')
+            ->join('asignacion_permisos','asignacion_permisos.rol_id','rol.id')
+            ->join('permiso','permiso.id','asignacion_permisos.permiso_id')
+            ->where('asignacion_administrador.usuario_id',$id)
+            ->where('permiso.estado',1)
+            ->where('rol.estado',1)
+            ->get();
+        foreach ($permisosAdmin as $permiso) {
+            array_push($permisosList,$permiso->alias);
+        }    
+        return response()->json($permisosList,200) ;
+    }
     /**
      * @param $request recibe la peticion del frontend
      * Atraves de $request podemos acceder al usuario, ver el token actual y eliminarlo

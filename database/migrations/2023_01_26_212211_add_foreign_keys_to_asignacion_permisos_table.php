@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('asignacion_permisos', function (Blueprint $table) {
-            $table->foreign(['permiso_Id'], 'fk_Asignacion Permisos_Permiso1')->references(['id'])->on('permiso')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['permiso_id'], 'fk_Asignacion Permisos_Permiso1')->references(['id'])->on('permiso')->onUpdate('NO ACTION')->onDelete('NO ACTION');
             $table->foreign(['rol_id'], 'fk_Asignacion Permisos_Rol1')->references(['id'])->on('rol')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }

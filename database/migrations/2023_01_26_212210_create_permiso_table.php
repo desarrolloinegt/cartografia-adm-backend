@@ -13,14 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('grupo', function (Blueprint $table) {
+        Schema::create('permiso', function (Blueprint $table) {
             $table->comment('');
             $table->integer('id', true);
-            $table->string('nombre', 100)->unique('Nombre_UNIQUE');
-            $table->string('descripcion', 400);
             $table->tinyInteger('estado');
-            $table->integer('proyecto_id')->index('fk_Grupo_Proyecto1_idx');
-            $table->integer('jerarquia');
+            $table->string('alias', 100)->unique('alias_UNIQUE');
         });
     }
 
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('grupo');
+        Schema::dropIfExists('permiso');
     }
 };

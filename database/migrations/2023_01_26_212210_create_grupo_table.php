@@ -13,12 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('asignacion_permisos', function (Blueprint $table) {
+        Schema::create('grupo', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('rol_id')->index('fk_Asignacion Permisos_Rol1_idx');
-            $table->integer('permiso_Id')->index('fk_Asignacion Permisos_Permiso1_idx');
-
-            $table->primary(['rol_id', 'permiso_Id']);
+            $table->integer('id', true);
+            $table->string('nombre', 100)->unique('Nombre_UNIQUE');
+            $table->string('descripcion', 400)->nullable();
+            $table->tinyInteger('estado');
+            $table->integer('proyecto_id')->index('fk_Grupo_Proyecto1_idx');
+            $table->integer('jerarquia');
         });
     }
 
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('asignacion_permisos');
+        Schema::dropIfExists('grupo');
     }
 };
