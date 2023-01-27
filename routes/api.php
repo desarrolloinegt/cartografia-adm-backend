@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AsignacionAdministradorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
@@ -51,6 +52,7 @@ Route::get('/usuariosList',[UsuarioController::class,'obtenerUsuariosList']);
 Route::get('/projectsAssing/{id}',[UsuarioController::class,'obtenerProyecto']);
 Route::post('/obtenerPermisos',[UsuarioController::class,'obtenerPermisos']);
 Route::get('/obtenerPermisosAdmin/{id}',[UsuarioController::class,'obtenerPermisosAdmin']);
+Route::get('/isAdmin/{id}',[UsuarioController::class,'isAdmin']);
 Route::post('/logout',[UsuarioController::class,'logout'])->middleware('auth:sanctum');
 
 
@@ -61,7 +63,7 @@ Route::patch('/asignacionGrupoUsuario/edit',[AsignacionGrupoController::class,'m
 
 //asgingaciones rol Permiso
 Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignacionMasiva']);
-Route::get('/asignacionesRolPermiso',[AsignacionPermisoController::class,'obtenerRolPermiso']);
+Route::get('/asignacionesRolPermiso/{id}',[AsignacionPermisoController::class,'obtenerRolPermiso']);
 Route::post('/asignacionRolPermiso/eliminar',[AsignacionPermisoController::class,'eliminarAsignacion']);
 
 
@@ -111,6 +113,10 @@ Route::get('/vehiculo/{id}',[VehiculoController::class,'desactivarVehiculo']);
 //Municipio y Departamento
 Route::get('/municipios',[MunicipioController::class,'obtenerMunicipios']);
 Route::get('/departamentos',[DepartamentoController::class,'obtenerDepartamentos']);
+
+//Asignacion de administradores
+
+Route::post('/asignarAdmin',[AsignacionAdministradorController::class,'asignarAdmin']);
 
 Route::group(['middleware' => ['auth:sanctum']], function() {
     

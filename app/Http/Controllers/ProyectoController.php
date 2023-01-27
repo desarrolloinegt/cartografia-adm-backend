@@ -24,7 +24,7 @@ class ProyectoController extends Controller
             $validateData = $request->validate([
                 'nombre' => 'required|string|unique:proyecto',
                 'year' => 'required|max:4|min:4',
-                'descripcion'=>'string',
+                'descripcion'=>'',
                 'encuesta_id' => 'required|int'
             ]);
             $encuesta = Encuesta::find($validateData['encuesta_id']);

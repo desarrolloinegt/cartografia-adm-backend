@@ -54,31 +54,31 @@ class AsignacionPermisoController extends Controller
     public function asignacionMasiva(Request $request)
     {
         try {
-            $erros = [];
             $validateData = $request->validate([
-                'rol_id' => 'required|int',
+                'id' => 'required|int',
                 'permisos' => 'array|required',
                 'permisos.*' => 'int'
             ]);
-            $rol = Role::find($validateData['rol_id']);
+            $rol = Role::find($validateData['id']);
             $arrayPermisos = $validateData['permisos'];
             if (isset($rol)) {
+                AsignacionPermiso::where('rol_id',$rol->id)->delete();
                 foreach ($arrayPermisos as $permiso) {
                     $asignacion = AsignacionPermiso::create([
                         "rol_id" => $rol->id,
                         "permiso_id" => $permiso
                     ]);
                 }
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Permisos asignados correctamente'
+                ], 200);
             } else {
                 return response()->json([
                     'status' => false,
                     'message' => "Rol no Econtrado"
                 ], 404);
             }
-            return response()->json([
-                'status' => true,
-                'message' => 'Permiso asignado correctamente'
-            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -92,21 +92,16 @@ class AsignacionPermisoController extends Controller
      *y el rol este activo, agrupados por el rol 
      *@return \Illuminate\Http\JsonResponse 
      */
-    public function obtenerRolPermiso()
+    public function obtenerRolPermiso($id)
     {
         try {
-            $asignacionArray = [];
-            $permisos = [];
-            $asginaciones = AsignacionPermiso::selectRaw('rol.id AS rol_id,rol.nombre, GROUP_CONCAT(permiso.alias) AS permisos')
+            $asginaciones = AsignacionPermiso::select('permiso.alias')
                 ->join('rol', 'asignacion_permisos.rol_id', 'rol.id')
                 ->join('permiso', 'asignacion_permisos.permiso_id', 'permiso.id')
                 ->where('permiso.estado', 1)
                 ->where('rol.estado', 1)
-                ->groupBy('asignacion_permisos.rol_id')
+                ->where('rol.id',$id)
                 ->get();
-            foreach ($asginaciones as $asginacion) {
-                $asginacion->permisos = explode(",", $asginacion->permisos);
-            }
             return response()->json($asginaciones);
         } catch (\Throwable $th) {
             return response()->json([

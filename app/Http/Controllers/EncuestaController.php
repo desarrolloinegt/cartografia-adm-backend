@@ -20,7 +20,7 @@ class EncuestaController extends Controller
     {
         $validateData = $request->validate([
             'nombre' => 'required|string|unique:encuesta',
-            'descripcion' => 'required|string'
+            'descripcion' => ''
         ]);
         $encuesta = Encuesta::create([
             "nombre" => $validateData['nombre'],

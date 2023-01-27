@@ -121,7 +121,24 @@ class UsuarioController extends Controller
         }
 
     }
+    public function isAdmin($id){
+        try{
+            $status = AsignacionAdministrador::where('usuario_id',$id)
+            ->first();
+            if(isset($status)){
+                return response()->json([
+                    "status" => true
+                ],200);
+            }else{
+                return response()->json([
+                    "status" => false
+                ],200); 
+            }
+        }catch(\Throwable $th){
 
+        }
+        
+    }
     public function obtenerPermisosAdmin($id){
         $permisosList = [];
         $permisosAdmin = AsignacionAdministrador::select('permiso.alias')
