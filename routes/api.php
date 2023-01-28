@@ -88,11 +88,13 @@ Route::post('/proyecto',[ProyectoController::class,'crearProyecto']);
 Route::patch('/proyecto/edit',[ProyectoController::class,'modificarProyecto']);
 Route::get('/proyectos',[ProyectoController::class,'obtenerProyectos']);
 Route::get('/proyecto/{id}',[ProyectoController::class,'desactivarProyecto']);
+Route::get('/obtenerGruposProyecto/{proyecto}',[ProyectoController::class,'obtenerGruposPorProyecto']);
 Route::get('/finalizarProyecto/{id}',[ProyectoController::class,'finalizarProyecto']);
 
 //Grupo
 Route::post('/grupo',[GrupoController::class,'createGroup']);
 Route::get('/grupos',[GrupoController::class,'obtenerGrupos']);
+Route::patch('/jerarquias', [GrupoController::class, 'modificarJerarquias']);
 Route::patch('/grupo/edit',[GrupoController::class,'modificarGrupo']);
 Route::get('/grupo/{id}',[GrupoController::class,'desactivarGrupo']);
 

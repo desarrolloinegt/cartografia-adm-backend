@@ -137,4 +137,27 @@ class GrupoController extends Controller
             ], 500);
         }
     }
+
+    public function modificarJerarquias(Request $request)
+    {
+        try {
+            $array = $request->all();
+            foreach ($array as $grupo=>$item) {
+                $grupoFind = Grupo::find($item['id']);
+                if (isset($grupoFind)) {
+                    $grupoFind->jerarquia = $item['jerarquia'];
+                    $grupoFind->save();
+                }
+            }
+            return response()->json([
+                "status" => true,
+                "message" => "Jerarquias actualizadas"
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
 }

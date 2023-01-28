@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Grupo;
 use Illuminate\Http\Request;
 use App\Models\Proyecto;
 use App\Models\Encuesta;
@@ -185,6 +186,24 @@ class ProyectoController extends Controller
                 ], 404);
             }
         } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerGruposPorProyecto($proyecto){
+        try{
+            $asignaciones = Grupo::select('grupo.id','grupo.nombre', 'jerarquia','grupo.descripcion')
+                ->join('proyecto','proyecto.id','grupo.proyecto_id')
+                ->where('proyecto.nombre',$proyecto)
+                ->where('proyecto.estado_proyecto',1)
+                ->where('grupo.estado',1)
+                ->orderBy('grupo.jerarquia','DESC')
+                ->get();
+            return response()->json($asignaciones,200); 
+        }catch(\Throwable $th){
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
