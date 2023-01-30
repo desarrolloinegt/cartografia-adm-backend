@@ -17,6 +17,7 @@ use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\MunicipioController;
 use App\Http\Controllers\AsignacionUpmController;
 use App\Http\Controllers\VehiculoController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -27,103 +28,100 @@ use App\Http\Controllers\VehiculoController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::post('/login',[UsuarioController::class,'login']);
+Route::post('/login', [UsuarioController::class, 'login']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-//roles
-
-Route::post('/rol',[RoleController::class,'createRole']);
-Route::get('/roles',[RoleController::class,'obtenerRoles']);
-Route::get('/rol/{id}',[RoleController::class,'desactivarRol']);
-Route::patch('/rol/edit',[RoleController::class,'modificarRol']);
-
-//permiso
-Route::get('/permisos',[PermisoController::class,'obtenerPermisos']);
-
-//usuario
-
-Route::post('/registro',[UsuarioController::class,'register']);
-Route::patch('/usuario/edit',[UsuarioController::class,'modificarUsuario']);
-Route::get('/usuario/{id}',[UsuarioController::class,'desactivarUsuario']);
-Route::get('/usuarios',[UsuarioController::class,'obtenerUsuarios']);
-Route::get('/usuariosList',[UsuarioController::class,'obtenerUsuariosList']);
-Route::get('/projectsAssing/{id}',[UsuarioController::class,'obtenerProyecto']);
-Route::post('/obtenerPermisos',[UsuarioController::class,'obtenerPermisos']);
-Route::get('/obtenerPermisosAdmin/{id}',[UsuarioController::class,'obtenerPermisosAdmin']);
-Route::get('/isAdmin/{id}',[UsuarioController::class,'isAdmin']);
-Route::post('/logout',[UsuarioController::class,'logout'])->middleware('auth:sanctum');
 
 
-//asginaciones grupo usuario
-Route::post('/asignarGruposUsuarios',[AsignacionGrupoController::class,'asignacionMasiva']);
-Route::get('/obtenerGrupoUsuarios/{id}',[AsignacionGrupoController::class,'obtenerGrupoUsuarios']);
-Route::patch('/asignacionGrupoUsuario/edit',[AsignacionGrupoController::class,'modificarGrupoUsuarios']);
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    //roles
 
-//asgingaciones rol Permiso
-Route::post('/asignarPermiso',[AsignacionPermisoController::class,'asignacionMasiva']);
-Route::get('/asignacionesRolPermiso/{id}',[AsignacionPermisoController::class,'obtenerRolPermiso']);
-Route::post('/asignacionRolPermiso/eliminar',[AsignacionPermisoController::class,'eliminarAsignacion']);
+    Route::post('/rol', [RoleController::class, 'createRole']);
+    Route::get('/roles', [RoleController::class, 'obtenerRoles']);
+    Route::get('/rol/{id}', [RoleController::class, 'desactivarRol']);
+    Route::patch('/rol/edit', [RoleController::class, 'modificarRol']);
 
+    //permiso
+    Route::get('/permisos', [PermisoController::class, 'obtenerPermisos']);
 
-//asgingaciones rol Grupo
-Route::get('/obtenerGruposRoles/{id}',[AsignacionRolController::class,'obtenerGruposRoles']);
-Route::post('/asignarGrupoRol',[AsignacionRolController::class,'asignarRolGrupo']);
-Route::patch('/asignacionGrupoRol/edit',[AsignacionRolController::class,'modificarGruposRoles']);
+    //usuario
 
-//Asginacions upms
-Route::post('/asginarUpmsProyecto',[AsignacionUpmController::class,'asignacionMasiva']);
-Route::get('/obtenerUpmsProyecto',[AsignacionUpmController::class,'obtenerUpmsProyecto']);
-
-
-//Encuesta
-Route::post('/encuesta',[EncuestaController::class,'crearEncuesta']);
-Route::patch('/encuesta/edit',[EncuestaController::class,'modificarEncuesta']);
-Route::get('/encuestas',[EncuestaController::class,'obtenerEncuestas']);
-Route::get('/encuesta/{id}',[EncuestaController::class,'desactivarEncuesta']);
-
-//Proyecto
-Route::post('/proyecto',[ProyectoController::class,'crearProyecto']);
-Route::patch('/proyecto/edit',[ProyectoController::class,'modificarProyecto']);
-Route::get('/proyectos',[ProyectoController::class,'obtenerProyectos']);
-Route::get('/proyectoId/{projecto}',[ProyectoController::class,'obtenerProyectoId']);
-Route::get('/proyecto/{id}',[ProyectoController::class,'desactivarProyecto']);
-Route::get('/obtenerGruposProyecto/{proyecto}',[ProyectoController::class,'obtenerGruposPorProyecto']);
-Route::get('/finalizarProyecto/{id}',[ProyectoController::class,'finalizarProyecto']);
-
-//Grupo
-Route::post('/grupo',[GrupoController::class,'createGroup']);
-Route::get('/grupos',[GrupoController::class,'obtenerGrupos']);
-Route::patch('/jerarquias', [GrupoController::class, 'modificarJerarquias']);
-Route::patch('/grupo/edit',[GrupoController::class,'modificarGrupo']);
-Route::get('/grupo/{id}',[GrupoController::class,'desactivarGrupo']);
+    Route::post('/registro', [UsuarioController::class, 'register']);
+    Route::patch('/usuario/edit', [UsuarioController::class, 'modificarUsuario']);
+    Route::get('/usuario/{id}', [UsuarioController::class, 'desactivarUsuario']);
+    Route::get('/usuarios', [UsuarioController::class, 'obtenerUsuarios']);
+    Route::get('/usuariosList', [UsuarioController::class, 'obtenerUsuariosList']);
+    Route::get('/projectsAssing/{id}', [UsuarioController::class, 'obtenerProyecto']);
+    Route::post('/obtenerPermisos', [UsuarioController::class, 'obtenerPermisos']);
+    Route::get('/obtenerPermisosAdmin/{id}', [UsuarioController::class, 'obtenerPermisosAdmin']);
+    Route::get('/isAdmin/{id}', [UsuarioController::class, 'isAdmin']);
+    Route::post('/logout', [UsuarioController::class, 'logout']);
 
 
-//UPM
-Route::post('/upm',[UPMController::class,'crearUpm']);
-Route::get('/upms',[UPMController::class,'obtenerUpms']);
-Route::post('/upm/edit',[UPMController::class,'modificarUpm']);
-Route::get('/upm/{id}',[UPMController::class,'desactivarUpm']);
+    //asginaciones grupo usuario
+    Route::post('/asignarGruposUsuarios', [AsignacionGrupoController::class, 'asignacionMasiva']);
+    Route::get('/obtenerGrupoUsuarios/{id}', [AsignacionGrupoController::class, 'obtenerGrupoUsuarios']);
+    Route::patch('/asignacionGrupoUsuario/edit', [AsignacionGrupoController::class, 'modificarGrupoUsuarios']);
 
-//Vehiculo
-Route::post('/vehiculo',[VehiculoController::class,'crearVehiculo']);
-Route::patch('/vehiculo/edit',[VehiculoController::class,'modificarVehiculo']);
-Route::get('/vehiculos',[VehiculoController::class,'obtenerVehiculos']);
-Route::get('/vehiculo/{id}',[VehiculoController::class,'desactivarVehiculo']);
+    //asgingaciones rol Permiso
+    Route::post('/asignarPermiso', [AsignacionPermisoController::class, 'asignacionMasiva']);
+    Route::get('/asignacionesRolPermiso/{id}', [AsignacionPermisoController::class, 'obtenerRolPermiso']);
+    Route::post('/asignacionRolPermiso/eliminar', [AsignacionPermisoController::class, 'eliminarAsignacion']);
 
 
-//Municipio y Departamento
-Route::get('/municipios',[MunicipioController::class,'obtenerMunicipios']);
-Route::get('/departamentos',[DepartamentoController::class,'obtenerDepartamentos']);
+    //asgingaciones rol Grupo
+    Route::get('/obtenerGruposRoles/{id}', [AsignacionRolController::class, 'obtenerGruposRoles']);
+    Route::post('/asignarGrupoRol', [AsignacionRolController::class, 'asignarRolGrupo']);
+    Route::patch('/asignacionGrupoRol/edit', [AsignacionRolController::class, 'modificarGruposRoles']);
 
-//Asignacion de administradores
+    //Asginacions upms
+    Route::post('/asginarUpmsProyecto', [AsignacionUpmController::class, 'asignacionMasiva']);
+    Route::get('/obtenerUpmsProyecto', [AsignacionUpmController::class, 'obtenerUpmsProyecto']);
 
-Route::post('/asignarAdmin',[AsignacionAdministradorController::class,'asignarAdmin']);
 
-Route::group(['middleware' => ['auth:sanctum']], function() {
-    
+    //Encuesta
+    Route::post('/encuesta', [EncuestaController::class, 'crearEncuesta']);
+    Route::patch('/encuesta/edit', [EncuestaController::class, 'modificarEncuesta']);
+    Route::get('/encuestas', [EncuestaController::class, 'obtenerEncuestas']);
+    Route::get('/encuesta/{id}', [EncuestaController::class, 'desactivarEncuesta']);
+
+    //Proyecto
+    Route::post('/proyecto', [ProyectoController::class, 'crearProyecto']);
+    Route::patch('/proyecto/edit', [ProyectoController::class, 'modificarProyecto']);
+    Route::get('/proyectos', [ProyectoController::class, 'obtenerProyectos']);
+    Route::get('/proyectoId/{projecto}', [ProyectoController::class, 'obtenerProyectoId']);
+    Route::get('/proyecto/{id}', [ProyectoController::class, 'desactivarProyecto']);
+    Route::get('/obtenerGruposProyecto/{proyecto}', [ProyectoController::class, 'obtenerGruposPorProyecto']);
+    Route::get('/finalizarProyecto/{id}', [ProyectoController::class, 'finalizarProyecto']);
+
+    //Grupo
+    Route::post('/grupo', [GrupoController::class, 'createGroup']);
+    Route::get('/grupos', [GrupoController::class, 'obtenerGrupos']);
+    Route::patch('/jerarquias', [GrupoController::class, 'modificarJerarquias']);
+    Route::patch('/grupo/edit', [GrupoController::class, 'modificarGrupo']);
+    Route::get('/grupo/{id}', [GrupoController::class, 'desactivarGrupo']);
+
+
+    //UPM
+    Route::post('/upm', [UPMController::class, 'crearUpm']);
+    Route::get('/upms', [UPMController::class, 'obtenerUpms']);
+    Route::post('/upm/edit', [UPMController::class, 'modificarUpm']);
+    Route::get('/upm/{id}', [UPMController::class, 'desactivarUpm']);
+
+    //Vehiculo
+    Route::post('/vehiculo', [VehiculoController::class, 'crearVehiculo']);
+    Route::patch('/vehiculo/edit', [VehiculoController::class, 'modificarVehiculo']);
+    Route::get('/vehiculos', [VehiculoController::class, 'obtenerVehiculos']);
+    Route::get('/vehiculo/{id}', [VehiculoController::class, 'desactivarVehiculo']);
+
+
+    //Municipio y Departamento
+    Route::get('/municipios', [MunicipioController::class, 'obtenerMunicipios']);
+    Route::get('/departamentos', [DepartamentoController::class, 'obtenerDepartamentos']);
+
+    //Asignacion de administradores
+
+    Route::post('/asignarAdmin', [AsignacionAdministradorController::class, 'asignarAdmin']);
 });
-
-
-
