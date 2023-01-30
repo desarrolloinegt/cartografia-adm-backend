@@ -195,7 +195,7 @@ class ProyectoController extends Controller
 
     public function obtenerGruposPorProyecto($proyecto){
         try{
-            $asignaciones = Grupo::select('grupo.id','grupo.nombre', 'jerarquia','grupo.descripcion')
+            $asignaciones = Grupo::select('grupo.id','grupo.nombre', 'jerarquia','grupo.descripcion','grupo.proyecto_id')
                 ->join('proyecto','proyecto.id','grupo.proyecto_id')
                 ->where('proyecto.nombre',$proyecto)
                 ->where('proyecto.estado_proyecto',1)
@@ -203,6 +203,20 @@ class ProyectoController extends Controller
                 ->orderBy('grupo.jerarquia','DESC')
                 ->get();
             return response()->json($asignaciones,200); 
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+    public function obtenerProyectoId($project){
+        try{
+            $id = Proyecto::select('id')
+                ->where('proyecto.nombre',$project)
+                ->where('proyecto.estado_proyecto',1)
+                ->first();
+            return response()->json($id->id,200);
         }catch(\Throwable $th){
             return response()->json([
                 'status' => false,

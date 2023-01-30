@@ -87,6 +87,7 @@ Route::get('/encuesta/{id}',[EncuestaController::class,'desactivarEncuesta']);
 Route::post('/proyecto',[ProyectoController::class,'crearProyecto']);
 Route::patch('/proyecto/edit',[ProyectoController::class,'modificarProyecto']);
 Route::get('/proyectos',[ProyectoController::class,'obtenerProyectos']);
+Route::get('/proyectoId/{projecto}',[ProyectoController::class,'obtenerProyectoId']);
 Route::get('/proyecto/{id}',[ProyectoController::class,'desactivarProyecto']);
 Route::get('/obtenerGruposProyecto/{proyecto}',[ProyectoController::class,'obtenerGruposPorProyecto']);
 Route::get('/finalizarProyecto/{id}',[ProyectoController::class,'finalizarProyecto']);
