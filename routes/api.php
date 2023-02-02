@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AsignacionAdministradorController;
+use App\Http\Controllers\CargaTrabajoController;
+use App\Http\Controllers\OrganizacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
@@ -78,7 +80,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Asginacions upms
     Route::post('/asginarUpmsProyecto', [AsignacionUpmController::class, 'asignacionMasiva']);
-    Route::get('/obtenerUpmsProyecto', [AsignacionUpmController::class, 'obtenerUpmsProyecto']);
+    
 
 
     //Encuesta
@@ -104,11 +106,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/grupo/{id}', [GrupoController::class, 'desactivarGrupo']);
 
 
-    //UPM
-    Route::post('/upm', [UPMController::class, 'crearUpm']);
-    Route::get('/upms', [UPMController::class, 'obtenerUpms']);
-    Route::post('/upm/edit', [UPMController::class, 'modificarUpm']);
-    Route::get('/upm/{id}', [UPMController::class, 'desactivarUpm']);
+   
 
     //Vehiculo
     Route::post('/vehiculo', [VehiculoController::class, 'crearVehiculo']);
@@ -125,3 +123,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('/asignarAdmin', [AsignacionAdministradorController::class, 'asignarAdmin']);
 });
+
+ //UPM
+ Route::post('/upm', [UPMController::class, 'crearUpm']);
+
+ //Asignaciones de Upms a proyecto
+ Route::patch('/sustituirUpm', [AsignacionUpmController::class, 'sustituirUpm']);  
+ 
+ 
+ //Asignacion de carga de trabajo
+Route::post('/asignarPersonal/{id}',[CargaTrabajoController::class,'asignarPersonal']);
+Route::get('/obtenerUpmsProyecto/{id}', [AsignacionUpmController::class, 'obtenerUpmsProyecto']);

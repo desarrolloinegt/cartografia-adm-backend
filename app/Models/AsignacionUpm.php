@@ -16,6 +16,7 @@ class AsignacionUpm extends Model
     public $timestamps = false;
     protected $fillable = [
         'upm_id',
-        'proyecto_id'
+        'proyecto_id',
+        'estado_upm'
     ];
 }

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\UPM;
 use App\Models\Proyecto;
 use App\Models\AsignacionUpm;
+use Illuminate\Support\Facades\DB;
 
 class AsignacionUpmController extends Controller
 {
@@ -19,29 +20,41 @@ class AsignacionUpmController extends Controller
      */
     public function asignacionMasiva(Request $request)
     {
+        $errores = [];
         try {
             $validateData = $request->validate([
                 'upms' => 'array|required',
-                'umps.*' => 'int',
+                'umps.*' => 'string',
                 'proyecto_id' => 'required|int'
             ]);
             $proyecto = Proyecto::find($validateData['proyecto_id']);
             $arrayUpms = $validateData['upms'];
             if (isset($proyecto)) {
-                foreach ($arrayUpms as $upm) {
-                    $asignacion = AsignacionUpm::create([
-                        "upm_id" => $upm,
-                        "proyecto_id" => $proyecto->id
-                    ]);
+
+                foreach ($arrayUpms as $upms) {
+                    try {
+                        $upm = UPM::where('nombre', $upms)->first();
+                        if (isset($upm)) {
+                            $asignacion = AsignacionUpm::create([
+                                "upm_id" => $upm->id,
+                                "proyecto_id" => $proyecto->id,
+                                "estado_upm" => 1
+                            ]);
+                        }
+                    } catch (\Throwable $th) {
+                        array_push($errores, $th->getMessage());
+                    }
                 }
+
                 return response()->json([
                     'status' => true,
-                    'message' => 'UPMs asignados correctamente'
+                    'message' => 'UPMs asignados correctamente',
+                    'errores' => $errores
                 ], 200);
             } else {
                 return response()->json([
                     'status' => false,
-                    'message' => "Upm no Econtrado"
+                    'message' => "Proyecto no Econtrado"
                 ], 404);
             }
         } catch (\Throwable $th) {
@@ -57,23 +70,18 @@ class AsignacionUpmController extends Controller
      * siempre que el proyetco y upm esten activos y se agrupa los upms por el proyecto
      * @return \Illuminate\Http\JsonResponse
      */
-    public function obtenerUpmsProyecto()
+    public function obtenerUpmsProyecto($id)
     {
         try {
-            $upmArray = [];
-            $permisos = [];
-            $asginaciones = AsignacionUpm::selectRaw('proyecto.id,proyecto.nombre,proyecto.year,encuesta.nombre AS encuesta,proyecto.progreso ,GROUP_CONCAT(upm.nombre) AS upms')
-                ->join('proyecto', 'asignacion_upm.proyecto_id', 'proyecto.id')
+            $asginaciones = AsignacionUpm::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id')
                 ->join('upm', 'asignacion_upm.upm_id', 'upm.id')
-                ->join('encuesta', 'proyecto.encuesta_id', 'encuesta.id')
-                ->where('proyecto.estado_proyecto', 1)
+                ->join('municipio', 'upm.municipio_id', 'municipio.id')
+                ->join('departamento', 'departamento.id', 'municipio.departamento_id')
+                ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm.estado_upm')
+                ->where('asignacion_upm.proyecto_id', $id)
                 ->where('upm.estado', 1)
-                ->groupBy('asignacion_upm.proyecto_id')
                 ->get();
-            foreach ($asginaciones as $asginacion) {
-                $asginacion->upms = explode(",", $asginacion->upms);
-            }
-            return response()->json($asginaciones);
+            return response()->json($asginaciones, 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -111,5 +119,59 @@ class AsignacionUpmController extends Controller
                 'message' => 'Datos no encontrados'
             ], 404);
         }
+    }
+
+
+    public function sustituirUpm(Request $request)
+    {
+        try {
+            $validateData = $request->validate([
+                'proyecto_id' => 'int|required',
+                'upm_anterior' => 'required|int',
+                'upm_nuevo' => 'required|string'
+            ]);
+            $matchTheseAnterior = ['proyecto_id' => $validateData['proyecto_id'], 'upm_id' => $validateData['upm_anterior']];
+            $asignacionAnterior = AsignacionUpm::where($matchTheseAnterior)->first();
+            if (isset($asignacionAnterior)) {
+                $upm = UPM::where('upm.nombre', $validateData['upm_nuevo'])->first();
+                if (isset($upm)) {
+                    $matchThese = ['proyecto_id' => $validateData['proyecto_id'], 'upm_id' => $upm->id];
+                    $asignacionNueva = AsignacionUpm::where($matchThese)->first();
+                    if (isset($asignacionNueva)) {
+                        return response()->json([
+                            'status' => true,
+                            'message' => 'Error, la UPM escrita ya existe en este proyecto'
+                        ], 404);
+                    }else{
+                        $asignacion = AsignacionUpm::create([
+                            'upm_id' => $upm->id,
+                            'proyecto_id' => $validateData['proyecto_id'],
+                            "estado_upm" => 1
+                        ]);
+                        $asignacionAnterior = AsignacionUpm::where($matchTheseAnterior)->update(['estado_upm'=>4]);
+                        return response()->json([
+                            'status' => true,
+                            'message' => 'UPM sustituido'
+                        ], 200);
+                    }
+                } else {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'UPM no existe, corrija el nombre'
+                    ], 404);
+                }
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'UPM que desea sustituir no existe'
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => true,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
     }
 }
