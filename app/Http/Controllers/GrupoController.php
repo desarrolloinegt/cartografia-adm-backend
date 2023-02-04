@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AsignacionGrupo;
 use Illuminate\Http\Request;
 use App\Models\Grupo;
+use Illuminate\Support\Facades\DB;
 
 class GrupoController extends Controller
 {
@@ -74,14 +76,12 @@ class GrupoController extends Controller
             $validateData = $request->validate([
                 'id' => 'required|int',
                 'nombre' => 'required|string',
-                'descripcion' => '',
-                'proyecto_id' => 'required|int',
+                'descripcion' => ''
             ]);
             $grupo = Grupo::find($validateData['id']);
             if (isset($grupo)) {
                 $grupo->nombre = $validateData['nombre'];
                 $grupo->descripcion = $validateData['descripcion'];
-                $grupo->proyecto_id = $validateData['proyecto_id'];
                 $grupo->save();
                 return response()->json([
                     'status' => true,
@@ -154,6 +154,33 @@ class GrupoController extends Controller
                 "message" => "Jerarquias actualizadas"
             ], 200);
         } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function seleccionarGruposMenores(Request $request){
+        try{
+            $validateData = $request->validate([
+                "proyecto_id"=>'required|int',
+                "usuario_id"=>'required|int'
+            ]);
+            $grupoMayor = Grupo::select('grupo.id','grupo.nombre','grupo.jerarquia')
+                ->join('asignacion_grupo','asignacion_grupo.grupo_id','grupo.id')
+                ->where('grupo.proyecto_id',$validateData['proyecto_id'])
+                ->where('asignacion_grupo.usuario_id',$validateData['usuario_id'])
+                ->orderBy('grupo.jerarquia','DESC')
+                ->first();
+            $grupos = Grupo::select('grupo.id','grupo.nombre','grupo.jerarquia')
+                ->where('grupo.proyecto_id',$validateData['proyecto_id'])
+                ->where('grupo.jerarquia','<',$grupoMayor->jerarquia)
+                ->orderBy('grupo.jerarquia','DESC')
+                ->get(); 
+
+            return response()->json($grupos,200);
+        }catch(\Throwable $th){
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()

@@ -65,7 +65,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //asginaciones grupo usuario
     Route::post('/asignarGruposUsuarios', [AsignacionGrupoController::class, 'asignacionMasiva']);
     Route::get('/obtenerGrupoUsuarios/{id}', [AsignacionGrupoController::class, 'obtenerGrupoUsuarios']);
-    Route::patch('/asignacionGrupoUsuario/edit', [AsignacionGrupoController::class, 'modificarGrupoUsuarios']);
+    Route::post('/asignacionGrupoUsuario', [AsignacionGrupoController::class, 'asignarUsuarioAGrupo']);
+    Route::patch('/eliminarUsuarioGrupo', [AsignacionGrupoController::class, 'eliminarUsuario']);
+
 
     //asgingaciones rol Permiso
     Route::post('/asignarPermiso', [AsignacionPermisoController::class, 'asignacionMasiva']);
@@ -80,7 +82,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Asginacions upms
     Route::post('/asginarUpmsProyecto', [AsignacionUpmController::class, 'asignacionMasiva']);
-    
+    Route::patch('/sustituirUpm', [AsignacionUpmController::class, 'sustituirUpm']);
 
 
     //Encuesta
@@ -104,9 +106,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::patch('/jerarquias', [GrupoController::class, 'modificarJerarquias']);
     Route::patch('/grupo/edit', [GrupoController::class, 'modificarGrupo']);
     Route::get('/grupo/{id}', [GrupoController::class, 'desactivarGrupo']);
+    Route::post('/seleccionarGruposMenores', [GrupoController::class, 'seleccionarGruposMenores']);
 
 
-   
 
     //Vehiculo
     Route::post('/vehiculo', [VehiculoController::class, 'crearVehiculo']);
@@ -122,15 +124,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Asignacion de administradores
 
     Route::post('/asignarAdmin', [AsignacionAdministradorController::class, 'asignarAdmin']);
+
+    //UPM
+    Route::post('/upm', [UPMController::class, 'crearUpm']);
+
+    //Asignacion de carga de trabajo
+    Route::post('/asignarPersonal/{id}', [CargaTrabajoController::class, 'asignarPersonal']);
+    Route::get('/obtenerUpmsProyecto/{id}', [AsignacionUpmController::class, 'obtenerUpmsProyecto']);
 });
-
- //UPM
- Route::post('/upm', [UPMController::class, 'crearUpm']);
-
- //Asignaciones de Upms a proyecto
- Route::patch('/sustituirUpm', [AsignacionUpmController::class, 'sustituirUpm']);  
- 
- 
- //Asignacion de carga de trabajo
-Route::post('/asignarPersonal/{id}',[CargaTrabajoController::class,'asignarPersonal']);
-Route::get('/obtenerUpmsProyecto/{id}', [AsignacionUpmController::class, 'obtenerUpmsProyecto']);
