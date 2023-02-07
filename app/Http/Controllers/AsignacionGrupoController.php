@@ -65,9 +65,11 @@ class AsignacionGrupoController extends Controller
                             "usuario_id" => $user->id,
                             "grupo_id" => $idGrupo
                         ]);
+                    }else{
+                        array_push($errores, "El usuario $username no existe");
                     }
                 } catch (\Throwable $th) {
-                    array_push($errores, $th->getMessage());
+                    
                 }
             }
             return response()->json([

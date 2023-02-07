@@ -17,8 +17,9 @@ return new class extends Migration
             $table->comment('');
             $table->integer('usuario_superior')->index('fk_organizacion_usuario1_idx');
             $table->integer('usuario_inferior')->index('fk_organizacion_usuario2_idx');
+            $table->integer('proyecto_id')->index('fk_organizacion_proyecto_idx');
 
-            $table->primary(['usuario_superior', 'usuario_inferior']);
+            $table->primary(['usuario_superior', 'usuario_inferior', 'proyecto_id']);
         });
     }
 
