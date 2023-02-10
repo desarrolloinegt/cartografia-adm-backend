@@ -37,7 +37,9 @@ class UsuarioController extends Controller
                 'email' => 'required|email|min:13|unique:usuario',
                 'codigo_usuario' => 'required|max:5',
                 'password' => 'required|min:8',
-                'username' => 'required|unique:usuario'
+                'username' => 'required|unique:usuario',
+                'telefono'=>'required',
+                'descripcion'=>''
             ]);
 
             $user = User::create([
@@ -48,7 +50,9 @@ class UsuarioController extends Controller
                 'codigo_usuario' => $validateData['codigo_usuario'],
                 'estado_usuario' => 1,
                 'password' => Hash::make($validateData['password']),
-                'username' => ($validateData['username'])
+                'username' => ($validateData['username']),
+                'telefono'=>$validateData['telefono'],
+                'descripcion'=>$validateData['descripcion']
             ]);
             return response()->json([
                 'status' => true,
@@ -253,7 +257,7 @@ class UsuarioController extends Controller
      */
     public function obtenerUsuarios()
     {
-        $users = User::select("id", "DPI", "nombres", "apellidos", "username", "email", "codigo_usuario")
+        $users = User::select("id", "DPI", "nombres", "apellidos", "username", "email", "codigo_usuario","telefono","descripcion")
             ->where("estado_usuario", 1)
             ->get();
         return response()->json($users, 200);
@@ -287,7 +291,9 @@ class UsuarioController extends Controller
                 'email' => 'required|email|min:13',
                 'codigo_usuario' => 'required|max:5',
                 'username' => 'required',
-                'password' => 'nullable|min:8'
+                'password' => 'nullable|min:8',
+                'telefono'=>'required|string',
+                'descripcion'=>''
             ]);
             $user = User::find($validateData['id']);
             if (isset($user)) {
@@ -297,6 +303,8 @@ class UsuarioController extends Controller
                 $user->codigo_usuario = $validateData['codigo_usuario'];
                 $user->username = $validateData['username'];
                 $user->DPI = $validateData['DPI'];
+                $user->telefono = $validateData['telefono'];
+                $user->descripcion = $validateData['descripcion'];
                 if ($validateData['password']) {
                     $user->password = Hash::make($validateData['password']);
                 }
