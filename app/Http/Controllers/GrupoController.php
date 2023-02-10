@@ -171,6 +171,7 @@ class GrupoController extends Controller
                 ->join('asignacion_grupo','asignacion_grupo.grupo_id','grupo.id')
                 ->where('grupo.proyecto_id',$validateData['proyecto_id'])
                 ->where('asignacion_grupo.usuario_id',$validateData['usuario_id'])
+                ->where('grupo.estado',1)
                 ->orderBy('grupo.jerarquia','DESC')
                 ->first();
             $grupos = Grupo::select('grupo.id','grupo.nombre','grupo.jerarquia')
