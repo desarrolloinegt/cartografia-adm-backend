@@ -27,6 +27,8 @@ class User extends Authenticatable
         'codigo_usuario',
         'estado_usuario',
         'password',
-        'username'
+        'username',
+        'telefono',
+        'descripcion'
     ]; 
 }

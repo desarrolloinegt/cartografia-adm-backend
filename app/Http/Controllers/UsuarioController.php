@@ -39,7 +39,7 @@ class UsuarioController extends Controller
                 'codigo_usuario' => 'required|max:5',
                 'password' => 'required|min:8',
                 'username' => 'required|unique:usuario',
-                'telefono'=>'required',
+                'telefono'=>'required|min:8',
                 'descripcion'=>''
             ]);
 
@@ -275,7 +275,7 @@ class UsuarioController extends Controller
                 'codigo_usuario' => 'required|max:5',
                 'username' => 'required',
                 'password' => 'nullable|min:8',
-                'telefono'=>'required|string',
+                'telefono'=>'required|min:8',
                 'descripcion'=>''
             ]);
             $user = User::find($validateData['id']);
