@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AsignacionAdministradorController;
+use App\Http\Controllers\AsignacionRolUsuarioController;
 use App\Http\Controllers\CargaTrabajoController;
 use App\Http\Controllers\OrganizacionController;
 use Illuminate\Http\Request;
@@ -59,6 +60,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/obtenerPermisos', [UsuarioController::class, 'obtenerPermisos']);
     Route::get('/obtenerPermisosDirectos/{id}', [UsuarioController::class, 'obtenerPermisosDirectos']);
     Route::post('/logout', [UsuarioController::class, 'logout']);
+ 
+
+    //asignaciones usuario rol
+    Route::get('/obtenerRolesUser/{id}',[AsignacionRolUsuarioController::class,'obtenerRolesUsuario']);
+    Route::patch('/asignarRoleUser',[AsignacionRolUsuarioController::class,'asignarUsuarioRol']);
 
 
     //asginaciones grupo usuario
