@@ -24,6 +24,8 @@ return new class extends Migration
             $table->tinyInteger('estado_usuario');
             $table->string('password', 100);
             $table->string('username', 50)->unique('username_UNIQUE');
+            $table->string('telefono', 45);
+            $table->string('descripcion', 300)->nullable();
         });
     }
 

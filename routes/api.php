@@ -57,8 +57,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/usuariosList', [UsuarioController::class, 'obtenerUsuariosList']);
     Route::get('/projectsAssing/{id}', [UsuarioController::class, 'obtenerProyecto']);
     Route::post('/obtenerPermisos', [UsuarioController::class, 'obtenerPermisos']);
-    Route::get('/obtenerPermisosAdmin/{id}', [UsuarioController::class, 'obtenerPermisosAdmin']);
-    Route::get('/isAdmin/{id}', [UsuarioController::class, 'isAdmin']);
+    Route::get('/obtenerPermisosDirectos/{id}', [UsuarioController::class, 'obtenerPermisosDirectos']);
     Route::post('/logout', [UsuarioController::class, 'logout']);
 
 

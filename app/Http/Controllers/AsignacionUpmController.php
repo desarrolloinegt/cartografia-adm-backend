@@ -48,7 +48,7 @@ class AsignacionUpmController extends Controller
 
                 return response()->json([
                     'status' => true,
-                    'message' => 'UPMs asignados correctamente',
+                    'message' => '  ',
                     'errores' => $errores
                 ], 200);
             } else {

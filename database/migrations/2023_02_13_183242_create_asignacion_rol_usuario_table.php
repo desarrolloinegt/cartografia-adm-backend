@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('asignacion_administrador', function (Blueprint $table) {
+        Schema::create('asignacion_rol_usuario', function (Blueprint $table) {
             $table->comment('');
             $table->integer('usuario_id')->index('fk_administrador_usuario1_idx');
             $table->integer('rol_id')->index('fk_asignacion_administrador_rol1_idx');
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('asignacion_administrador');
+        Schema::dropIfExists('asignacion_rol_usuario');
     }
 };

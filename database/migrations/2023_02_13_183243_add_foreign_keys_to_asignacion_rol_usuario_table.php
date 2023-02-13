@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('asignacion_administrador', function (Blueprint $table) {
+        Schema::table('asignacion_rol_usuario', function (Blueprint $table) {
             $table->foreign(['usuario_id'], 'fk_administrador_usuario1')->references(['id'])->on('usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
             $table->foreign(['rol_id'], 'fk_asignacion_administrador_rol1')->references(['id'])->on('rol')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
@@ -26,7 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('asignacion_administrador', function (Blueprint $table) {
+        Schema::table('asignacion_rol_usuario', function (Blueprint $table) {
             $table->dropForeign('fk_administrador_usuario1');
             $table->dropForeign('fk_asignacion_administrador_rol1');
         });

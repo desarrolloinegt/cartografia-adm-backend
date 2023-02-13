@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Permiso;
 use App\Models\Role;
 use App\Models\AsignacionAdministrador;
+use App\Models\AsignacionRolUsuario;
 use App\Models\Proyecto;
 use App\Models\AsignacionGrupo;
 use App\Http\Controllers\Controller;
@@ -125,32 +126,14 @@ class UsuarioController extends Controller
         }
 
     }
-    public function isAdmin($id){
-        try{
-            $status = AsignacionAdministrador::where('usuario_id',$id)
-            ->first();
-            if(isset($status)){
-                return response()->json([
-                    "status" => true
-                ],200);
-            }else{
-                return response()->json([
-                    "status" => false
-                ],200); 
-            }
-        }catch(\Throwable $th){
-
-        }
-        
-    }
-    public function obtenerPermisosAdmin($id){
+    public function obtenerPermisosDirectos($id){
         $permisosList = [];
-        $permisosAdmin = AsignacionAdministrador::select('permiso.alias')
-            ->join('usuario','usuario.id','asignacion_administrador.usuario_id')
-            ->join('rol','rol.id','asignacion_administrador.rol_id')
+        $permisosAdmin = AsignacionRolUsuario::select('permiso.alias')
+            ->join('usuario','usuario.id','asignacion_rol_usuario.usuario_id')
+            ->join('rol','rol.id','asignacion_rol_usuario.rol_id')
             ->join('asignacion_permisos','asignacion_permisos.rol_id','rol.id')
             ->join('permiso','permiso.id','asignacion_permisos.permiso_id')
-            ->where('asignacion_administrador.usuario_id',$id)
+            ->where('asignacion_rol_usuario.usuario_id',$id)
             ->where('permiso.estado',1)
             ->where('rol.estado',1)
             ->get();
