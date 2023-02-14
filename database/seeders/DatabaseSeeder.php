@@ -10,11 +10,11 @@ use App\Models\AsignacionPermiso;
 class DatabaseSeeder extends Seeder
 {
 
-    private $permisos = ["crear-usuario","editar-usuario","desactivar-usuario","ver-usuario"
+    private $permisos = ["crear-usuario","editar-usuario","desactivar-usuario","ver-usuario","asignar-roles-usuario"
     ,"editar-encuesta","desactivar-encuesta","crear-encuesta","ver-encuesta","editar-vehiculo","desactivar-vehiculo"
-    ,"crear-vehiculo","ver-vehiculo","editar-grupo","desactivar-grupo","crear-grupo","ver-grupo","asignar-proyecto-grupo",
-    "asignar-rol-grupo","asignar-usuario-grupo","editar-rol","desactivar-rol","crear-rol","asignar-permiso-rol","ver-rol","editar-proyecto","desactivar-proyecto",
-    "crear-proyecto","ver-proyecto","finalizar-proyecto"];
+    ,"crear-vehiculo","ver-vehiculo","editar-grupo","desactivar-grupo","crear-grupo","ver-grupo",
+    "asignar-rol-grupo","asignar-usuario-grupo","ver-usuario-grupo","eliminar-usuario-grupo","editar-rol","desactivar-rol","crear-rol","asignar-permiso-rol","ver-rol","editar-proyecto","desactivar-proyecto",
+    "crear-proyecto","ver-proyecto","finalizar-proyecto","asignar-upm-proyecto","ver-upms","reemplazar-upms","asignar-personal","asignar-upms-personal"];
 
     private $roleAdmin = "Administrador";
     /**
