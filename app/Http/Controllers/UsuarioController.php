@@ -38,7 +38,6 @@ class UsuarioController extends Controller
                 'email' => 'required|email|min:13|unique:usuario',
                 'codigo_usuario' => 'required|max:5',
                 'password' => 'required|min:8',
-                'username' => 'required|unique:usuario',
                 'telefono'=>'required|min:8',
                 'descripcion'=>''
             ]);
@@ -51,7 +50,6 @@ class UsuarioController extends Controller
                 'codigo_usuario' => $validateData['codigo_usuario'],
                 'estado_usuario' => 1,
                 'password' => Hash::make($validateData['password']),
-                'username' => ($validateData['username']),
                 'telefono'=>$validateData['telefono'],
                 'descripcion'=>$validateData['descripcion']
             ]);
@@ -84,10 +82,10 @@ class UsuarioController extends Controller
     {
         try {
             $validateData = $request->validate([
-                'username' => 'required|string',
+                'codigo_usuario' => 'required|int',
                 'password' => 'required|string'
             ]);
-            $user = User::where("username", $validateData['username'])->first();
+            $user = User::where("codigo_usuario", $validateData['codigo_usuario'])->first();
             if (isset($user)) {
                 if ($user->estado_usuario == 1) {
                     if (Hash::check($validateData['password'], $user->password)) { //comparacion de contraseñas
@@ -97,7 +95,7 @@ class UsuarioController extends Controller
                             "status" => true,
                             "token" => $token,
                             "id" => $user->id,
-                            "usuario" => $user->username,
+                            "usuario" => $user->nombres." ".$user->apellidos,
                         ], 200);
                     } else {
                         return response()->json([
@@ -240,7 +238,7 @@ class UsuarioController extends Controller
      */
     public function obtenerUsuarios()
     {
-        $users = User::select("id", "DPI", "nombres", "apellidos", "username", "email", "codigo_usuario","telefono","descripcion")
+        $users = User::select("id", "DPI", "nombres", "apellidos", "email", "codigo_usuario","telefono","descripcion")
             ->where("estado_usuario", 1)
             ->get();
         return response()->json($users, 200);
@@ -248,7 +246,7 @@ class UsuarioController extends Controller
 
     public function obtenerUsuariosList()
     {
-        $users = User::select("id", "username")
+        $users = User::select("id", "nombres","apellidos")
             ->where("estado_usuario", 1)
             ->get();
         return response()->json($users, 200);
@@ -273,7 +271,6 @@ class UsuarioController extends Controller
                 'apellidos' => 'required|string|max:25',
                 'email' => 'required|email|min:13',
                 'codigo_usuario' => 'required|max:5',
-                'username' => 'required',
                 'password' => 'nullable|min:8',
                 'telefono'=>'required|min:8',
                 'descripcion'=>''
@@ -284,7 +281,6 @@ class UsuarioController extends Controller
                 $user->apellidos = $validateData['apellidos'];
                 $user->email = $validateData['email'];
                 $user->codigo_usuario = $validateData['codigo_usuario'];
-                $user->username = $validateData['username'];
                 $user->DPI = $validateData['DPI'];
                 $user->telefono = $validateData['telefono'];
                 $user->descripcion = $validateData['descripcion'];

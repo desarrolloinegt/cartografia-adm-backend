@@ -53,20 +53,20 @@ class AsignacionGrupoController extends Controller
             $validateData=$request->validate([
                 "grupo_id"=>'required|int',
                 "usuarios"=>"required|array",
-                "usuarios.*"=>'string'
+                "usuarios.*"=>'int'
             ]);
             $array = $validateData['usuarios'];
             $idGrupo = $validateData['grupo_id'];
-            foreach ($array as $username) {
+            foreach ($array as $codigo_usuario) {
                 try {
-                    $user = User::where('username', $username)->first();
+                    $user = User::where('codigo_usuario', $codigo_usuario)->first();
                     if(isset($user)){
                         $asignacion = AsignacionGrupo::create([
                             "usuario_id" => $user->id,
                             "grupo_id" => $idGrupo
                         ]);
                     }else{
-                        array_push($errores, "El usuario $username no existe");
+                        array_push($errores, "El usuario $codigo_usuario no existe");
                     }
                 } catch (\Throwable $th) {
                     
@@ -97,11 +97,11 @@ class AsignacionGrupoController extends Controller
     public function asignarUsuarioAGrupo(Request $request)
     {
         $validateData = $request->validate([
-            'username' => 'required|string',
+            'codigo_usuario' => 'required|int',
             'grupo_id' => 'required|int'
         ]);
         $grupo = Grupo::find($validateData['grupo_id']);
-        $user = User::where('username',$validateData['username'])->first();
+        $user = User::where('codigo_usuario',$validateData['codigo_usuario'])->first();
         if (isset($grupo)) {
             if(isset($user)){
                 $matchThese = ["usuario_id"=>$user->id,"grupo_id"=>$grupo->id];
@@ -140,9 +140,9 @@ class AsignacionGrupoController extends Controller
         try{
             $validateData = $request->validate([
                 "grupo_id"=>'required|int',
-                "username"=>'required|string'
+                "codigo_usuario"=>'required|int'
             ]);
-            $user = User::where('username',$validateData['username'])->first();
+            $user = User::where('codigo_usuario',$validateData['codigo_usuario'])->first();
             if(isset($user) ){
                 $matchThese = ["grupo_id"=>$validateData['grupo_id'],"usuario_id"=>$user->id];
                 AsignacionGrupo::where($matchThese)->delete();
@@ -171,7 +171,7 @@ class AsignacionGrupoController extends Controller
     public function obtenerGrupoUsuarios($id)
     {
         try {
-            $asginaciones = AsignacionGrupo::select('usuario.id','usuario.username')
+            $asginaciones = AsignacionGrupo::select('usuario.codigo_usuario','usuario.nombres','usuario.apellidos')
                 ->join('usuario', 'asignacion_grupo.usuario_id', 'usuario.id')
                 ->join('grupo', 'asignacion_grupo.grupo_id', 'grupo.id')
                 ->where('usuario.estado_usuario', 1)
