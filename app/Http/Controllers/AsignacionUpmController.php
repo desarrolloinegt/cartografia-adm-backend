@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ReemplazoUpm;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\UPM;
 use App\Models\Proyecto;
@@ -125,14 +127,18 @@ class AsignacionUpmController extends Controller
     public function sustituirUpm(Request $request)
     {
         try {
+            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
             $validateData = $request->validate([
                 'proyecto_id' => 'int|required',
                 'upm_anterior' => 'required|int',
-                'upm_nuevo' => 'required|string'
+                'upm_nuevo' => 'required|string',
+                'usuario_id'=>'int|required',
+                'descripcion'=>'required|string'
             ]);
             $matchTheseAnterior = ['proyecto_id' => $validateData['proyecto_id'], 'upm_id' => $validateData['upm_anterior']];
             $asignacionAnterior = AsignacionUpm::where($matchTheseAnterior)->first();
-            if (isset($asignacionAnterior)) {
+            $user=User::find($validateData["usuario_id"]);
+            if (isset($asignacionAnterior) && isset($user)) {
                 $upm = UPM::where('upm.nombre', $validateData['upm_nuevo'])->first();
                 if (isset($upm)) {
                     $matchThese = ['proyecto_id' => $validateData['proyecto_id'], 'upm_id' => $upm->id];
@@ -149,6 +155,13 @@ class AsignacionUpmController extends Controller
                             "estado_upm" => 1
                         ]);
                         $asignacionAnterior = AsignacionUpm::where($matchTheseAnterior)->update(['estado_upm'=>4]);
+                        ReemplazoUpm::create([
+                            "usuario_id"=>$user->id,
+                            "descripcion"=>$validateData['descripcion'],
+                            "upm_anterior"=>$validateData['upm_anterior'],
+                            "upm_nuevo"=>$upm->id,
+                            "fecha"=>$fecha
+                        ]);
                         return response()->json([
                             'status' => true,
                             'message' => 'UPM sustituido'

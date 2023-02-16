@@ -4,6 +4,7 @@ use App\Http\Controllers\AsignacionAdministradorController;
 use App\Http\Controllers\AsignacionRolUsuarioController;
 use App\Http\Controllers\CargaTrabajoController;
 use App\Http\Controllers\OrganizacionController;
+use App\Http\Controllers\ReemplazoUpmController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
@@ -138,4 +139,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/obtenerUpmsProyecto/{id}', [AsignacionUpmController::class, 'obtenerUpmsProyecto']);
     Route::post('/asignarUpmPersonal',[CargaTrabajoController::class,'asignarUpmsAPersonal']);
     Route::post('/obtenerUpmPersonal',[CargaTrabajoController::class,'obtenerUpmsPersonal']);
+
+    //Reemplazo de upm
+    Route::get('/detalleSustitucion/{id}',[ReemplazoUpmController::class,'verDetalle']);
 });
