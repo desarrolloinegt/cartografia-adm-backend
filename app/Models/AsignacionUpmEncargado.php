@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AsignacionAdministrador extends Model
+class AsignacionUpmEncargado extends Model
 {
-    protected $table="asignacion_administrador";
+    use HasFactory;
+    protected $table="asignacion_upm_usuario";
     public $timestamps = false;
     protected $fillable = [
+        'upm_id',
         'usuario_id',
-        'rol_id'
+        'proyecto_id'
     ];
 }

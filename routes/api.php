@@ -136,4 +136,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Asignacion de carga de trabajo
     Route::post('/asignarPersonal/{id}', [CargaTrabajoController::class, 'asignarPersonal']);
     Route::get('/obtenerUpmsProyecto/{id}', [AsignacionUpmController::class, 'obtenerUpmsProyecto']);
+    Route::post('/asignarUpmPersonal',[CargaTrabajoController::class,'asignarUpmsAPersonal']);
+    Route::post('/obtenerUpmPersonal',[CargaTrabajoController::class,'obtenerUpmsPersonal']);
 });
