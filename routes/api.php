@@ -88,7 +88,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/obtenerPoliticaPermisos/{id}', [AsignacionPermisoPoliticaController::class, 'obtenerPoliticaPermisos']);
 
 
-    //asgingaciones rol Grupo
+    //asgingaciones rol Politicas
     Route::get('/obtenerRolPoliticas/{id}', [AsignacionRolPoliticaController::class, 'obtenerRolesPoliticas']);
     Route::patch('/asignarRolPoliticas', [AsignacionRolPoliticaController::class, 'modificarRolesPoliticas']);
 
@@ -132,6 +132,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Municipio y Departamento
     Route::get('/municipios', [MunicipioController::class, 'obtenerMunicipios']);
     Route::get('/departamentos', [DepartamentoController::class, 'obtenerDepartamentos']);
+    Route::post('/cargarMunicipios', [MunicipioController::class, 'cargarMunicipios']);
+    Route::post('/cargarDepartamentos', [DepartamentoController::class, 'cargarDepartamentos']);
 
     //Asignacion de carga de trabajo
     Route::post('/asignarPersonal/{id}', [CargaTrabajoController::class, 'asignarPersonal']);
@@ -144,4 +146,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/obtenerPersonalAsignado',[OrganizacionController::class,'obtenerPersonalAsignado']);
     //Reemplazo de upm
     Route::get('/detalleSustitucion/{id}',[ReemplazoUpmController::class,'verDetalle']);
+
+    //Cargar Upms
+    Route::post('/cargarUpms', [UPMController::class, 'cargarUpms']);
 });

@@ -20,4 +20,31 @@ class MunicipioController extends Controller
             ->get();
         return response()->json($municipios);
     }
+
+    public function cargarMunicipios(Request $request){
+        try{
+            $errores=[];
+            $array=$request->all();
+            foreach ($array as $departamento=>$value) {
+                try{
+                    Municipio::create([
+                        "nombre"=>$value['nombre'],
+                        "departamento_id"=>$value['departamento_id']
+                    ]);
+                }catch(\Throwable $th){
+                    array_push($errores,$th->getMessage());
+                }
+            }
+            return response()->json([
+                "status"=>true,
+                "message"=>"Municipios creados",
+                "errores"=>$errores
+           ],200);
+        }catch(\Throwable $th){
+            return response()->json([
+                "status"=>true,
+                "message"=>$th->getMessage(),
+           ],500);
+        }
+    }
 }

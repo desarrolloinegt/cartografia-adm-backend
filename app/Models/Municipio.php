@@ -13,4 +13,9 @@ class Municipio extends Model
      * El arreglo fillable es para indiciar que si se desea crear un nuevo Vehiculo debe cumplir con los campos indicados en el arreglo
      */
     protected $table="municipio";
+    public $timestamps = false;
+    protected $fillable = [
+        "nombre",
+        "departamento_id"
+    ];
 }

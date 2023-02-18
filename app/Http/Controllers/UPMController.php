@@ -41,4 +41,30 @@ class UPMController extends Controller
             ], 500);
         }
     }
+
+    public function cargarUpms(Request $request){
+        try{
+            $errores=[];
+            $arrayUpms=$request->all();
+            foreach ($arrayUpms as $key => $value) {
+                try{
+                    UPM::create([
+                        'municipio_id'=>$value['municipio_id'],
+                        'nombre'=>$value['nombre'],
+                        'estado'=>1
+                    ]);
+
+                }catch(\Throwable $th){
+                    array_push($errores,$th->getMessage());
+                }
+            }
+            return response()->json([
+                "status"=>true,
+                "message"=>"Upms cargados",
+                "errores"=>$errores
+            ],200);
+        }catch(\Throwable $th){
+
+        }
+    }
 }

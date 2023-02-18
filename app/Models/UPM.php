@@ -15,7 +15,6 @@ class UPM extends Model
     protected $table="upm";
     public $timestamps = false;
     protected $fillable = [
-        'descripcion',
         'municipio_id',
         'estado',
         'nombre'

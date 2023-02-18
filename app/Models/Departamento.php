@@ -15,4 +15,9 @@ class Departamento extends Model
      * El arreglo fillable es para indiciar que si se desea crear un nuevo Vehiculo debe cumplir con los campos indicados en el arreglo
      */
     protected $table="departamento";
+    public $timestamps = false;
+    protected $fillable = [
+        'nombre'
+    ];
+
 }
