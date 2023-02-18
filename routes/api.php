@@ -1,10 +1,18 @@
 <?php
 
 use App\Http\Controllers\AsignacionAdministradorController;
+use App\Http\Controllers\AsignacionPermisoPoliticaController;
+use App\Http\Controllers\AsignacionPoliticaUsuarioController;
+use App\Http\Controllers\AsignacionRolPoliticaController;
 use App\Http\Controllers\AsignacionRolUsuarioController;
+use App\Http\Controllers\AsignacionUpmProyectoController;
 use App\Http\Controllers\CargaTrabajoController;
 use App\Http\Controllers\OrganizacionController;
+use App\Http\Controllers\PoliticaController;
 use App\Http\Controllers\ReemplazoUpmController;
+use App\Http\Controllers\RolController;
+use App\Models\AsignacionPoliticaUsuario;
+use App\Models\AsignacionUpmProyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
@@ -40,12 +48,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    //roles
-
-    Route::post('/rol', [RoleController::class, 'createRole']);
-    Route::get('/roles', [RoleController::class, 'obtenerRoles']);
-    Route::get('/rol/{id}', [RoleController::class, 'desactivarRol']);
-    Route::patch('/rol/edit', [RoleController::class, 'modificarRol']);
+    
+    //politica
+    Route::post('/politica', [PoliticaController::class, 'createPolicy']);
+    Route::get('/politicas', [PoliticaController::class, 'obtenerPoliticas']);
+    Route::get('/politica/{id}', [PoliticaController::class, 'desactivarPolitica']);
+    Route::patch('/politica/edit', [PoliticaController::class, 'modificarPolitica']);
 
     //permiso
     Route::get('/permisos', [PermisoController::class, 'obtenerPermisos']);
@@ -63,33 +71,31 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/logout', [UsuarioController::class, 'logout']);
  
 
-    //asignaciones usuario rol
-    Route::get('/obtenerRolesUser/{id}',[AsignacionRolUsuarioController::class,'obtenerRolesUsuario']);
-    Route::patch('/asignarRoleUser',[AsignacionRolUsuarioController::class,'asignarUsuarioRol']);
+    //asignaciones usuario politica
+    Route::get('/obtenerPoliticaUser/{id}',[AsignacionPoliticaUsuarioController::class,'obtenerUsuarioPoliticas']);
+    Route::patch('/asignarPoliticaUser',[AsignacionPoliticaUsuarioController::class,'asignarUsuarioPolitica']);
 
 
     //asginaciones grupo usuario
-    Route::post('/asignarGruposUsuarios', [AsignacionGrupoController::class, 'asignacionMasiva']);
-    Route::get('/obtenerGrupoUsuarios/{id}', [AsignacionGrupoController::class, 'obtenerGrupoUsuarios']);
-    Route::post('/asignacionGrupoUsuario', [AsignacionGrupoController::class, 'asignarUsuarioAGrupo']);
-    Route::patch('/eliminarUsuarioGrupo', [AsignacionGrupoController::class, 'eliminarUsuario']);
+    Route::post('/asignarUsuariosRol', [AsignacionRolUsuarioController::class, 'asignacionMasiva']);
+    Route::get('/obtenerUsuariosRol/{id}', [AsignacionRolUsuarioController::class, 'obtenerUsuariosRol']);
+    Route::post('/asignacionUsuarioRol', [AsignacionRolUsuarioController::class, 'asignarUsuariosRol']);
+    Route::patch('/eliminarUsuarioRol', [AsignacionRolUsuarioController::class, 'eliminarUsuarioRol']);
 
 
-    //asgingaciones rol Permiso
-    Route::post('/asignarPermiso', [AsignacionPermisoController::class, 'asignacionMasiva']);
-    Route::get('/asignacionesRolPermiso/{id}', [AsignacionPermisoController::class, 'obtenerRolPermiso']);
-    Route::post('/asignacionRolPermiso/eliminar', [AsignacionPermisoController::class, 'eliminarAsignacion']);
+    //asgingaciones politica Permiso
+    Route::post('/asignarPermiso', [AsignacionPermisoPoliticaController::class, 'asignacionMasiva']);
+    Route::get('/obtenerPoliticaPermisos/{id}', [AsignacionPermisoPoliticaController::class, 'obtenerPoliticaPermisos']);
 
 
     //asgingaciones rol Grupo
-    Route::get('/obtenerGruposRoles/{id}', [AsignacionRolController::class, 'obtenerGruposRoles']);
-    Route::post('/asignarGrupoRol', [AsignacionRolController::class, 'asignarRolGrupo']);
-    Route::patch('/asignacionGrupoRol/edit', [AsignacionRolController::class, 'modificarGruposRoles']);
+    Route::get('/obtenerRolPoliticas/{id}', [AsignacionRolPoliticaController::class, 'obtenerRolesPoliticas']);
+    Route::patch('/asignarRolPoliticas', [AsignacionRolPoliticaController::class, 'modificarRolesPoliticas']);
 
     //Asginacions upms
-    Route::post('/asginarUpmsProyecto', [AsignacionUpmController::class, 'asignacionMasiva']);
-    Route::patch('/sustituirUpm', [AsignacionUpmController::class, 'sustituirUpm']);
-
+    Route::post('/asginarUpmsProyecto', [AsignacionUpmProyectoController::class, 'asignacionMasiva']);
+    Route::patch('/sustituirUpm', [AsignacionUpmProyectoController::class, 'sustituirUpm']);
+    Route::get('/obtenerUpmsProyecto/{id}', [AsignacionUpmProyectoController::class, 'obtenerUpmsProyecto']);
 
     //Encuesta
     Route::post('/encuesta', [EncuestaController::class, 'crearEncuesta']);
@@ -103,16 +109,16 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/proyectos', [ProyectoController::class, 'obtenerProyectos']);
     Route::get('/proyectoId/{projecto}', [ProyectoController::class, 'obtenerProyectoId']);
     Route::get('/proyecto/{id}', [ProyectoController::class, 'desactivarProyecto']);
-    Route::get('/obtenerGruposProyecto/{proyecto}', [ProyectoController::class, 'obtenerGruposPorProyecto']);
+    Route::get('/obtenerRolesProyecto/{proyecto}', [ProyectoController::class, 'obtenerGruposPorProyecto']);
     Route::get('/finalizarProyecto/{id}', [ProyectoController::class, 'finalizarProyecto']);
 
-    //Grupo
-    Route::post('/grupo', [GrupoController::class, 'createGroup']);
-    Route::get('/grupos', [GrupoController::class, 'obtenerGrupos']);
-    Route::patch('/jerarquias', [GrupoController::class, 'modificarJerarquias']);
-    Route::patch('/grupo/edit', [GrupoController::class, 'modificarGrupo']);
-    Route::get('/grupo/{id}', [GrupoController::class, 'desactivarGrupo']);
-    Route::post('/seleccionarGruposMenores', [GrupoController::class, 'seleccionarGruposMenores']);
+    //Rol
+    Route::post('/rol', [RolController::class, 'createRol']);
+    Route::get('/roles', [RolController::class, 'obtenerRoles']);
+    Route::patch('/jerarquias', [RolController::class, 'modificarJerarquias']);
+    Route::patch('/rol/edit', [RolController::class, 'modificarRol']);
+    Route::get('/rol/{id}', [RolController::class, 'desactivarRol']);
+    Route::post('/seleccionarRolesMenores', [RolController::class, 'seleccionarRolesMenores']);
 
 
 
@@ -127,19 +133,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/municipios', [MunicipioController::class, 'obtenerMunicipios']);
     Route::get('/departamentos', [DepartamentoController::class, 'obtenerDepartamentos']);
 
-    //Asignacion de administradores
-
-    Route::post('/asignarAdmin', [AsignacionAdministradorController::class, 'asignarAdmin']);
-
-    //UPM
-    Route::post('/upm', [UPMController::class, 'crearUpm']);
-
     //Asignacion de carga de trabajo
     Route::post('/asignarPersonal/{id}', [CargaTrabajoController::class, 'asignarPersonal']);
-    Route::get('/obtenerUpmsProyecto/{id}', [AsignacionUpmController::class, 'obtenerUpmsProyecto']);
+    
     Route::post('/asignarUpmPersonal',[CargaTrabajoController::class,'asignarUpmsAPersonal']);
     Route::post('/obtenerUpmPersonal',[CargaTrabajoController::class,'obtenerUpmsPersonal']);
+    Route::post('/obtenerUpmsAsignados',[CargaTrabajoController::class,'obtenerUpmsAsignados']);
 
+    //asignacion de personal
+    Route::post('/obtenerPersonalAsignado',[OrganizacionController::class,'obtenerPersonalAsignado']);
     //Reemplazo de upm
     Route::get('/detalleSustitucion/{id}',[ReemplazoUpmController::class,'verDetalle']);
 });

@@ -19,18 +19,27 @@ class EncuestaController extends Controller
     public function crearEncuesta(Request $request)
     {
         $validateData = $request->validate([
-            'nombre' => 'required|string|unique:encuesta',
+            'nombre' => 'required|string',
             'descripcion' => ''
         ]);
-        $encuesta = Encuesta::create([
-            "nombre" => $validateData['nombre'],
-            "descripcion" => $validateData['descripcion'],
-            "estado" => 1
-        ]);
-        return response()->json([
-            'status' => true,
-            'message' => 'Encuesta creada correctamente'
-        ], 200);
+        $exist=Encuesta::where('nombre',$validateData['nombre'])->first();
+        if(isset($exist)){
+            return response()->json([
+                'status' => true,
+                'message' => 'Esta encuesta ya existe'
+            ], 404);
+        }else{
+            $encuesta = Encuesta::create([
+                "nombre" => $validateData['nombre'],
+                "descripcion" => $validateData['descripcion'],
+                "estado" => 1
+            ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Encuesta creada correctamente'
+            ], 200);
+        }
+       
     }
 
     /**

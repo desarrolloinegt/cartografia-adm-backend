@@ -19,20 +19,30 @@ class VehiculoController extends Controller
     {
         try {
             $validateData = $request->validate([
-                'placa' => 'required|string|max:7|unique:vehiculo',
+                'placa' => 'required|string|max:7',
                 'modelo' => 'required|string',
                 'year' => 'required|max:4|min:4'
             ]);
-            $vehiculo = Vehiculo::create([
-                "placa" => $validateData['placa'],
-                "modelo" => $validateData['modelo'],
-                "year" => $validateData['year'],
-                "estado" => 1
-            ]);
-            return response()->json([
-                'status' => true,
-                'message' => 'Vehiculo creado correctamente'
-            ], 200);
+            $exists=Vehiculo::where('placa',$validateData['placa'])->first();
+            if(isset($exists)){
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Este vehiculo ya existe'
+                ], 404);
+            } else{
+                $vehiculo = Vehiculo::create([
+                    "placa" => $validateData['placa'],
+                    "modelo" => $validateData['modelo'],
+                    "year" => $validateData['year'],
+                    "estado" => 1
+                ]);
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Vehiculo creado correctamente'
+                ], 200);
+               
+            }
+            
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,

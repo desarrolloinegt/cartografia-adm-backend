@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AsignacionPoliticaUsuario;
 use App\Models\Grupo;
+use App\Models\Politica;
+use App\Models\Rol;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Permiso;
@@ -126,16 +129,16 @@ class UsuarioController extends Controller
     }
     public function obtenerPermisosDirectos($id){
         $permisosList = [];
-        $permisosAdmin = AsignacionRolUsuario::select('permiso.alias')
-            ->join('usuario','usuario.id','asignacion_rol_usuario.usuario_id')
-            ->join('rol','rol.id','asignacion_rol_usuario.rol_id')
-            ->join('asignacion_permisos','asignacion_permisos.rol_id','rol.id')
-            ->join('permiso','permiso.id','asignacion_permisos.permiso_id')
-            ->where('asignacion_rol_usuario.usuario_id',$id)
+        $permisosDirectos=AsignacionPoliticaUsuario::select('permiso.alias')
+            ->join('usuario','usuario.id','asignacion_politica_usuario.usuario_id')
+            ->join('politica','politica.id','asignacion_politica_usuario.politica_id')
+            ->join('asignacion_permiso_politica','asignacion_permiso_politica.politica_id','politica.id')
+            ->join('permiso','permiso.id','asignacion_permiso_politica.permiso_id')
+            ->where('asignacion_politica_usuario.usuario_id',$id)
             ->where('permiso.estado',1)
-            ->where('rol.estado',1)
+            ->where('politica.estado',1)
             ->get();
-        foreach ($permisosAdmin as $permiso) {
+        foreach ($permisosDirectos as $permiso) {
             array_push($permisosList,$permiso->alias);
         }    
         return response()->json($permisosList,200) ;
@@ -174,10 +177,10 @@ class UsuarioController extends Controller
     public function obtenerProyecto($id)
     {
         try {
-            $proyectos = AsignacionGrupo::selectRaw('proyecto.nombre')
-                ->join('usuario', "asignacion_grupo.usuario_id", "usuario.id")
-                ->join('grupo', 'asignacion_grupo.grupo_id', 'grupo.id')
-                ->join('proyecto', 'proyecto.id', 'grupo.proyecto_id')
+            $proyectos = AsignacionRolUsuario::selectRaw('proyecto.nombre')
+                ->join('usuario', "asignacion_rol_usuario.usuario_id", "usuario.id")
+                ->join('rol', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                ->join('proyecto', 'proyecto.id', 'rol.proyecto_id')
                 ->where('usuario.id', $id)
                 ->groupBy('proyecto.nombre')
                 ->get();
@@ -198,23 +201,23 @@ class UsuarioController extends Controller
                 'proyecto' => 'required|string',
                 'usuario_id' => 'required|int'
             ]);
-            $grupos = Grupo::select('grupo.id')
-                ->join('asignacion_grupo', 'asignacion_grupo.grupo_id', 'grupo.id')
-                ->join('usuario', 'usuario.id', 'asignacion_grupo.usuario_id')
-                ->join('proyecto','proyecto.id','grupo.proyecto_id')
+            $roles = Rol::select('rol.id')
+                ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                ->join('usuario', 'usuario.id', 'asignacion_rol_usuario.usuario_id')
+                ->join('proyecto','proyecto.id','rol.proyecto_id')
                 ->where('usuario.id', $validateData['usuario_id'])
                 ->where('proyecto.nombre',$validateData['proyecto'])
                 ->get();
-            foreach ($grupos as $grupo) {
-                $role = Role::select('rol.id')
-                    ->join('asignacion_rol', "rol.id", "asignacion_rol.rol_id")
-                    ->where('asignacion_rol.grupo_id', $grupo->id)
-                    ->where('rol.estado', 1)
+            foreach ($roles as $rol) {
+                $politicas = Politica::select('politica.id')
+                    ->join('asignacion_rol_politica', "asignacion_rol_politica.politica_id", "politica.id")
+                    ->where('asignacion_rol_politica.rol_id', $rol->id)
+                    ->where('politica.estado', 1)
                     ->get();
-                foreach ($role as $rol) {
+                foreach ($politicas as $politica) {
                     $permisos = Permiso::select('alias')
-                        ->join('asignacion_permisos', 'asignacion_permisos.permiso_id', 'permiso.id')
-                        ->where('asignacion_permisos.rol_id', $rol->id)
+                        ->join('asignacion_permiso_politica', 'asignacion_permiso_politica.permiso_id', 'permiso.id')
+                        ->where('asignacion_permiso_politica.politica_id', $politica->id)
                         ->get();
                     foreach($permisos as $permiso){
                         array_push($permisosList,$permiso->alias);

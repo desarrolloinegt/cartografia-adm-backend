@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Grupo;
+use App\Models\Rol;
 use Illuminate\Http\Request;
 use App\Models\Proyecto;
 use App\Models\Encuesta;
@@ -195,12 +196,12 @@ class ProyectoController extends Controller
 
     public function obtenerGruposPorProyecto($proyecto){
         try{
-            $asignaciones = Grupo::select('grupo.id','grupo.nombre', 'jerarquia','grupo.descripcion','grupo.proyecto_id')
-                ->join('proyecto','proyecto.id','grupo.proyecto_id')
+            $asignaciones = Rol::select('rol.id','rol.nombre', 'jerarquia','rol.descripcion','rol.proyecto_id')
+                ->join('proyecto','proyecto.id','rol.proyecto_id')
                 ->where('proyecto.nombre',$proyecto)
                 ->where('proyecto.estado_proyecto',1)
-                ->where('grupo.estado',1)
-                ->orderBy('grupo.jerarquia','DESC')
+                ->where('rol.estado',1)
+                ->orderBy('rol.jerarquia','DESC')
                 ->get();
             return response()->json($asignaciones,200); 
         }catch(\Throwable $th){
