@@ -55,10 +55,12 @@ class AsignacionRolUsuarioController extends Controller
         try{
             $validateData=$request->validate([
                 "rol_id"=>'required|int',
+                "proyecto"=>'required|string',
                 "usuarios"=>"required|array",
                 "usuarios.*"=>'int'
             ]);
             $array = $validateData['usuarios'];
+            $proyecto=Proyecto::where('nombre',$validateData['proyecto'])->first() ;
             $idRol = $validateData['rol_id'];
             foreach ($array as $codigo_usuario) {
                 try {
@@ -66,7 +68,8 @@ class AsignacionRolUsuarioController extends Controller
                     if(isset($user)){
                         $asignacion = AsignacionRolUsuario::create([
                             "usuario_id" => $user->id,
-                            "rol_id" => $idRol
+                            "rol_id" => $idRol,
+                            "proyecto_id"=>$proyecto->id
                         ]);
                     }else{
                         array_push($errores, "El usuario $codigo_usuario no existe");
@@ -104,28 +107,40 @@ class AsignacionRolUsuarioController extends Controller
             'rol_id' => 'required|int',
             'proyecto'=>'required|string'
         ]);
+        
         $proyecto=Proyecto::where('nombre',$validateData['proyecto'])->first();
         $rol = Rol::find($validateData['rol_id']);
         $user = User::where('codigo_usuario',$validateData['codigo_usuario'])->first();
         if (isset($rol) && isset($proyecto)) {
             if(isset($user)){
-                $matchThese = ["usuario_id"=>$user->id,"rol_id"=>$rol->id];
-                $asignacion = AsignacionRolUsuario::where($matchThese)->first();
-                if(isset($asignacion)){
+                $matchTheseExisit = ["usuario_id"=>$user->id,"proyecto_id"=>$proyecto->id];
+                $exist=AsignacionRolUsuario::where($matchTheseExisit)->first();
+                if(isset($exist)){
+                    $rolAsignado=Rol::find($exist->rol_id);
                     return response()->json([
                         'status' => true,
-                        'message' => 'El usuario ya existe en este rol'
+                        'message' => 'El usuario '.$user->codigo_usuario.' ya existe en este proyecto y esta asignado al rol: '.
+                        $rolAsignado->nombre
                     ], 404);
                 }else{
-                    AsignacionRolUsuario::create([
-                        "usuario_id" => $user->id,
-                        "rol_id" => $validateData['rol_id'],
-                        "proyecto_id"=>$proyecto->id
-                    ]);
-                    return response()->json([
-                        'status' => true,
-                        'message' => 'Usuario agregado correctamente'
-                    ], 200);
+                    $matchThese = ["usuario_id"=>$user->id,"rol_id"=>$rol->id];
+                    $asignacion = AsignacionRolUsuario::where($matchThese)->first();
+                    if(isset($asignacion)){
+                        return response()->json([
+                            'status' => true,
+                            'message' => 'El usuario ya existe en este rol'
+                        ], 404);
+                    }else{
+                        AsignacionRolUsuario::create([
+                            "usuario_id" => $user->id,
+                            "rol_id" => $validateData['rol_id'],
+                            "proyecto_id"=>$proyecto->id
+                        ]);
+                        return response()->json([
+                            'status' => true,
+                            'message' => 'Usuario agregado correctamente'
+                        ], 200);
+                    }
                 }
             }else{
                 return response()->json([

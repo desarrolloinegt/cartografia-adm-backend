@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Asignacionrol;
 use App\Models\AsignacionRolUsuario;
-use App\Models\rol;
+use App\Models\Rol;
 use App\Models\Organizacion;
-use App\Models\Proyecto;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class OrganizacionController extends Controller
@@ -100,25 +97,26 @@ class OrganizacionController extends Controller
     public function obtenerPersonalAsignado(Request $request){
         try{
             $validateData=$request->validate([
-                'rol_id'=>'required|int',
-                'usuario_id'=>'required|int'
+                'proyecto_id'=>'required|int',
+                'usuario_id'=>'required|int',
+                'rol_id'=>'required:int'
             ]);
             $rolMayor=AsignacionRolUsuario::select('rol.id','rol.nombre','rol.jerarquia')
-                ->join('rol','rol.id','asignacion_rol.rol_id')
-                ->where('rol.id',$validateData['rol_id'])
+                ->join('rol','rol.id','asignacion_rol_usuario.rol_id')
+                ->where('rol.proyecto_id',$validateData['proyecto_id'])
                 ->orderBy('rol.jerarquia','DESC')
                 ->first();
                
             $rol= Rol::select('rol.id','rol.nombre','rol.jerarquia')
-                ->join('asignacion_rol','asignacion_rol.rol_id','rol.id')
-                ->where('asignacion_rol.usuario_id',$validateData['usuario_id'])
+                ->join('asignacion_rol_usuario','asignacion_rol_usuario.rol_id','rol.id')
+                ->where('asignacion_rol_usuario.usuario_id',$validateData['usuario_id'])
                 ->where('rol.estado',1)
                 ->first();
             if($rolMayor->jerarquia==$rol->jerarquia){
-                $users=$this->obtenerPersonalJefe($validateData['rol_id']);
+                $users=$this->obtenerPersonalJefe($validateData['proyecto_id'],$validateData['rol_id']);
                 return response()->json($users,200);
             }else{
-                $userss=$this->obtenerPersonalEmpleado($validateData['rol_id'],$validateData['usuario_id']);
+                $userss=$this->obtenerPersonalEmpleado($validateData['proyecto_id'],$validateData['usuario_id'],$validateData['rol_id']);
                 return response()->json($userss,200);
             }     
         }catch(\Throwable $th){
@@ -129,13 +127,13 @@ class OrganizacionController extends Controller
         }
     }
 
-    public function obtenerPersonalJefe($id){
+    public function obtenerPersonalJefe($proyecto,$rol){
         try{
             $asginaciones = AsignacionRolUsuario::select('usuario.codigo_usuario','usuario.nombres','usuario.apellidos')
-            ->join('usuario', 'asignacion_rol.usuario_id', 'usuario.id')
-            ->join('rol', 'asignacion_rol.rol_id', 'rol.id')
-            ->where('usuario.estado_usuario', 1)
-            ->where('rol.id',$id)
+            ->join('usuario', 'asignacion_rol_usuario.usuario_id', 'usuario.id')
+            ->join('rol', 'asignacion_rol_usuario.rol_id', 'rol.id')
+            ->where('rol.proyecto_id',$proyecto)
+            ->where('rol.id',$rol)
             ->where('usuario.estado_usuario',1)
             ->where('rol.estado', 1)
             ->get();
@@ -148,14 +146,16 @@ class OrganizacionController extends Controller
         }
     }
 
-    public function obtenerPersonalEmpleado($rol,$usuario){
+    public function obtenerPersonalEmpleado($proyecto,$usuario,$rol){
         try{
             $users=Organizacion::select('usuario.codigo_usuario','usuario.nombres','usuario.apellidos')
                 ->join('usuario','usuario.id','organizacion.usuario_inferior')
-                ->join('asignacion_rol','asignacion_rol.usuario_id','usuario.id')
-                ->join('rol','rol.id','asignacion_rol.rol_id')
+                ->join('asignacion_rol_usuario','asignacion_rol_usuario.usuario_id','usuario.id')
+                ->join('rol','rol.id','asignacion_rol_usuario.rol_id')
                 ->where('organizacion.usuario_superior',$usuario)
+                ->where('rol.proyecto_id',$proyecto)
                 ->where('rol.id',$rol)
+                ->where('usuario.estado_usuario',1)
                 ->get();
             return $users;
         }catch(\Throwable $th){
