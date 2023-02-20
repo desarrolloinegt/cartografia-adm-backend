@@ -13,6 +13,7 @@ class Organizacion extends Model
     protected $fillable = [
         'usuario_superior',
         'usuario_inferior',
-        'proyecto_id'
+        'proyecto_id',
+        'usuario_asignador'
     ];
 }

@@ -43,7 +43,7 @@ use App\Http\Controllers\VehiculoController;
 Route::post('/login', [UsuarioController::class, 'login']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    return $request->user()->id;
 });
 
 

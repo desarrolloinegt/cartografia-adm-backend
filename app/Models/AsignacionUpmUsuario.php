@@ -13,6 +13,7 @@ class AsignacionUpmUsuario extends Model
     protected $fillable = [
         'upm_id',
         'usuario_id',
-        'proyecto_id'
+        'proyecto_id',
+        'usuario_asignador'
     ];
 }
