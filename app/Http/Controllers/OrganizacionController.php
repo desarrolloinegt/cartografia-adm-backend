@@ -5,33 +5,34 @@ namespace App\Http\Controllers;
 use App\Models\AsignacionRolUsuario;
 use App\Models\Rol;
 use App\Models\Organizacion;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class OrganizacionController extends Controller
 {
-    public function asignarPersonal($id, Request $request)
+    public function asignarPersonal( Request $request)
     {
         $errores = [];
         $array = $request->all();
         try {
             foreach ($array as $key => $value) {
                 try {
-                    $superior = AsignacionRolUsuario::select('rol.jerarquia', 'usuario.id', 'usuario.codigo_usuario AS usuario')
-                        ->join('usuario', 'usuario.id', 'asignacion_rol.usuario_id')
-                        ->join('rol', 'rol.id', 'asignacion_rol.rol_id')
+                    $superior = AsignacionRolUsuario::select('rol.jerarquia', 'usuario.id')
+                        ->join('usuario', 'usuario.id', 'asignacion_rol_usuario.usuario_id')
+                        ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                         ->join('proyecto', 'proyecto.id', 'rol.proyecto_id')
                         ->where('proyecto.id', $value['proyecto_id'])
                         ->where('usuario.codigo_usuario', $value['codigo_superior'])
-                        ->fist();
-                    $inferior = AsignacionRolUsuario::select('rol.jerarquia', 'usuario.id', 'usuario.codigo_usuario AS usuario')
-                        ->join('usuario', 'usuario.id', 'asignacion_rol.usuario_id')
-                        ->join('rol', 'rol.id', 'asignacion_rol.rol_id')
+                        ->first();
+                    $inferior = AsignacionRolUsuario::select('rol.jerarquia', 'usuario.id')
+                        ->join('usuario', 'usuario.id', 'asignacion_rol_usuario.usuario_id')
+                        ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                         ->where('usuario.codigo_usuario', $value['codigo_inferior'])
                         ->first();
                     if ($superior->jerarquia > $inferior->jerarquia && $value['codigo_superior']!=$value['codigo_inferior']) {
                         Organizacion::create([
-                            "usuario_superior" => $superior->usuario,
-                            "usuario_inferior" => $inferior->usuario,
+                            "usuario_superior" => $superior->id,
+                            "usuario_inferior" => $inferior->id,
                             "proyecto_id" => $value['proyecto_id']
                         ]);
                     } else {
@@ -55,37 +56,42 @@ class OrganizacionController extends Controller
         }
     }
 
-    public function obtenerAsignacionesPersonal(){
+    public function obtenerAsignacionesPersonal(Request $request){
         try{
-           /* $validateData=$request->validate([
+           $validateData=$request->validate([
                 "usuario_id"=>"int|required",
                 "proyecto_id"=>"int|required"
             ]);
             $user=User::find($validateData['usuario_id']);
             if(isset($user)){
-                $rolMayor = rol::select('rol.id','rol.nombre','rol.jerarquia')
-                ->join('asignacion_rol','asignacion_rol.rol_id','rol.id')
-                ->where('rol.proyecto_id',$validateData['proyecto_id'])
-                ->where('asignacion_rol.usuario_id',$validateData['usuario_id'])
+                $rol= Rol::select('rol.id','rol.nombre','rol.jerarquia')
+                ->join('asignacion_rol_usuario','asignacion_rol_usuario.rol_id','rol.id')
+                ->where('asignacion_rol_usuario.usuario_id',$validateData['usuario_id'])
                 ->where('rol.estado',1)
-                ->orderBy('rol.jerarquia','DESC')
                 ->first();
-
-                $upms=AsignacionUpmEncargado::select('usuario.nombres','usuario.apellidos','upm.nombre as upm')
-                    ->join('upm','upm.id','asignacion_upm_usuario.upm_id')
-                    ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_id')
-                    ->join('asignacion_rol','asignacion_rol.usuario_id','usuario.id')
-                    ->join('rol','rol.id','asignacion_rol.rol_id')
-                    ->where('rol.proyecto_id',$validateData['proyecto_id'])   
-                    ->where('rol.jerarquia','<',$rolMayor->jerarquia)
+                $users=Organizacion::selectRaw('CONCAT(rs.nombre,\'-\',s.codigo_usuario,\' \', s.nombres,\' \', s.apellidos) as encargado,
+                 CONCAT(ri.nombre,\'-\',i.codigo_usuario,\' \', i.nombres, \' \', i.apellidos) AS empleado')
+                    ->join('usuario AS s','s.id','organizacion.usuario_superior')
+                    ->join('usuario AS i','i.id','organizacion.usuario_inferior')
+                    ->join('asignacion_rol_usuario AS ars','ars.usuario_id','s.id')
+                    ->join('asignacion_rol_usuario AS ari','ari.usuario_id','i.id')
+                    ->join('rol AS rs','rs.id','ars.rol_id')
+                    ->join('rol AS ri','ri.id','ari.rol_id')
+                    ->where('rs.proyecto_id',$validateData['proyecto_id'])   
+                    ->where('rs.jerarquia','<',$rol->jerarquia)
                     ->get();
-                return response()->json($upms,200);
+                    //ars= asignacion rol-usuario superior
+                    //ari= asignacion rol-usuario inferior
+                    //rs= rol superior
+                    //ri= rol inferior
+                return response()->json($users,200);    
+                
             }else{
                 return response()->json([
                     "status"=>false,
                     "message"=>"Usuario no encontrado"
                 ],404); 
-            }*/
+            }
         }catch(\Throwable $th){
             return response()->json([
                 "status"=>false,

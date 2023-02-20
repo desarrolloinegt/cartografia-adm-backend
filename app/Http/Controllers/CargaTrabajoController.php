@@ -70,7 +70,8 @@ class CargaTrabajoController extends Controller
                 ->orderBy('rol.jerarquia','DESC')
                 ->first();
 
-                $upms=AsignacionUpmUsuario::select('usuario.nombres','usuario.apellidos','upm.nombre as upm')
+                $upms=AsignacionUpmUsuario::selectRaw('rol.nombre as rol,CONCAT(usuario.codigo_usuario,\' \',
+                usuario.nombres,\' \',usuario.apellidos) AS encargado,upm.nombre as upm')
                     ->join('upm','upm.id','asignacion_upm_usuario.upm_id')
                     ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_id')
                     ->join('asignacion_rol_usuario','asignacion_rol_usuario.usuario_id','usuario.id')

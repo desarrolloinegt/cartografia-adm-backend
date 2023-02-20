@@ -143,6 +143,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/obtenerUpmsAsignados',[CargaTrabajoController::class,'obtenerUpmsAsignados']);
 
     //asignacion de personal
+    Route::post('/asginarPersonal',[OrganizacionController::class,'asignarPersonal']);
+    Route::post('/obtenerEncargadoEmpleado',[OrganizacionController::class,'obtenerAsignacionesPersonal']);
     Route::post('/obtenerPersonalAsignado',[OrganizacionController::class,'obtenerPersonalAsignado']);
     //Reemplazo de upm
     Route::get('/detalleSustitucion/{id}',[ReemplazoUpmController::class,'verDetalle']);
