@@ -43,7 +43,7 @@ class CargaTrabajoController extends Controller
                     //los usuarios del rol
                     if ($rol->jerarquia == $rolMayor->jerarquia) {
                         if (isset($upm)) {
-                            $matchThese = ["proyecto_id" => $value['proyecto_id'], "upm_id" => $upm->id];
+                            $matchThese = ["proyecto_id" => $value['proyecto_id'], "upm_id" => $upm->id,"estado_upm"=>1];
                             $upmProyecto = AsignacionUpmProyecto::where($matchThese)->get();//Evalua si el upm existe en el proyecto
                             if (isset($user) && isset($upmProyecto)) {
                                 $this->createAssignmet($upm->id, $user->id, $value['proyecto_id'], $idUser);
@@ -57,7 +57,7 @@ class CargaTrabajoController extends Controller
                     } else {
                         //Solo puede hacer uso de los upms que le asignaron y los usuarios que le asignaron
                         if (isset($upm)) {
-                            $matchThese = ["proyecto_id" => $value['proyecto_id'], "upm_id" => $upm->id];
+                            $matchThese = ["proyecto_id" => $value['proyecto_id'], "upm_id" => $upm->id,"estado_upm"=>1];
                             $upmProyecto = AsignacionUpmProyecto::where($matchThese)->get();//Evaluar si el upm existe en el proyecto
                             $matchTheseUpmAssigned = ["usuario_id" => $idUser, "upm_id" => $upm->id]; 
                             $matchTheseUserAssigned = ["usuario_superior" => $idUser, "usuario_inferior" => $user->id];
@@ -106,28 +106,21 @@ class CargaTrabajoController extends Controller
     public function obtenerUpmsPersonal(Request $request)
     {
         try {
+            $idUser=$request->user()->id;
             $validateData = $request->validate([
-                "usuario_id" => "int|required",
                 "proyecto_id" => "int|required"
             ]);
-            $user = User::find($validateData['usuario_id']);
+            $user = User::find($idUser);
             if (isset($user)) {
-                $grupoMayor = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
-                    ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
-                    ->where('rol.proyecto_id', $validateData['proyecto_id'])
-                    ->where('asignacion_rol_usuario.usuario_id', $validateData['usuario_id'])
-                    ->where('rol.estado', 1)
-                    ->orderBy('rol.jerarquia', 'DESC')
-                    ->first();
-
-                $upms = AsignacionUpmUsuario::selectRaw('rol.nombre as rol,CONCAT(usuario.codigo_usuario,\' \',
-                usuario.nombres,\' \',usuario.apellidos) AS encargado,upm.nombre as upm')
+                $upms = AsignacionUpmUsuario::selectRaw('rol.nombre as rol,CONCAT(u.codigo_usuario,\' \',
+                u.nombres,\' \',u.apellidos) AS encargado,upm.nombre as upm')
                     ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
-                    ->join('usuario', 'usuario.id', 'asignacion_upm_usuario.usuario_id')
-                    ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.usuario_id', 'usuario.id')
+                    ->join('usuario AS u', 'u.id', 'asignacion_upm_usuario.usuario_id')
+                    ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.usuario_id', 'u.id')
+                    ->join('usuario AS as','as.id','asignacion_upm_usuario.usuario_asignador')
                     ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                     ->where('rol.proyecto_id', $validateData['proyecto_id'])
-                    ->where('rol.jerarquia', '<', $grupoMayor->jerarquia)
+                    ->where('asignacion_upm_usuario.usuario_asignador',$idUser)
                     ->get();
                 return response()->json($upms, 200);
             } else {
@@ -187,7 +180,7 @@ class CargaTrabajoController extends Controller
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
                 ->where('asignacion_upm_proyecto.proyecto_id', $id)
-                ->where('upm.estado', 1)
+                ->where('estado_upm.cod_estado', 1)
                 ->get();
 
             return $upms;
@@ -210,9 +203,34 @@ class CargaTrabajoController extends Controller
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')
                 ->where('asignacion_upm_usuario.usuario_id', $usuario)
                 ->where('asignacion_upm_proyecto.proyecto_id', $proyecto)
-                ->where('upm.estado', 1)
+                ->where('estado_upm.cod_estado', 1)
                 ->get();
             return $upms;
+        } catch (\Throwable $th) {
+            return response()->json([
+                "status" => false,
+                "message" => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerUpmCartografos(Request $request){
+        try {
+            $usuario=$request->user()->id;
+            $validateData = $request->validate([
+                "proyecto_id" => "int|required"
+            ]);
+            $upms = AsignacionUpmUsuario::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id')
+                ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
+                ->join('municipio', 'upm.municipio_id', 'municipio.id')
+                ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
+                ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
+                ->join('departamento', 'departamento.id', 'municipio.departamento_id')
+                ->where('asignacion_upm_usuario.usuario_id', $usuario)
+                ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
+                ->where('upm.estado', 1)
+                ->get();
+            return response()->json($upms, 200);
         } catch (\Throwable $th) {
             return response()->json([
                 "status" => false,

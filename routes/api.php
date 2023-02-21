@@ -151,4 +151,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Cargar Upms
     Route::post('/cargarUpms', [UPMController::class, 'cargarUpms']);
+
+    //Obtener upms del cartografo
+    Route::post('/obtenerUpmCartografo',[CargaTrabajoController::class,'obtenerUpmCartografos']);
 });
