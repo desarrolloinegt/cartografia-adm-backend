@@ -22,69 +22,60 @@ class CargaTrabajoController extends Controller
     public function asignarUpmsAPersonal(Request $request)
     {
         $idUser = $request->user()->id;
-        $errores = [];
+        $errors = [];
         try {
             $array = $request->all();
-            $rol = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
-                ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
-                ->where('asignacion_rol_usuario.usuario_id', $idUser)
-                ->where('rol.estado', 1)
-                ->first();
-            foreach ($array as $key => $value) {
-                try {
-                    $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')
-                        ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
-                        ->where('rol.proyecto_id', $value['proyecto_id'])
-                        ->orderBy('rol.jerarquia', 'DESC')
-                        ->first();
-                    $upm = UPM::where("nombre", $value['upm'])->first();
-                    $user = User::where('codigo_usuario', $value['codigo_usuario'])->first();
-                    //Inicio de la parte donde el usuario de mayor rango puede usar todos lo upms del proyecto y todos
-                    //los usuarios del rol
-                    if ($rol->jerarquia == $rolMayor->jerarquia) {
-                        if (isset($upm)) {
-                            $matchThese = ["proyecto_id" => $value['proyecto_id'], "upm_id" => $upm->id,"estado_upm"=>1];
-                            $upmProyecto = AsignacionUpmProyecto::where($matchThese)->get();//Evalua si el upm existe en el proyecto
-                            if (isset($user) && isset($upmProyecto)) {
-                                $this->createAssignmet($upm->id, $user->id, $value['proyecto_id'], $idUser);
-                            } else {
-                                array_push($errores, "El usuario" . $value['codigo_usuario'] . " no existe");
-                            }
+            $idProject = $array[0]['proyecto_id'];
+            $errors = $this->verifiUpmAndUserExists($array);
+            if (empty($errors)) {
+                $errors = $this->verifyUserUpmProject($array); //Verificar si hay errores en que los usuarios y upms si existan en el proyecto
+                if (empty($errors)) {
+                    $errors = $this->verifyNotAssignmet($array);
+                    if (empty($errors)) {
+                        $rolUser = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+                            ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                            ->where('asignacion_rol_usuario.usuario_id', $idUser)
+                            ->where('rol.estado', 1)
+                            ->first();
+                        $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+                            ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
+                            ->where('rol.proyecto_id', $idProject)
+                            ->orderBy('rol.jerarquia', 'DESC')
+                            ->first();
+                        if ($rolUser->jerarquia == $rolMayor->jerarquia) {
+                            $this->createAssignmet($array, $idUser);
                         } else {
-                            array_push($errores, "El upm" . $value['upm'] . " no existe");
+                            $errors = $this->verifyUpmUserAssigned($array, $idUser);
+                            if (empty($errors)) {
+                                $this->createAssignmet($array, $idUser);
+                            } else {
+                                return response()->json([
+                                    "status" => false,
+                                    "message" => $errors
+                                ], 400);
+                            }
                         }
-                        //Fin
                     } else {
-                        //Solo puede hacer uso de los upms que le asignaron y los usuarios que le asignaron
-                        if (isset($upm)) {
-                            $matchThese = ["proyecto_id" => $value['proyecto_id'], "upm_id" => $upm->id,"estado_upm"=>1];
-                            $upmProyecto = AsignacionUpmProyecto::where($matchThese)->get();//Evaluar si el upm existe en el proyecto
-                            $matchTheseUpmAssigned = ["usuario_id" => $idUser, "upm_id" => $upm->id]; 
-                            $matchTheseUserAssigned = ["usuario_superior" => $idUser, "usuario_inferior" => $user->id];
-                            $upmAssigned = AsignacionUpmUsuario::where($matchTheseUpmAssigned)->first();// Evalura si el upm lo tiene asignado el usuario
-                            $userAssigned = Organizacion::where($matchTheseUserAssigned)->first();//Evaluar si el que desea asignar esta asignado al encargado previamente
-                            if (isset($user)) {
-                                if (isset($upmAssigned) && isset($userAssigned) && isset($upmProyecto)) {
-                                    $this->createAssignmet($upm->id, $user->id, $value['proyecto_id'], $idUser);
-                                } else {
-                                    array_push($errores, "El usuario no tiene asignado el upm: " . $value['upm'] . ", y el usuario
-                                    : " . $value['codigo_usuario']);
-                                }
-                            } else {
-                                array_push($errores, "El usuario" . $value['codigo_usuario'] . " no existe");
-                            }
-                        } else {
-                            array_push($errores, "El upm" . $value['upm'] . " no existe");
-                        }
+                        return response()->json([
+                            "status" => false,
+                            "message" => $errors
+                        ], 400);
                     }
-                } catch (\Throwable $th) {
-                    array_push($errores, $th->getMessage());
+                } else {
+                    return response()->json([
+                        "status" => false,
+                        "message" => $errors
+                    ], 400);
                 }
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => $errors
+                ], 404);
             }
             return response()->json([
                 "status" => true,
-                "message" => "UPMs Asignados",
-                "errores" => $errores
+                "message" => "UPMs Asignados"
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -94,19 +85,119 @@ class CargaTrabajoController extends Controller
         }
     }
 
-    public function createAssignmet($upm, $usuario, $proyecto, $asignador)
+    public function verifiUpmAndUserExists($asignments)
     {
-        AsignacionUpmUsuario::create([
-            "upm_id" => $upm,
-            "usuario_id" => $usuario,
-            "proyecto_id" => $proyecto,
-            "usuario_asignador" => $asignador
-        ]);
+        $errors = [];
+        foreach ($asignments as $key => $value) {
+            $upm = UPM::where("nombre", $value['upm'])->first();
+            $user = User::where('codigo_usuario', $value['codigo_usuario'])->first();
+            if (!isset($upm)) {
+                array_push($errors, "El upm: " . $value['upm'] . " no existe");
+            }
+            if (!isset($user)) {
+                array_push($errors, "El usuario: " . $value['codigo_usuario'] . " no existe");
+            }
+        }
+        return $errors;
+    }
+
+    public function verifyUserUpmProject($asignments)
+    { //Funcion para verificar que el usuario si este asignado al proyecto
+        $errors = [];
+        foreach ($asignments as $key => $value) {
+            //Verificacion del usuario
+            $user = User::where('codigo_usuario', $value['codigo_usuario'])->first();
+            $rolUsuario = AsignacionRolUsuario::select('usuario.id') //Evaluar si el upm existe en el proyecto
+                ->join('usuario', 'usuario.id', 'asignacion_rol_usuario.usuario_id')
+                ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
+                ->where('rol.proyecto_id', $value['proyecto_id'])
+                ->where('asignacion_rol_usuario.usuario_id', $user->id)
+                ->first();
+            if (!isset($rolUsuario)) {
+                array_push($errors, "El usuario: " . $value['codigo_usuario'] . " no esta asignado a este proyecto");
+            }
+
+            //Verificacion de upm
+            $upm = UPM::where("nombre", $value['upm'])->first();
+            $matchThese = ["proyecto_id" => $value['proyecto_id'], "upm_id" => $upm->id, "estado_upm" => 1];
+            $upmProject = AsignacionUpmProyecto::where($matchThese)->first(); //Evaluar si el upm existe en el proyecto
+            if (!isset($upmProject)) {
+                array_push($errors, "El upm: " . $value['upm'] . " no esta asignado a este proyecto");
+            }
+        }
+        return $errors;
+    }
+
+    public function verifyNotAssignmet($asignments)
+    { //Verificar que una upm no este asignada en el proyecto a una persona con el mismo rol
+        $errors = [];
+        foreach ($asignments as $key => $value) {
+            $user = User::where('codigo_usuario', $value['codigo_usuario'])->first();
+            $rolNewUser = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Rol del usuario al que se le quiere asignar
+                ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                ->where('asignacion_rol_usuario.usuario_id', $user->id)
+                ->where('rol.estado', 1)
+                ->first();
+            $assignment = AsignacionUpmUsuario::select('upm.id', 'usuario.id as usuario')
+                ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
+                ->join('usuario', 'usuario.id', 'asignacion_upm_usuario.usuario_id')
+                ->where('upm.nombre', $value['upm'])
+                ->first();
+            if (isset($assignment)) {
+                $rolUserExist = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Rol del usuario del que ya esta asignado el upm
+                    ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                    ->where('asignacion_rol_usuario.usuario_id', $assignment->usuario)
+                    ->where('rol.estado', 1)
+                    ->first();
+                if ($rolNewUser->jerarquia == $rolUserExist->jerarquia) {
+                    array_push($errors, "Upm: " . $value['upm'] . " ya se encuentra asignada al rol: " . $rolUserExist->nombre);
+                }
+            }
+        }
+        return $errors;
+    }
+
+    public function verifyUpmUserAssigned($asignments, $idUser)
+    {
+        $errors = [];
+        foreach ($asignments as $key => $value) {
+            $upm = UPM::where("nombre", $value['upm'])->first();
+            $user = User::where('codigo_usuario', $value['codigo_usuario'])->first();
+            $matchTheseUpmAssigned = ["usuario_id" => $idUser, "upm_id" => $upm->id];
+            $matchTheseUserAssigned = ["usuario_superior" => $idUser, "usuario_inferior" => $user->id];
+            $upmAssigned = AsignacionUpmUsuario::where($matchTheseUpmAssigned)->first(); // Evalura si el upm lo tiene asignado el usuario
+            $userAssigned = Organizacion::where($matchTheseUserAssigned)->first(); //Evaluar si el que desea asignar esta asignado al encargado previamente
+            if (!isset($upmAssigned)) {
+                array_push($errors, "Usted no tiene asignado el upm: " . $upm->nombre);
+            }
+            if (!isset($userAssigned)) {
+                array_push($errors, "Usted no tiene asignado el usuario: " . $user->codigo_usuario);
+            }
+        }
+        return $errors;
+    }
+
+    public function createAssignmet($array, $asignador)
+    {
+        foreach ($array as $key => $value) {
+            try {
+                $upm = UPM::where("nombre", $value['upm'])->first();
+                $user = User::where('codigo_usuario', $value['codigo_usuario'])->first();
+                AsignacionUpmUsuario::create([
+                    "upm_id" => $upm->id,
+                    "usuario_id" => $user->id,
+                    "proyecto_id" => $value['proyecto_id'],
+                    "usuario_asignador" => $asignador
+                ]);
+            } catch (\Throwable $th) {
+
+            }
+        }
     }
     public function obtenerUpmsPersonal(Request $request)
     {
         try {
-            $idUser=$request->user()->id;
+            $idUser = $request->user()->id;
             $validateData = $request->validate([
                 "proyecto_id" => "int|required"
             ]);
@@ -117,10 +208,10 @@ class CargaTrabajoController extends Controller
                     ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
                     ->join('usuario AS u', 'u.id', 'asignacion_upm_usuario.usuario_id')
                     ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.usuario_id', 'u.id')
-                    ->join('usuario AS as','as.id','asignacion_upm_usuario.usuario_asignador')
+                    ->join('usuario AS as', 'as.id', 'asignacion_upm_usuario.usuario_asignador')
                     ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                     ->where('rol.proyecto_id', $validateData['proyecto_id'])
-                    ->where('asignacion_upm_usuario.usuario_asignador',$idUser)
+                    ->where('asignacion_upm_usuario.usuario_asignador', $idUser)
                     ->get();
                 return response()->json($upms, 200);
             } else {
@@ -214,9 +305,10 @@ class CargaTrabajoController extends Controller
         }
     }
 
-    public function obtenerUpmCartografos(Request $request){
+    public function obtenerUpmCartografos(Request $request)
+    {
         try {
-            $usuario=$request->user()->id;
+            $usuario = $request->user()->id;
             $validateData = $request->validate([
                 "proyecto_id" => "int|required"
             ]);

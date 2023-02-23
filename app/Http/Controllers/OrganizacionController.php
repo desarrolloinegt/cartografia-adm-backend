@@ -12,66 +12,88 @@ class OrganizacionController extends Controller
 {
     public function asignarPersonal(Request $request)
     {
-        $errores = [];
+        $errors = [];
         $idUser = $request->user()->id;
         $array = $request->all();
         try {
-            $rol = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
-                ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
-                ->where('asignacion_rol_usuario.usuario_id', $idUser)
-                ->where('rol.estado', 1)
-                ->first();
-            foreach ($array as $key => $value) {
-                try {
-                    $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')
-                        ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
-                        ->where('rol.proyecto_id', $value['proyecto_id'])
-                        ->orderBy('rol.jerarquia', 'DESC')
-                        ->first();
-                    $superior = AsignacionRolUsuario::select('rol.jerarquia', 'usuario.id')
-                        ->join('usuario', 'usuario.id', 'asignacion_rol_usuario.usuario_id')
-                        ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
-                        ->join('proyecto', 'proyecto.id', 'rol.proyecto_id')
-                        ->where('proyecto.id', $value['proyecto_id'])
-                        ->where('usuario.codigo_usuario', $value['codigo_superior'])
-                        ->first();
-                    $inferior = AsignacionRolUsuario::select('rol.jerarquia', 'usuario.id')
-                        ->join('usuario', 'usuario.id', 'asignacion_rol_usuario.usuario_id')
-                        ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
-                        ->join('proyecto', 'proyecto.id', 'rol.proyecto_id')
-                        ->where('proyecto.id', $value['proyecto_id'])
-                        ->where('usuario.codigo_usuario', $value['codigo_inferior'])
-                        ->first();
-                    if ($rol->jerarquia == $rolMayor->jerarquia) {
-                        if ($superior->jerarquia > $inferior->jerarquia && $value['codigo_superior'] != $value['codigo_inferior']) {
-                            $this->createOrganization($superior->id,$inferior->id,$value['proyecto_id'],$idUser);
+            $idProject = $array[0]['proyecto_id'];
+            $errors = $this->verifyExistUser($array);
+            if (empty($errors)) {
+                $rolUser = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+                    ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                    ->where('asignacion_rol_usuario.usuario_id', $idUser)
+                    ->where('rol.estado', 1)
+                    ->first();
+                $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+                    ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
+                    ->where('rol.proyecto_id', $idProject)
+                    ->orderBy('rol.jerarquia', 'DESC')
+                    ->first();
+                if ($rolUser->jerarquia == $rolMayor->jerarquia) {
+                    $errors = $this->verifyUserProject($array);
+                    if (empty($errors)) {
+                        $errors = $this->verifyNotAssignmet($array);
+                        if (empty($errors)) {
+                            $errors = $this->verifyHierarchy($array);
+                            if (empty($errors)) {
+                                $this->createOrganization($array, $idUser);
+                            } else {
+                                return response()->json([
+                                    "status" => false,
+                                    "message" => $errors
+                                ], 404);
+                            }
                         } else {
-                            array_push($errores, [$superior->codigo_usuario, $inferior->codigo_usuario]);
+                            return response()->json([
+                                "status" => false,
+                                "message" => $errors
+                            ], 404);
                         }
                     } else {
-                        $matchTheseSuperior=["usuario_superior"=>$idUser,"usuario_inferior"=>$superior->id];
-                        $matchTheseInferior=["usuario_superior"=>$idUser,"usuario_inferior"=>$inferior->id];
-                        $asignacionSuperior=Organizacion::where($matchTheseSuperior)->first();
-                        $asignacionInferior=Organizacion::where($matchTheseInferior)->first();
-                        if(isset($asignacionSuperior) && isset($asignacionInferior)){
-                            if($superior->jerarquia > $inferior->jerarquia && $value['codigo_superior'] != $value['codigo_inferior']){
-                                $this->createOrganization($superior->id,$inferior->id,$value['proyecto_id'],$idUser);
-                            }else{
-                                array_push($errores, [$superior->codigo_usuario, $inferior->codigo_usuario]);
-                            }
-                        } else{
-                            array_push($errores,"El usuario ".$idUser." no tiene asignados los usuarios ".$superior->id
-                            .", ".$inferior->id);
-                        }
+                        return response()->json([
+                            "status" => false,
+                            "message" => $errors
+                        ], 404);
                     }
-                } catch (\Throwable $th) {
-                    array_push($errores, $th->getMessage());
+                } else {
+                    $errors = $this->verifyUserProject($array);
+                    if (empty($errors)) {
+                        $errors = $this->verifyUserAssignment($array, $idUser, $idProject);
+                        if (empty($errors)) {
+                            $errors = $this->verifyHierarchy($array);
+                            if (empty($errors)) {
+                                $errors = $this->verifyNotAssignmet($array);
+                                if (empty($errors)) {
+                                    $this->createOrganization($array, $idUser);
+                                } else {
+                                    return response()->json([
+                                        "status" => false,
+                                        "message" => $errors
+                                    ], 404);
+                                }
+                            } else {
+                                return response()->json([
+                                    "status" => false,
+                                    "message" => $errors
+                                ], 404);
+                            }
+                        } else {
+                            return response()->json([
+                                "status" => false,
+                                "message" => $errors
+                            ], 404);
+                        }
+                    } else {
+                        return response()->json([
+                            "status" => false,
+                            "message" => $errors
+                        ], 404);
+                    }
                 }
             }
             return response()->json([
                 "status" => true,
                 "message" => "Personal Asignado",
-                "errores" => $errores
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -81,14 +103,144 @@ class OrganizacionController extends Controller
         }
     }
 
-    public function createOrganization($superior,$inferior,$proyecto,$asignador)
+    private function verifyExistUser($array)
     {
-        Organizacion::create([
-            "usuario_superior" => $superior,
-            "usuario_inferior" => $inferior,
-            "proyecto_id" => $proyecto,
-            "usuario_asignador"=>$asignador
-        ]);
+        $errors = [];
+        foreach ($array as $key => $value) {
+            $superior = User::where('codigo_usuario', $value['codigo_superior'])->first();
+            ;
+            $inferior = User::where('codigo_usuario', $value['codigo_inferior'])->first();
+            if (!isset($superior)) {
+                array_push($errors, "El usuario: " . $value['codigo_superior'] . " no existe");
+            }
+            if (!isset($inferior)) {
+                array_push($errors, "El usuario: " . $value['codigo_inferior'] . " no existe");
+            }
+        }
+        return $errors;
+    }
+
+    public function verifyUserProject($asignments)
+    { //Funcion para verificar que el usuario si este asignado al proyecto
+        $errors = [];
+        foreach ($asignments as $key => $value) {
+            //Verificacion del usuario
+            $superior = User::where('codigo_usuario', $value['codigo_superior'])->first();
+            ;
+            $inferior = User::where('codigo_usuario', $value['codigo_inferior'])->first();
+            $userSuperiorProject = AsignacionRolUsuario::select('usuario.id') //Evaluar si el upm existe en el proyecto
+                ->join('usuario', 'usuario.id', 'asignacion_rol_usuario.usuario_id')
+                ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
+                ->where('rol.proyecto_id', $value['proyecto_id'])
+                ->where('asignacion_rol_usuario.usuario_id', $superior->id)
+                ->first();
+            $userInferiorProject = AsignacionRolUsuario::select('usuario.id') //Evaluar si el upm existe en el proyecto
+                ->join('usuario', 'usuario.id', 'asignacion_rol_usuario.usuario_id')
+                ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
+                ->where('rol.proyecto_id', $value['proyecto_id'])
+                ->where('asignacion_rol_usuario.usuario_id', $inferior->id)
+                ->first();
+            if (!isset($userSuperiorProject)) {
+                array_push($errors, "El usuario: " . $value['codigo_superior'] . " no esta asignado a este proyecto");
+            }
+            if (!isset($userInferiorProject)) {
+                array_push($errors, "El usuario: " . $value['codigo_inferior'] . " no esta asignado a este proyecto");
+            }
+        }
+        return $errors;
+    }
+
+    public function verifyNotAssignmet($asignments)
+    { //Verificar que un usuario no este asignada en el proyecto a una persona con el mismo rol
+        $errors = [];
+        foreach ($asignments as $key => $value) {
+            $superior = User::where('codigo_usuario', $value['codigo_superior'])->first();
+            $inferior = User::where('codigo_usuario', $value['codigo_inferior'])->first();
+            $rolNewSuperior = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Rol del usuario al que se le quiere asignar
+                ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                ->where('asignacion_rol_usuario.usuario_id', $superior->id)
+                ->where('rol.estado', 1)
+                ->first();
+            $assignment = Organizacion::select('su.id', 'su.codigo_usuario')
+                ->join('usuario AS in', 'in.id', 'organizacion.usuario_inferior')
+                ->join('usuario AS su', 'su.id', 'organizacion.usuario_superior')
+                ->where('in.id', $inferior->id)
+                ->first();
+            if (isset($assignment)) {
+                $rolUserExist = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Rol del encargado del usuario inferior
+                    ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                    ->where('asignacion_rol_usuario.usuario_id', $assignment->id)
+                    ->where('rol.estado', 1)
+                    ->first();
+                if ($rolNewSuperior->jerarquia == $rolUserExist->jerarquia) {
+                    array_push($errors, "Usuario: " . $value['codigo_inferior'] . " ya se encuentra asignado al usuario: " . $assignment->codigo_usuario);
+                }
+            }
+        }
+        return $errors;
+    }
+
+
+    private function verifyHierarchy($asignments)
+    {
+        $errors = [];
+        foreach ($asignments as $key => $value) {
+            $superior = User::where('codigo_usuario', $value['codigo_superior'])->first();
+            $inferior = User::where('codigo_usuario', $value['codigo_inferior'])->first();
+            $rolSuperior = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Rol del usuario al que se le quiere asignar
+                ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                ->where('asignacion_rol_usuario.usuario_id', $superior->id)
+                ->where('rol.estado', 1)
+                ->first();
+            $rolInferior = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Rol del usuario al que se le quiere asignar
+                ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+                ->where('asignacion_rol_usuario.usuario_id', $inferior->id)
+                ->where('rol.estado', 1)
+                ->first();
+            if ($rolSuperior->jerarquia > $rolInferior->jerarquia && $value['codigo_superior'] != $value['codigo_inferior']) {
+            } else {
+                array_push($errors, "El usuario: " . $value['codigo_superior'] . " no puede ser encardo del usuario: " . $value['codigo_inferior']);
+            }
+        }
+        return $errors;
+    }
+
+    private function verifyUserAssignment($asignments, $idUser, $idProject)
+    {
+        $errors = [];
+        foreach ($asignments as $key => $value) {
+            $superior = User::where('codigo_usuario', $value['codigo_superior'])->first();
+            $inferior = User::where('codigo_usuario', $value['codigo_inferior'])->first();
+            $matchTheseSuperior = ["usuario_superior" => $idUser, "usuario_inferior" => $superior->id, "proyecto_id" => $idProject];
+            $matchTheseInferior = ["usuario_superior" => $idUser, "usuario_inferior" => $inferior->id, "proyecto_id" => $idProject];
+            $asignacionSuperior = Organizacion::where($matchTheseSuperior)->first();
+            $asignacionInferior = Organizacion::where($matchTheseInferior)->first();
+            if (!isset($asignacionSuperior)) {
+                array_push($errors, "Usted no tiene asignado el usuario: " . $value['codigo_superior']);
+            }
+            if (!isset($asignacionInferior)) {
+                array_push($errors, "Usted no tiene asignado el usuario: " . $value['codigo_inferior']);
+            }
+        }
+        return $errors;
+    }
+    public function createOrganization($asignments, $asignador)
+    {
+        foreach ($asignments as $key => $value) {
+            try {
+                $superior = User::where('codigo_usuario', $value['codigo_superior'])->first();
+                $inferior = User::where('codigo_usuario', $value['codigo_inferior'])->first();
+                Organizacion::create([
+                    "usuario_superior" => $superior->id,
+                    "usuario_inferior" => $inferior->id,
+                    "proyecto_id" => $value['proyecto_id'],
+                    "usuario_asignador" => $asignador
+                ]);
+            } catch (\Throwable $th) {
+
+            }
+
+        }
     }
     public function obtenerAsignacionesPersonal(Request $request)
     {
@@ -99,30 +251,30 @@ class OrganizacionController extends Controller
             ]);
             $user = User::find($idUser);
             if (isset($user)) {
-                
-                    $users = Organizacion::selectRaw('CONCAT(rs.nombre,\'-\',s.codigo_usuario,\' \', s.nombres,\' \', s.apellidos) as encargado,
+
+                $users = Organizacion::selectRaw('CONCAT(rs.nombre,\'-\',s.codigo_usuario,\' \', s.nombres,\' \', s.apellidos) as encargado,
                     CONCAT(ri.nombre,\'-\',i.codigo_usuario,\' \', i.nombres, \' \', i.apellidos) AS empleado')
-                        ->join('usuario AS s', 's.id', 'organizacion.usuario_superior')
-                        ->join('usuario AS i', 'i.id', 'organizacion.usuario_inferior')
-                        ->join('usuario AS as','as.id','organizacion.usuario_asignador')
-                        ->join('asignacion_rol_usuario AS ars', 'ars.usuario_id', 's.id')
-                        ->join('asignacion_rol_usuario AS ari', 'ari.usuario_id', 'i.id')
-                        ->join('rol AS rs', 'rs.id', 'ars.rol_id')
-                        ->join('rol AS ri', 'ri.id', 'ari.rol_id')
-                        ->where('rs.proyecto_id', $validateData['proyecto_id'])
-                        ->where('as.id',$idUser)
-                        ->get();
-                    //ars= asignacion rol-usuario superior
-                    //ari= asignacion rol-usuario inferior
-                    //rs= rol superior
-                    //ri= rol inferior
-                    return response()->json($users, 200);
-                } else {
+                    ->join('usuario AS s', 's.id', 'organizacion.usuario_superior')
+                    ->join('usuario AS i', 'i.id', 'organizacion.usuario_inferior')
+                    ->join('usuario AS as', 'as.id', 'organizacion.usuario_asignador')
+                    ->join('asignacion_rol_usuario AS ars', 'ars.usuario_id', 's.id')
+                    ->join('asignacion_rol_usuario AS ari', 'ari.usuario_id', 'i.id')
+                    ->join('rol AS rs', 'rs.id', 'ars.rol_id')
+                    ->join('rol AS ri', 'ri.id', 'ari.rol_id')
+                    ->where('rs.proyecto_id', $validateData['proyecto_id'])
+                    ->where('as.id', $idUser)
+                    ->get();
+                //ars= asignacion rol-usuario superior
+                //ari= asignacion rol-usuario inferior
+                //rs= rol superior
+                //ri= rol inferior
+                return response()->json($users, 200);
+            } else {
                 return response()->json([
                     "status" => false,
                     "message" => "Usuario no encontrado"
                 ], 404);
-                }
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 "status" => false,
