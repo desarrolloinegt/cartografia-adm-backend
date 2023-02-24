@@ -7,6 +7,7 @@ use App\Http\Controllers\AsignacionRolPoliticaController;
 use App\Http\Controllers\AsignacionRolUsuarioController;
 use App\Http\Controllers\AsignacionUpmProyectoController;
 use App\Http\Controllers\CargaTrabajoController;
+use App\Http\Controllers\EquipoCampoController;
 use App\Http\Controllers\OrganizacionController;
 use App\Http\Controllers\PoliticaController;
 use App\Http\Controllers\ReemplazoUpmController;
@@ -155,4 +156,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Obtener upms del cartografo
     Route::post('/obtenerUpmCartografo',[CargaTrabajoController::class,'obtenerUpmCartografos']);
+
+    //Equipos
+    Route::post('/equipo',[EquipoCampoController::class,'createTeam']);
+    Route::patch('/equipo',[EquipoCampoController::class,'deleteTeam']);
+    Route::post('/equipos',[EquipoCampoController::class,'getTeams']);
+    Route::post('/miebrosEquipo',[EquipoCampoController::class,'getUsersTeam']);
 });
