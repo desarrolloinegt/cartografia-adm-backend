@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AsignacionRolUsuario;
+use App\Models\AsignacionUpmUsuario;
 use App\Models\Rol;
 use App\Models\Organizacion;
 use App\Models\User;
@@ -242,6 +243,40 @@ class OrganizacionController extends Controller
 
         }
     }
+
+    public function deleteAssignmentOrganization(Request $request)
+    {
+        try {
+            $idUser=$request->user()->id;
+            $validateData = $request->validate([
+                "encargado_id" => "int|required",
+                "empleado_id" => "int|required",
+                "proyecto_id"=>"int|required"
+            ]);
+            $matchThese=["usuario_superior"=>$validateData["encargado_id"],"usuario_inferior"=>$validateData["empleado_id"]
+            ,"proyecto_id"=>$validateData["proyecto_id"],"usuario_asignador"=>$idUser];
+            $assignment=Organizacion::where($matchThese)->first();
+            if(isset($assignment)){
+                Organizacion::where($matchThese)->delete();
+                $matchThese=["usuario_superior"=>$validateData['empleado_id'],"proyecto_id"=>$validateData["proyecto_id"]];
+                Organizacion::where($matchThese)->delete();
+                $matchThese=["usuario_inferior"=>$validateData['empleado_id'],"proyecto_id"=>$validateData["proyecto_id"]];
+                Organizacion::where($matchThese)->delete();
+                $matchThese=["usuario_id"=>$validateData['empleado_id'],"proyecto_id"=>$validateData['proyecto_id']];
+                AsignacionUpmUsuario::where($matchThese)->delete();
+            }
+            return response()->json([
+                "status" => true,
+                "message" => "Asignacion eliminada",
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "status" => false,
+                "message" => $th->getMessage()
+            ], 500);
+        }
+
+    }
     public function obtenerAsignacionesPersonal(Request $request)
     {
         try {
@@ -252,8 +287,8 @@ class OrganizacionController extends Controller
             $user = User::find($idUser);
             if (isset($user)) {
 
-                $users = Organizacion::selectRaw('CONCAT(rs.nombre,\'-\',s.codigo_usuario,\' \', s.nombres,\' \', s.apellidos) as encargado,
-                    CONCAT(ri.nombre,\'-\',i.codigo_usuario,\' \', i.nombres, \' \', i.apellidos) AS empleado')
+                $users = Organizacion::selectRaw('s.id AS encargado_id,CONCAT(rs.nombre,\'-\',s.codigo_usuario,\' \', s.nombres,\' \', s.apellidos) as encargado,
+                i.id AS empleado_id,CONCAT(ri.nombre,\'-\',i.codigo_usuario,\' \', i.nombres, \' \', i.apellidos) AS empleado')
                     ->join('usuario AS s', 's.id', 'organizacion.usuario_superior')
                     ->join('usuario AS i', 'i.id', 'organizacion.usuario_inferior')
                     ->join('usuario AS as', 'as.id', 'organizacion.usuario_asignador')

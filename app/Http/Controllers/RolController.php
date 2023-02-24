@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AsignacionGrupo;
+use App\Models\AsignacionRolUsuario;
+use App\Models\AsignacionUpmUsuario;
+use App\Models\Organizacion;
 use App\Models\Rol;
 use Illuminate\Http\Request;
 use App\Models\Grupo;
@@ -121,6 +124,13 @@ class RolController extends Controller
             if (isset($rol)) {
                 $rol->estado = 0;
                 $rol->save();
+                $usuariosRol=AsignacionRolUsuario::where('rol_id',$id)->get();
+                AsignacionRolUsuario::where('rol_id',$id)->delete();
+                foreach($usuariosRol as $asignment){
+                    AsignacionUpmUsuario::where('usuario_id',$asignment->usuario_id)->delete();
+                    Organizacion::where('usuario_superior',$asignment->usuario_id)->delete();
+                    Organizacion::where('usuario_inferior',$asignment->usuario_id)->delete();
+                }
                 return response()->json([
                     'status' => true,
                     'message' => 'Rol desactivado correctamente'
@@ -179,6 +189,7 @@ class RolController extends Controller
                 ->where('rol.proyecto_id',$validateData['proyecto_id'])
                 ->where('rol.jerarquia','<',$rolMayor->jerarquia)
                 ->orderBy('rol.jerarquia','DESC')
+                ->where('rol.estado',1)
                 ->get(); 
 
             return response()->json($roles,200);

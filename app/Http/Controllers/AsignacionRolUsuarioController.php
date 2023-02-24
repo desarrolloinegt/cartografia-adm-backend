@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AsignacionRolUsuario;
+use App\Models\AsignacionUpmUsuario;
+use App\Models\Organizacion;
 use App\Models\Proyecto;
 use App\Models\Rol;
 use Illuminate\Http\Request;
@@ -166,7 +168,14 @@ class AsignacionRolUsuarioController extends Controller
             $user = User::where('codigo_usuario',$validateData['codigo_usuario'])->first();
             if(isset($user) ){
                 $matchThese = ["rol_id"=>$validateData['rol_id'],"usuario_id"=>$user->id];
-                AsignacionRolUsuario::where($matchThese)->delete();
+                $asignacion=AsignacionRolUsuario::where($matchThese)->first();
+                if(isset($asignacion)){
+                    AsignacionRolUsuario::where($matchThese)->delete();
+                    AsignacionUpmUsuario::where('usuario_id',$user->id)->delete();
+                    Organizacion::where('usuario_superior',$user->id)->delete();
+                    Organizacion::where('usuario_inferior',$user->id)->delete();
+                    
+                }
                 return response()->json([
                     'status' => true,
                     'message' =>"Usuario eliminado del rol"

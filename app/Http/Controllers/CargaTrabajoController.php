@@ -194,6 +194,7 @@ class CargaTrabajoController extends Controller
             }
         }
     }
+
     public function obtenerUpmsPersonal(Request $request)
     {
         try {
@@ -203,7 +204,7 @@ class CargaTrabajoController extends Controller
             ]);
             $user = User::find($idUser);
             if (isset($user)) {
-                $upms = AsignacionUpmUsuario::selectRaw('rol.nombre as rol,CONCAT(u.codigo_usuario,\' \',
+                $upms = AsignacionUpmUsuario::selectRaw('rol.nombre as rol,u.id ,CONCAT(u.codigo_usuario,\' \',
                 u.nombres,\' \',u.apellidos) AS encargado,upm.nombre as upm')
                     ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
                     ->join('usuario AS u', 'u.id', 'asignacion_upm_usuario.usuario_id')
