@@ -14,6 +14,6 @@ class EquipoCampo extends Model
     protected $fillable = [
         'proyecto_id',
         'supervisor',
-        'vehiculo_id'
+        'usuario_asignador'
     ];
 }

@@ -144,7 +144,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/obtenerUpmsAsignados',[CargaTrabajoController::class,'obtenerUpmsAsignados']);
 
     //asignacion de personal
-    Route::post('/asginarPersonal',[OrganizacionController::class,'asignarPersonal']);
+    Route::post('/asignarPersonal',[OrganizacionController::class,'asignarPersonal']);
     Route::post('/obtenerEncargadoEmpleado',[OrganizacionController::class,'obtenerAsignacionesPersonal']);
     Route::post('/obtenerPersonalAsignado',[OrganizacionController::class,'obtenerPersonalAsignado']);
     Route::patch('/eliminarAsignacionPersonal',[OrganizacionController::class,'deleteAssignmentOrganization']);
@@ -158,8 +158,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/obtenerUpmCartografo',[CargaTrabajoController::class,'obtenerUpmCartografos']);
 
     //Equipos
-    Route::post('/equipo',[EquipoCampoController::class,'createTeam']);
-    Route::patch('/equipo',[EquipoCampoController::class,'deleteTeam']);
+     Route::post('/equipo',[EquipoCampoController::class,'createTeams']);
+    Route::patch('/equipo/edit',[EquipoCampoController::class,'deleteTeam']);
     Route::post('/equipos',[EquipoCampoController::class,'getTeams']);
-    Route::post('/miebrosEquipo',[EquipoCampoController::class,'getUsersTeam']);
+    Route::post('/miembrosEquipo',[EquipoCampoController::class,'getUsersTeam']);
 });

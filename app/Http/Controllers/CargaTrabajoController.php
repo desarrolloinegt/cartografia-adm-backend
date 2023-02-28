@@ -16,6 +16,7 @@ use App\Models\UPM;
 use App\Models\User;
 use App\Models\Proyecto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CargaTrabajoController extends Controller
 {
@@ -97,6 +98,7 @@ class CargaTrabajoController extends Controller
             if (!isset($user)) {
                 array_push($errors, "El usuario: " . $value['codigo_usuario'] . " no existe");
             }
+            DB::disconnect();
         }
         return $errors;
     }
@@ -124,6 +126,7 @@ class CargaTrabajoController extends Controller
             if (!isset($upmProject)) {
                 array_push($errors, "El upm: " . $value['upm'] . " no esta asignado a este proyecto");
             }
+            DB::disconnect();
         }
         return $errors;
     }
@@ -153,6 +156,7 @@ class CargaTrabajoController extends Controller
                     array_push($errors, "Upm: " . $value['upm'] . " ya se encuentra asignada al rol: " . $rolUserExist->nombre);
                 }
             }
+            DB::disconnect();
         }
         return $errors;
     }
@@ -173,6 +177,7 @@ class CargaTrabajoController extends Controller
             if (!isset($userAssigned)) {
                 array_push($errors, "Usted no tiene asignado el usuario: " . $user->codigo_usuario);
             }
+            DB::disconnect();
         }
         return $errors;
     }
@@ -189,6 +194,7 @@ class CargaTrabajoController extends Controller
                     "proyecto_id" => $value['proyecto_id'],
                     "usuario_asignador" => $asignador
                 ]);
+                DB::disconnect();
             } catch (\Throwable $th) {
 
             }

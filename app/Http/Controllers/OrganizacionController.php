@@ -8,6 +8,7 @@ use App\Models\Rol;
 use App\Models\Organizacion;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrganizacionController extends Controller
 {
@@ -147,6 +148,7 @@ class OrganizacionController extends Controller
             if (!isset($userInferiorProject)) {
                 array_push($errors, "El usuario: " . $value['codigo_inferior'] . " no esta asignado a este proyecto");
             }
+            DB::disconnect();
         }
         return $errors;
     }
@@ -177,6 +179,7 @@ class OrganizacionController extends Controller
                     array_push($errors, "Usuario: " . $value['codigo_inferior'] . " ya se encuentra asignado al usuario: " . $assignment->codigo_usuario);
                 }
             }
+            DB::disconnect();
         }
         return $errors;
     }
@@ -202,6 +205,7 @@ class OrganizacionController extends Controller
             } else {
                 array_push($errors, "El usuario: " . $value['codigo_superior'] . " no puede ser encardo del usuario: " . $value['codigo_inferior']);
             }
+            DB::disconnect();
         }
         return $errors;
     }
@@ -222,11 +226,13 @@ class OrganizacionController extends Controller
             if (!isset($asignacionInferior)) {
                 array_push($errors, "Usted no tiene asignado el usuario: " . $value['codigo_inferior']);
             }
+            DB::disconnect();
         }
         return $errors;
     }
     public function createOrganization($asignments, $asignador)
     {
+        $array=[];
         foreach ($asignments as $key => $value) {
             try {
                 $superior = User::where('codigo_usuario', $value['codigo_superior'])->first();
@@ -237,10 +243,10 @@ class OrganizacionController extends Controller
                     "proyecto_id" => $value['proyecto_id'],
                     "usuario_asignador" => $asignador
                 ]);
+                DB::disconnect();
             } catch (\Throwable $th) {
 
             }
-
         }
     }
 
@@ -259,8 +265,6 @@ class OrganizacionController extends Controller
             if(isset($assignment)){
                 Organizacion::where($matchThese)->delete();
                 $matchThese=["usuario_superior"=>$validateData['empleado_id'],"proyecto_id"=>$validateData["proyecto_id"]];
-                Organizacion::where($matchThese)->delete();
-                $matchThese=["usuario_inferior"=>$validateData['empleado_id'],"proyecto_id"=>$validateData["proyecto_id"]];
                 Organizacion::where($matchThese)->delete();
                 $matchThese=["usuario_id"=>$validateData['empleado_id'],"proyecto_id"=>$validateData['proyecto_id']];
                 AsignacionUpmUsuario::where($matchThese)->delete();

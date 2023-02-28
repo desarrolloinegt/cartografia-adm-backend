@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
     "asignar-rol-grupo","asignar-usuario-grupo","ver-usuario-grupo","eliminar-usuario-grupo","editar-rol",
     "desactivar-rol","crear-rol","asignar-permiso-rol","ver-rol","administrar-proyecto","editar-proyecto","desactivar-proyecto",
     "crear-proyecto","ver-proyecto","finalizar-proyecto","asignar-upm-proyecto","ver-upms","reemplazar-upm",
-    "descargar-plantilla","asignar-personal","asignar-upms-personal","ver-upms-cartografo","inicializar-actualizacion","finalizar-actualizacion"];
+    "descargar-plantilla","asignar-personal","asignar-upms-personal","ver-upms-cartografo","inicializar-actualizacion","finalizar-actualizacion",
+    "ver-equipo-campo","ver-usuarios-equipo-campo"];
 
     private $policyAdmin = "Administrador";
     /**

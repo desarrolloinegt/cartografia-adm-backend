@@ -174,14 +174,14 @@ class RolController extends Controller
 
     public function seleccionarRolesMenores(Request $request){
         try{
+            $idUser=$request->user()->id;
             $validateData = $request->validate([
-                "proyecto_id"=>'required|int',
-                "usuario_id"=>'required|int'
+                "proyecto_id"=>'required|int'
             ]);
             $rolMayor = Rol::select('rol.id','rol.nombre','rol.jerarquia')
                 ->join('asignacion_rol_usuario','asignacion_rol_usuario.rol_id','rol.id')
                 ->where('rol.proyecto_id',$validateData['proyecto_id'])
-                ->where('asignacion_rol_usuario.usuario_id',$validateData['usuario_id'])
+                ->where('asignacion_rol_usuario.usuario_id',$idUser)
                 ->where('rol.estado',1)
                 ->orderBy('rol.jerarquia','DESC')
                 ->first();
