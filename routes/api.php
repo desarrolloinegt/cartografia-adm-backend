@@ -158,8 +158,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/obtenerUpmCartografo',[CargaTrabajoController::class,'obtenerUpmCartografos']);
 
     //Equipos
-     Route::post('/equipo',[EquipoCampoController::class,'createTeams']);
-    Route::patch('/equipo/edit',[EquipoCampoController::class,'deleteTeam']);
+    Route::post('/equipo',[EquipoCampoController::class,'createTeams']);
+    Route::patch('/equipo/edit',[EquipoCampoController::class,'modifyVehicle']);
+    Route::patch('/addVehiculo',[EquipoCampoController::class,'assignVehicle']);
     Route::post('/equipos',[EquipoCampoController::class,'getTeams']);
+    Route::post('/addEquipo',[EquipoCampoController::class,'addTeam']);
     Route::post('/miembrosEquipo',[EquipoCampoController::class,'getUsersTeam']);
 });
