@@ -15,6 +15,7 @@ class EquipoCampo extends Model
         'proyecto_id',
         'supervisor',
         'usuario_asignador',
-        'vehiculo_id'
+        'vehiculo_id',
+        'descripcion'
     ];
 }

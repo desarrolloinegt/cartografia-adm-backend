@@ -30,13 +30,15 @@ class EquipoCampoController extends Controller
                             "supervisor" => $user->id,
                             "proyecto_id" => $value['proyecto_id'],
                             "usuario_asignador" => $idUser,
-                            "vehiculo_id" => $vehiculo->id
+                            "vehiculo_id" => $vehiculo->id,
+                            "descripcion"=>$value['descripcion']
                         ]);
                     } else if (!isset($assignment) && !isset($vehiculo)) {
                         EquipoCampo::create([
                             "supervisor" => $user->id,
                             "proyecto_id" => $value['proyecto_id'],
                             "usuario_asignador" => $idUser,
+                            "descripcion"=>$value['descripcion']
                         ]);
                     }
                 }
@@ -60,7 +62,8 @@ class EquipoCampoController extends Controller
             $validateData = $request->validate([
                 "codigo_usuario" => 'required|int',
                 "placa" => 'nullable|string',
-                "proyecto_id" => 'required|int'
+                "proyecto_id" => 'required|int',
+                "descripcion"=>''
             ]);
             $user = User::where("codigo_usuario", $validateData['codigo_usuario'])->first();
             if (isset($user)) {
@@ -119,7 +122,35 @@ class EquipoCampoController extends Controller
         }
     }
 
-
+    public function editTeam(Request $request){
+        try{
+            $validateData=$request->validate([
+                "usuario_id"=>'required|int',
+                "proyecto_id"=>"required|int",
+                "descripcion"=>"",
+            ]);
+            $idUser=$request->user()->id;
+            $matchThese=["supervisor"=>$validateData['usuario_id'],"proyecto_id"=>$validateData['proyecto_id'],"usuario_asignador"=>$idUser];
+            $assignment=EquipoCampo::where($matchThese)->first();
+            if(isset($assignment)){
+                EquipoCampo::where($matchThese)->update(["descripcion"=>$validateData['descripcion']]);
+                return response()->json([
+                    'status' => true,
+                    'message' => "Equipo modificado"
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Equipo no encontrado"
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
     public function deleteTeam(Request $request)
     {
         try {
@@ -153,7 +184,7 @@ class EquipoCampoController extends Controller
                 "proyecto" => "required|string"
             ]);
             $project = Proyecto::where("nombre", $validateData['proyecto'])->first();
-            $teams = EquipoCampo::select('usuario.id', 'usuario.codigo_usuario', 'vehiculo.placa', 'vehiculo.modelo', 'usuario.nombres', 'usuario.apellidos')
+            $teams = EquipoCampo::select('equipo_campo.descripcion','usuario.id', 'usuario.codigo_usuario', 'vehiculo.placa', 'vehiculo.modelo', 'usuario.nombres', 'usuario.apellidos')
                 ->join('usuario', 'usuario.id', 'equipo_campo.supervisor')
                 ->leftJoin('vehiculo', 'vehiculo.id', 'equipo_campo.vehiculo_id')
                 ->where('equipo_campo.usuario_asignador', $idUser)

@@ -164,7 +164,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     
     //Equipos
     Route::post('/equipo',[EquipoCampoController::class,'createTeams']);
-    Route::patch('/equipo/edit',[EquipoCampoController::class,'modifyVehicle']);
+    Route::patch('/equipoVehicle/edit',[EquipoCampoController::class,'modifyVehicle']);
+    Route::patch('/equipo/edit',[EquipoCampoController::class,'editTeam']);
     Route::patch('/addVehiculo',[EquipoCampoController::class,'assignVehicle']);
     Route::post('/equipos',[EquipoCampoController::class,'getTeams']);
     Route::post('/addEquipo',[EquipoCampoController::class,'addTeam']);
