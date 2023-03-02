@@ -138,6 +138,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Asignacion de carga de trabajo
     Route::post('/asignarPersonal/{id}', [CargaTrabajoController::class, 'asignarPersonal']);
+    Route::patch('/iniciarActualizacion', [CargaTrabajoController::class, 'initActualization']);
+    Route::patch('/finalizarActualizacion', [CargaTrabajoController::class, 'finishActualization']);
     
     Route::post('/asignarUpmPersonal',[CargaTrabajoController::class,'asignarUpmsAPersonal']);
     Route::post('/obtenerUpmPersonal',[CargaTrabajoController::class,'obtenerUpmsPersonal']);
@@ -156,7 +158,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Obtener upms del cartografo
     Route::post('/obtenerUpmCartografo',[CargaTrabajoController::class,'obtenerUpmCartografos']);
-
+    Route::patch('/upmSupervisor/edit',[CargaTrabajoController::class,'modifyUpmCartographer']);
+    //Obtener upm del supervisor
+    Route::post('/obtenerUpmSupervisor',[CargaTrabajoController::class,'getUpmSupervisor']);
+    
     //Equipos
     Route::post('/equipo',[EquipoCampoController::class,'createTeams']);
     Route::patch('/equipo/edit',[EquipoCampoController::class,'modifyVehicle']);

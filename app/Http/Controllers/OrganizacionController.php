@@ -243,7 +243,6 @@ class OrganizacionController extends Controller
                     "proyecto_id" => $value['proyecto_id'],
                     "usuario_asignador" => $asignador
                 ]);
-                DB::disconnect();
             } catch (\Throwable $th) {
 
             }

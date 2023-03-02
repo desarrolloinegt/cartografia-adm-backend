@@ -319,7 +319,8 @@ class CargaTrabajoController extends Controller
             $validateData = $request->validate([
                 "proyecto_id" => "int|required"
             ]);
-            $upms = AsignacionUpmUsuario::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id')
+            $upms = AsignacionUpmUsuario::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado'
+            , 'upm.id','estado_upm.cod_estado')
                 ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
                 ->join('municipio', 'upm.municipio_id', 'municipio.id')
                 ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
@@ -331,6 +332,146 @@ class CargaTrabajoController extends Controller
                 ->get();
             return response()->json($upms, 200);
         } catch (\Throwable $th) {
+            return response()->json([
+                "status" => false,
+                "message" => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getUpmSupervisor(Request $request){
+        try{
+            $idUser = $request->user()->id;
+            $validateData = $request->validate([
+                "proyecto_id" => "int|required"
+            ]);
+            $data=[];
+            $upms=$this->obtenerUpmsEmpleados($idUser,$validateData['proyecto_id']);
+            foreach ($upms as $upm) {
+                $assignment=AsignacionUpmUsuario::select("usuario.codigo_usuario","usuario.nombres","usuario.apellidos")
+                    ->join('organizacion','organizacion.usuario_inferior','asignacion_upm_usuario.usuario_id')
+                    ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_id')
+                    ->where('asignacion_upm_usuario.upm_id',$upm->id)
+                    ->where('organizacion.usuario_superior',$idUser)
+                    ->first();
+                if(isset($assignment)) {
+                    $dto=["upm"=>$upm->upm,"codigo_usuario"=>$assignment->codigo_usuario,"nombres"=>$assignment->nombres,"apellidos"=>
+                    $assignment->apellidos];
+                    array_push($data,$dto);
+                } else {
+                    $dto=["upm"=>$upm->upm,"codigo_usuario"=>"","nombres"=>"","apellidos"=>""];
+                    array_push($data,$dto);
+                }  
+            }
+            return response()->json($data,200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "status" => false,
+                "message" => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function modifyUpmCartographer(Request $request){
+        try{
+            $validateData = $request->validate([
+                "proyecto_id" => "int|required",
+                "usuario_anterior"=>"required|int",
+                "usuario_nuevo"=>"required|int",
+                "upm"=>"required|string"
+            ]);
+            $idUser=$request->user()->id;
+            $upm=UPM::where("nombre",$validateData['upm'])->first();
+            $cartographer=User::find($validateData['usuario_nuevo']);
+            $project=Proyecto::find($validateData['proyecto_id']);
+            if(isset($upm) && isset($cartographer) && isset($project)){
+                $matchThese=["usuario_superior"=>$idUser,"usuario_inferior"=>$cartographer->id];
+                $assignmentUser=Organizacion::where($matchThese)->first();
+                if(isset($assignmentUser)){
+                    $matchThese=["usuario_id"=>$validateData['usuario_anterior'],"upm_id"=>$upm->id,"usuario_asignador"=>$idUser];
+                    $assignment=AsignacionUpmUsuario::where($matchThese)->first();
+                    if(isset($assignment)){
+                        AsignacionUpmUsuario::where($matchThese)->update(["usuario_id"=>$cartographer->id]);
+                        return response()->json([
+                            "status" => true,
+                            "message" => "Modificacion correcta"
+                        ], 200);
+                    } else{
+                        return response()->json([
+                            "status" => false,
+                            "message" => "Error al modificar"
+                        ], 400);
+                    }
+                } else{
+                    return response()->json([
+                        "status" => false,
+                        "message" => "Usted no tiene asignado el usuario"
+                    ], 400);
+                }
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Datos no encontrados"
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                "status" => false,
+                "message" => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function initActualization(Request $request){
+        try{
+            $validateData=$request->validate([
+                "upm"=>"required|string",
+                "proyecto_id"=>"required|int"
+            ]);
+            $upm=UPM::where("nombre",$validateData['upm'])->first();
+            $idUser=$request->user()->id;
+            if(isset($upm)){
+                $matchThese=["usuario_id"=>$idUser,"upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
+                $assignment=AsignacionUpmUsuario::where($matchThese)->first();
+                if(isset($assignment)){
+                    $matchThese=["upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
+                    AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>2]);
+                    return response()->json([
+                        "status" => true,
+                        "message" => "Actualizacion de upm iniciada"
+                    ], 200);
+                }
+            }
+           
+        } catch (\Throwable $th) {
+            return response()->json([
+                "status" => false,
+                "message" => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function finishActualization(Request $request){
+        try{
+            $validateData=$request->validate([
+                "upm"=>"required|string",
+                "proyecto_id"=>"required|int"
+            ]);
+            $upm=UPM::where("nombre",$validateData['upm'])->first();
+            $idUser=$request->user()->id;
+            if(isset($upm)){
+                $matchThese=["usuario_id"=>$idUser,"upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
+                $assignment=AsignacionUpmUsuario::where($matchThese)->first();
+                if(isset($assignment)){
+                    $matchThese=["upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
+                    AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>3]);
+                    return response()->json([
+                        "status" => true,
+                        "message" => "Actualizacion de upm Finalizada"
+                    ], 200);
+                }
+            }
+        } catch(\Throwable $th){
             return response()->json([
                 "status" => false,
                 "message" => $th->getMessage()
