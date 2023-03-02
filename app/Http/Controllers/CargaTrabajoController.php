@@ -346,7 +346,14 @@ class CargaTrabajoController extends Controller
                 "proyecto_id" => "int|required"
             ]);
             $data=[];
-            $upms=$this->obtenerUpmsEmpleados($idUser,$validateData['proyecto_id']);
+            $upms=AsignacionUpmUsuario::select('upm.id','upm.nombre as upm','estado_upm.nombre as estado')
+                ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_id')
+                ->join('upm','upm.id','asignacion_upm_usuario.upm_id')
+                ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
+                ->join('estado_upm','estado_upm.cod_estado','asignacion_upm_proyecto.estado_upm')
+                ->where('asignacion_upm_usuario.usuario_id',$idUser)
+                ->where('usuario.estado_usuario',1)
+                ->get();
             foreach ($upms as $upm) {
                 $assignment=AsignacionUpmUsuario::select("usuario.codigo_usuario","usuario.nombres","usuario.apellidos")
                     ->join('organizacion','organizacion.usuario_inferior','asignacion_upm_usuario.usuario_id')
@@ -355,11 +362,11 @@ class CargaTrabajoController extends Controller
                     ->where('organizacion.usuario_superior',$idUser)
                     ->first();
                 if(isset($assignment)) {
-                    $dto=["upm"=>$upm->upm,"codigo_usuario"=>$assignment->codigo_usuario,"nombres"=>$assignment->nombres,"apellidos"=>
+                    $dto=["upm"=>$upm->upm,"estado"=>$upm->estado,"codigo_usuario"=>$assignment->codigo_usuario,"nombres"=>$assignment->nombres,"apellidos"=>
                     $assignment->apellidos];
                     array_push($data,$dto);
                 } else {
-                    $dto=["upm"=>$upm->upm,"codigo_usuario"=>"","nombres"=>"","apellidos"=>""];
+                    $dto=["upm"=>$upm->upm,"estado"=>$upm->estado,"codigo_usuario"=>"","nombres"=>"","apellidos"=>""];
                     array_push($data,$dto);
                 }  
             }
