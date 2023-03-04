@@ -327,8 +327,9 @@ class OrganizacionController extends Controller
             $validateData = $request->validate([
                 'proyecto_id' => 'required|int',
                 'usuario_id' => 'required|int',
-                'rol_id' => 'required:int'
+                'rol_id' => 'required|int'
             ]);
+            $idUser=$request->user()->id;
             $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')
                 ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                 ->where('rol.proyecto_id', $validateData['proyecto_id'])
@@ -337,7 +338,7 @@ class OrganizacionController extends Controller
 
             $rol = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
                 ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
-                ->where('asignacion_rol_usuario.usuario_id', $validateData['usuario_id'])
+                ->where('asignacion_rol_usuario.usuario_id', $idUser)
                 ->where('rol.estado', 1)
                 ->first();
             if ($rolMayor->jerarquia == $rol->jerarquia) {

@@ -346,7 +346,7 @@ class CargaTrabajoController extends Controller
                 "proyecto_id" => "int|required"
             ]);
             $data=[];
-            $upms=AsignacionUpmUsuario::select('upm.id','upm.nombre as upm','estado_upm.nombre as estado')
+            $upms=AsignacionUpmUsuario::select('upm.id','upm.nombre as upm','estado_upm.nombre as estado','estado_upm.cod_estado')
                 ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_id')
                 ->join('upm','upm.id','asignacion_upm_usuario.upm_id')
                 ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
@@ -362,11 +362,11 @@ class CargaTrabajoController extends Controller
                     ->where('organizacion.usuario_superior',$idUser)
                     ->first();
                 if(isset($assignment)) {
-                    $dto=["upm"=>$upm->upm,"estado"=>$upm->estado,"codigo_usuario"=>$assignment->codigo_usuario,"nombres"=>$assignment->nombres,"apellidos"=>
+                    $dto=["upm"=>$upm->upm,"estado"=>$upm->estado,"cod_estado"=>$upm->cod_estado,"codigo_usuario"=>$assignment->codigo_usuario,"nombres"=>$assignment->nombres,"apellidos"=>
                     $assignment->apellidos];
                     array_push($data,$dto);
                 } else {
-                    $dto=["upm"=>$upm->upm,"estado"=>$upm->estado,"codigo_usuario"=>"","nombres"=>"","apellidos"=>""];
+                    $dto=["upm"=>$upm->upm,"estado"=>$upm->estado,"cod_estado"=>$upm->cod_estado,"codigo_usuario"=>"","nombres"=>"","apellidos"=>""];
                     array_push($data,$dto);
                 }  
             }
@@ -379,23 +379,41 @@ class CargaTrabajoController extends Controller
         }
     }
 
+    public function getCartographerSupervisor(Request $request){
+        try{
+            $validateData=$request->validate([
+                "proyecto_id"=>"required|int"
+            ]);
+            $idUser=$request->user()->id;
+            $users=Organizacion::select()
+                ->join('usuario','usuario.id','organizacion.usuario_inferior')
+                ->where('organizacion.usuario_superior',$idUser)
+                ->where('organizacion.proyecto_id',$validateData['proyecto_id'])
+                ->where('usuario.estado_usuario',1)->get();
+            return response()->json($users,200);    
+        } catch (\Throwable $th) {
+            return response()->json([
+                "status" => false,
+                "message" => $th->getMessage()
+            ], 500);
+        }
+    }
     public function modifyUpmCartographer(Request $request){
         try{
             $validateData = $request->validate([
                 "proyecto_id" => "int|required",
-                "usuario_anterior"=>"required|int",
                 "usuario_nuevo"=>"required|int",
                 "upm"=>"required|string"
             ]);
             $idUser=$request->user()->id;
             $upm=UPM::where("nombre",$validateData['upm'])->first();
-            $cartographer=User::find($validateData['usuario_nuevo']);
+            $cartographer=User::where("codigo_usuario",$validateData['usuario_nuevo'])->first();
             $project=Proyecto::find($validateData['proyecto_id']);
             if(isset($upm) && isset($cartographer) && isset($project)){
                 $matchThese=["usuario_superior"=>$idUser,"usuario_inferior"=>$cartographer->id];
                 $assignmentUser=Organizacion::where($matchThese)->first();
                 if(isset($assignmentUser)){
-                    $matchThese=["usuario_id"=>$validateData['usuario_anterior'],"upm_id"=>$upm->id,"usuario_asignador"=>$idUser];
+                    $matchThese=["proyecto_id"=>$project->id,"upm_id"=>$upm->id,"usuario_asignador"=>$idUser];
                     $assignment=AsignacionUpmUsuario::where($matchThese)->first();
                     if(isset($assignment)){
                         AsignacionUpmUsuario::where($matchThese)->update(["usuario_id"=>$cartographer->id]);
@@ -404,6 +422,20 @@ class CargaTrabajoController extends Controller
                             "message" => "Modificacion correcta"
                         ], 200);
                     } else{
+                        $matchThese=["proyecto_id"=>$project->id,"upm_id"=>$upm->id];
+                        $assignment=AsignacionUpmUsuario::where($matchThese)->first();
+                        if(isset($assignment)){
+                            AsignacionUpmUsuario::create([
+                                "upm_id" => $upm->id,
+                                "usuario_id" => $cartographer->id,
+                                "proyecto_id" => $project->id,
+                                "usuario_asignador" => $idUser
+                            ]);
+                            return response()->json([
+                                "status" => true,
+                                "message" => "Modificacion correcta"
+                            ], 200);
+                        }
                         return response()->json([
                             "status" => false,
                             "message" => "Error al modificar"

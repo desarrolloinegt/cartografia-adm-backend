@@ -158,9 +158,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Obtener upms del cartografo
     Route::post('/obtenerUpmCartografo',[CargaTrabajoController::class,'obtenerUpmCartografos']);
-    Route::patch('/upmSupervisor/edit',[CargaTrabajoController::class,'modifyUpmCartographer']);
+    Route::patch('/upmCartografoSupervisor/edit',[CargaTrabajoController::class,'modifyUpmCartographer']);
     //Obtener upm del supervisor
     Route::post('/obtenerUpmSupervisor',[CargaTrabajoController::class,'getUpmSupervisor']);
+    //Obtener cartografos del supervisor
+    Route::post('/obtenerCartografosSupervisor',[CargaTrabajoController::class,'getCartographerSupervisor']);
     
     //Equipos
     Route::post('/equipo',[EquipoCampoController::class,'createTeams']);
