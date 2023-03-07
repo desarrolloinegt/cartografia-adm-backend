@@ -168,6 +168,7 @@ class OrganizacionController extends Controller
                 ->join('usuario AS in', 'in.id', 'organizacion.usuario_inferior')
                 ->join('usuario AS su', 'su.id', 'organizacion.usuario_superior')
                 ->where('in.id', $inferior->id)
+                ->where('organizacion.proyecto_id',$value['proyecto_id'])
                 ->first();
             if (isset($assignment)) {
                 $rolUserExist = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Rol del encargado del usuario inferior
