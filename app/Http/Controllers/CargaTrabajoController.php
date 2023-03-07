@@ -145,6 +145,7 @@ class CargaTrabajoController extends Controller
                 ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
                 ->join('usuario', 'usuario.id', 'asignacion_upm_usuario.usuario_id')
                 ->where('upm.nombre', $value['upm'])
+                ->where('asignacion_upm_usuario.proyecto_id',$value['proyecto_id'])
                 ->first();
             if (isset($assignment)) {
                 $rolUserExist = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Rol del usuario del que ya esta asignado el upm
@@ -210,16 +211,27 @@ class CargaTrabajoController extends Controller
             ]);
             $user = User::find($idUser);
             if (isset($user)) {
-                $upms = AsignacionUpmUsuario::selectRaw('rol.nombre as rol,u.id ,CONCAT(u.codigo_usuario,\' \',
+                $upms=AsignacionUpmUsuario::selectRaw('rol.nombre as rol,usuario.id ,CONCAT(usuario.codigo_usuario,\' \',
+                usuario.nombres,\' \',usuario.apellidos) AS encargado,upm.nombre as upm')
+                    ->join('upm','upm.id','asignacion_upm_usuario.upm_id')
+                    ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_id')
+                    ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.usuario_id', 'usuario.id')
+                    ->join('rol','rol.id','asignacion_rol_usuario.rol_id')
+                    ->where('asignacion_upm_usuario.proyecto_id',$validateData['proyecto_id'])
+                    ->where('asignacion_upm_usuario.usuario_asignador',$idUser)
+                    ->where('rol.proyecto_id',$validateData['proyecto_id'])
+                    ->get();
+                /*$upms = AsignacionUpmUsuario::selectRaw('rol.nombre as rol,u.id ,CONCAT(u.codigo_usuario,\' \',
                 u.nombres,\' \',u.apellidos) AS encargado,upm.nombre as upm')
                     ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
                     ->join('usuario AS u', 'u.id', 'asignacion_upm_usuario.usuario_id')
                     ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.usuario_id', 'u.id')
                     ->join('usuario AS as', 'as.id', 'asignacion_upm_usuario.usuario_asignador')
                     ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
-                    ->where('rol.proyecto_id', $validateData['proyecto_id'])
+                    ->join('proyecto','proyecto.id','rol.proyecto_id')
+                    ->where('proyecto.id', $validateData['proyecto_id'])
                     ->where('asignacion_upm_usuario.usuario_asignador', $idUser)
-                    ->get();
+                    ->get();*/
                 return response()->json($upms, 200);
             } else {
                 return response()->json([
@@ -300,6 +312,7 @@ class CargaTrabajoController extends Controller
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')
                 ->where('asignacion_upm_usuario.usuario_id', $usuario)
+                ->where('asignacion_upm_usuario.proyecto_id', $proyecto)
                 ->where('asignacion_upm_proyecto.proyecto_id', $proyecto)
                 ->where('estado_upm.cod_estado', 1)
                 ->get();
@@ -327,6 +340,7 @@ class CargaTrabajoController extends Controller
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')
                 ->where('asignacion_upm_usuario.usuario_id', $usuario)
+                ->where('asignacion_upm_usuario.proyecto_id', $validateData['proyecto_id'])
                 ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
                 ->where('upm.estado', 1)
                 ->get();
@@ -352,6 +366,8 @@ class CargaTrabajoController extends Controller
                 ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
                 ->join('estado_upm','estado_upm.cod_estado','asignacion_upm_proyecto.estado_upm')
                 ->where('asignacion_upm_usuario.usuario_id',$idUser)
+                ->where('asignacion_upm_usuario.proyecto_id',$validateData['proyecto_id'])
+                ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
                 ->where('usuario.estado_usuario',1)
                 ->get();
             foreach ($upms as $upm) {
@@ -360,6 +376,8 @@ class CargaTrabajoController extends Controller
                     ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_id')
                     ->where('asignacion_upm_usuario.upm_id',$upm->id)
                     ->where('organizacion.usuario_superior',$idUser)
+                    ->where('organizacion.proyecto_id',$validateData['proyecto_id'])
+                    ->where('asignacion_upm_usuario.proyecto_id',$validateData['proyecto_id'])
                     ->first();
                 if(isset($assignment)) {
                     $dto=["upm"=>$upm->upm,"estado"=>$upm->estado,"cod_estado"=>$upm->cod_estado,"codigo_usuario"=>$assignment->codigo_usuario,"nombres"=>$assignment->nombres,"apellidos"=>

@@ -212,6 +212,8 @@ class EquipoCampoController extends Controller
                 ->join('usuario', 'usuario.id', 'organizacion.usuario_inferior')
                 ->where('organizacion.usuario_superior', $validateData['supervisor'])
                 ->where('organizacion.usuario_asignador', $idUser)
+                ->where('usuario.estado_usuario',1)
+                ->where('organizacion.proyecto_id',$validateData['proyecto_id'])
                 ->get();
             return response()->json($users, 200);
         } catch (\Throwable $th) {

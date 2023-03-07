@@ -295,13 +295,14 @@ class OrganizacionController extends Controller
                 i.id AS empleado_id,CONCAT(ri.nombre,\'-\',i.codigo_usuario,\' \', i.nombres, \' \', i.apellidos) AS empleado')
                     ->join('usuario AS s', 's.id', 'organizacion.usuario_superior')
                     ->join('usuario AS i', 'i.id', 'organizacion.usuario_inferior')
-                    ->join('usuario AS as', 'as.id', 'organizacion.usuario_asignador')
                     ->join('asignacion_rol_usuario AS ars', 'ars.usuario_id', 's.id')
                     ->join('asignacion_rol_usuario AS ari', 'ari.usuario_id', 'i.id')
                     ->join('rol AS rs', 'rs.id', 'ars.rol_id')
                     ->join('rol AS ri', 'ri.id', 'ari.rol_id')
                     ->where('rs.proyecto_id', $validateData['proyecto_id'])
-                    ->where('as.id', $idUser)
+                    ->where('ri.proyecto_id',$validateData['proyecto_id']    )
+                    ->where('organizacion.proyecto_id',$validateData['proyecto_id'])
+                    ->where('organizacion.usuario_asignador', $idUser)
                     ->get();
                 //ars= asignacion rol-usuario superior
                 //ari= asignacion rol-usuario inferior
@@ -386,6 +387,7 @@ class OrganizacionController extends Controller
                 ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                 ->where('organizacion.usuario_superior', $usuario)
                 ->where('rol.proyecto_id', $proyecto)
+                ->where('organizacion.proyecto_id',$proyecto)
                 ->where('rol.id', $rol)
                 ->where('usuario.estado_usuario', 1)
                 ->get();
