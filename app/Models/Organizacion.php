@@ -14,6 +14,7 @@ class Organizacion extends Model
         'usuario_superior',
         'usuario_inferior',
         'proyecto_id',
-        'usuario_asignador'
+        'usuario_asignador',
+        'fecha_asignacion'
     ];
 }

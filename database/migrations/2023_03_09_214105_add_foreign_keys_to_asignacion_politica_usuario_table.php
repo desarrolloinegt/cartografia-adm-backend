@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('asignacion_politica_usuario', function (Blueprint $table) {
             $table->foreign(['usuario_id'], 'fk_administrador_usuario1')->references(['id'])->on('usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
-            $table->foreign(['rol_id'], 'fk_asignacion_administrador_rol1')->references(['id'])->on('politica')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['politica_id'], 'fk_asignacion_administrador_rol1')->references(['id'])->on('politica')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 

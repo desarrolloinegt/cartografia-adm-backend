@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('vehiculo', function (Blueprint $table) {
             $table->comment('');
-            $table->string('placa', 7);
+            $table->string('placa', 7)->unique('placa_UNIQUE');
             $table->string('modelo', 100);
             $table->year('year');
             $table->tinyInteger('estado');

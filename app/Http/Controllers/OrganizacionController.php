@@ -233,7 +233,7 @@ class OrganizacionController extends Controller
     }
     public function createOrganization($asignments, $asignador)
     {
-        $array=[];
+        $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
         foreach ($asignments as $key => $value) {
             try {
                 $superior = User::where('codigo_usuario', $value['codigo_superior'])->first();
@@ -242,7 +242,8 @@ class OrganizacionController extends Controller
                     "usuario_superior" => $superior->id,
                     "usuario_inferior" => $inferior->id,
                     "proyecto_id" => $value['proyecto_id'],
-                    "usuario_asignador" => $asignador
+                    "usuario_asignador" => $asignador,
+                    "fecha_asignacion"=>$fecha
                 ]);
             } catch (\Throwable $th) {
 

@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('asginacion_upm_usuario', function (Blueprint $table) {
+        Schema::table('asignacion_upm_usuario', function (Blueprint $table) {
             $table->foreign(['proyecto_id'], 'fk_asginacion_upm_usuario_proyecto1')->references(['id'])->on('proyecto')->onUpdate('NO ACTION')->onDelete('NO ACTION');
             $table->foreign(['upm_id'], 'fk_asginacion_upm_usuario_upm1')->references(['id'])->on('upm')->onUpdate('NO ACTION')->onDelete('NO ACTION');
             $table->foreign(['usuario_id'], 'fk_asginacion_upm_usuario_usuario1')->references(['id'])->on('usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['usuario_asignador'], 'fk_asignacion_upm_usuario_usuario2')->references(['id'])->on('usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -27,10 +28,11 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('asginacion_upm_usuario', function (Blueprint $table) {
+        Schema::table('asignacion_upm_usuario', function (Blueprint $table) {
             $table->dropForeign('fk_asginacion_upm_usuario_proyecto1');
             $table->dropForeign('fk_asginacion_upm_usuario_upm1');
             $table->dropForeign('fk_asginacion_upm_usuario_usuario1');
+            $table->dropForeign('fk_asignacion_upm_usuario_usuario2');
         });
     }
 };

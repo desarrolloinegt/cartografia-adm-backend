@@ -9,6 +9,7 @@ use App\Models\AsignacionUpm;
 use App\Models\AsignacionUpmEncargado;
 use App\Models\AsignacionUpmProyecto;
 use App\Models\AsignacionUpmUsuario;
+use App\Models\ControlProgreso;
 use App\Models\Grupo;
 use App\Models\Organizacion;
 use App\Models\Rol;
@@ -98,8 +99,8 @@ class CargaTrabajoController extends Controller
             if (!isset($user)) {
                 array_push($errors, "El usuario: " . $value['codigo_usuario'] . " no existe");
             }
-            DB::disconnect();
         }
+        DB::disconnect();
         return $errors;
     }
 
@@ -126,8 +127,8 @@ class CargaTrabajoController extends Controller
             if (!isset($upmProject)) {
                 array_push($errors, "El upm: " . $value['upm'] . " no esta asignado a este proyecto");
             }
-            DB::disconnect();
         }
+        DB::disconnect();
         return $errors;
     }
 
@@ -157,8 +158,8 @@ class CargaTrabajoController extends Controller
                     array_push($errors, "Upm: " . $value['upm'] . " ya se encuentra asignada al rol: " . $rolUserExist->nombre);
                 }
             }
-            DB::disconnect();
         }
+        DB::disconnect();
         return $errors;
     }
 
@@ -178,13 +179,14 @@ class CargaTrabajoController extends Controller
             if (!isset($userAssigned)) {
                 array_push($errors, "Usted no tiene asignado el usuario: " . $user->codigo_usuario);
             }
-            DB::disconnect();
         }
+        DB::disconnect();
         return $errors;
     }
 
     public function createAssignmet($array, $asignador)
     {
+        $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
         foreach ($array as $key => $value) {
             try {
                 $upm = UPM::where("nombre", $value['upm'])->first();
@@ -193,9 +195,9 @@ class CargaTrabajoController extends Controller
                     "upm_id" => $upm->id,
                     "usuario_id" => $user->id,
                     "proyecto_id" => $value['proyecto_id'],
-                    "usuario_asignador" => $asignador
+                    "usuario_asignador" => $asignador,
+                    "fecha_asignacion"=>$fecha
                 ]);
-                DB::disconnect();
             } catch (\Throwable $th) {
 
             }
@@ -418,6 +420,7 @@ class CargaTrabajoController extends Controller
     }
     public function modifyUpmCartographer(Request $request){
         try{
+            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
             $validateData = $request->validate([
                 "proyecto_id" => "int|required",
                 "usuario_nuevo"=>"required|int",
@@ -434,7 +437,7 @@ class CargaTrabajoController extends Controller
                     $matchThese=["proyecto_id"=>$project->id,"upm_id"=>$upm->id,"usuario_asignador"=>$idUser];
                     $assignment=AsignacionUpmUsuario::where($matchThese)->first();
                     if(isset($assignment)){
-                        AsignacionUpmUsuario::where($matchThese)->update(["usuario_id"=>$cartographer->id]);
+                        AsignacionUpmUsuario::where($matchThese)->update(["usuario_id"=>$cartographer->id,"fecha_asignacion"=>$fecha]);
                         return response()->json([
                             "status" => true,
                             "message" => "Modificacion correcta"
@@ -447,7 +450,8 @@ class CargaTrabajoController extends Controller
                                 "upm_id" => $upm->id,
                                 "usuario_id" => $cartographer->id,
                                 "proyecto_id" => $project->id,
-                                "usuario_asignador" => $idUser
+                                "usuario_asignador" => $idUser,
+                                "fecha_asignacion"=>$fecha
                             ]);
                             return response()->json([
                                 "status" => true,
@@ -481,6 +485,7 @@ class CargaTrabajoController extends Controller
 
     public function initActualization(Request $request){
         try{
+            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
             $validateData=$request->validate([
                 "upm"=>"required|string",
                 "proyecto_id"=>"required|int"
@@ -493,6 +498,12 @@ class CargaTrabajoController extends Controller
                 if(isset($assignment)){
                     $matchThese=["upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
                     AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>2]);
+                    ControlProgreso::create([
+                        "fecha_inicio"=>$fecha,
+                        "proyecto_id"=>$validateData['proyecto_id'],
+                        "usuario_id"=>$assignment->usuario_id,
+                        "upm_id"=>$upm->id
+                    ]);
                     return response()->json([
                         "status" => true,
                         "message" => "Actualizacion de upm iniciada"
@@ -510,6 +521,7 @@ class CargaTrabajoController extends Controller
 
     public function finishActualization(Request $request){
         try{
+            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
             $validateData=$request->validate([
                 "upm"=>"required|string",
                 "proyecto_id"=>"required|int"
@@ -522,6 +534,8 @@ class CargaTrabajoController extends Controller
                 if(isset($assignment)){
                     $matchThese=["upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
                     AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>3]);
+                    $matchThese=["usuario_id"=>$idUser,"upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
+                    ControlProgreso::where($matchThese)->update(['fecha_final'=>$fecha]);
                     return response()->json([
                         "status" => true,
                         "message" => "Actualizacion de upm Finalizada"

@@ -18,6 +18,8 @@ return new class extends Migration
             $table->integer('proyecto_id')->index('fk_Equipo Campo_Proyecto1_idx');
             $table->integer('supervisor')->index('fk_Equipo Campo_Usuario1_idx');
             $table->integer('vehiculo_id')->nullable()->index('fk_equipo_campo_vehiculo1_idx');
+            $table->integer('usuario_asignador')->index('fk_equipo_campo_usuario2_idx');
+            $table->string('descripcion', 250)->nullable();
 
             $table->primary(['supervisor', 'proyecto_id']);
         });

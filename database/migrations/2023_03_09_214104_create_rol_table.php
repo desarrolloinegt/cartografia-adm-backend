@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('rol', function (Blueprint $table) {
             $table->comment('');
-            $table->integer('id')->primary();
+            $table->integer('id', true);
             $table->string('nombre', 100)->unique('nombre_UNIQUE');
             $table->string('descripcion', 400)->nullable();
             $table->tinyInteger('estado');
