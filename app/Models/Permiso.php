@@ -15,6 +15,7 @@ class Permiso extends Model
     public $timestamps = false;
     protected $fillable = [
         'alias',
-        'estado'
+        'estado',
+        'permiso_sistema'
     ];
 }
