@@ -15,6 +15,7 @@ class Politica extends Model
     public $timestamps = false;
     protected $fillable = [
         'nombre',
-        'estado'
+        'estado',
+        'politica_sistema'
     ];
 }

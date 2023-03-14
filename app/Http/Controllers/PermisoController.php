@@ -13,9 +13,47 @@ class PermisoController extends Controller
      */
     public function obtenerPermisos()
     {
-        $permisos = Permiso::select('id', 'alias')
+        try{
+            $permisos = Permiso::select('id', 'alias')
             ->where('estado', 1)
             ->get();
-        return response()->json($permisos);
+            return response()->json($permisos,200);
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+        
+    }
+
+    public function obtenerPermisosSistema(){
+        try{
+            $permisos = Permiso::select('id', 'alias')
+            ->where('estado', 1)
+            ->where('permiso_sistema',1)
+            ->get();
+            return response()->json($permisos,200);
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerPermisosProyecto(){
+        try{
+            $permisos = Permiso::select('id', 'alias')
+            ->where('estado', 1)
+            ->where('permiso_sistema',0)
+            ->get();
+            return response()->json($permisos,200);
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 }

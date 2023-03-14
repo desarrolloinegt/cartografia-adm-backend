@@ -53,12 +53,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //politica
     Route::post('/politica', [PoliticaController::class, 'createPolicy']);
     Route::get('/politicas', [PoliticaController::class, 'obtenerPoliticas']);
+    Route::get('/politicasSistema', [PoliticaController::class, 'obtenerPoliticasSistema']);
+    Route::get('/politicasProyecto', [PoliticaController::class, 'obtenerPoliticasProyecto']);
     Route::get('/politica/{id}', [PoliticaController::class, 'desactivarPolitica']);
     Route::patch('/politica/edit', [PoliticaController::class, 'modificarPolitica']);
 
     //permiso
     Route::get('/permisos', [PermisoController::class, 'obtenerPermisos']);
-
+    Route::get('/permisosSistema', [PermisoController::class, 'obtenerPermisosSistema']);
+    Route::get('/permisosProyecto', [PermisoController::class, 'obtenerPermisosProyecto']);
     //usuario
 
     Route::post('/registro', [UsuarioController::class, 'register']);

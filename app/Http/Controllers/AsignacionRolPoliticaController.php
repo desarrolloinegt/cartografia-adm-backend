@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AsignacionRolPolitica;
+use App\Models\Politica;
 use App\Models\Rol;
 use Illuminate\Http\Request;
 use App\Models\AsignacionRol;
@@ -31,14 +32,17 @@ class AsignacionRolPoliticaController extends Controller
         if (isset($rol)) {
             if ($rol->estado == 1) {
                 foreach ($arrayPoliticas as $politica) {
-                    $asignacion = AsignacionRolPolitica::create([
-                        "rol_id" => $rol->id,
-                        "politica_id" => $politica
-                    ]);
+                    $policy=Politica::find($politica);
+                    if($policy->politica_sistema==0){ 
+                        $asignacion = AsignacionRolPolitica::create([
+                            "rol_id" => $rol->id,
+                            "politica_id" => $politica
+                        ]);
+                    }
                 }
                 return response()->json([
                     'status' => true,
-                    'message' => 'Rol asignado a grupo correctamente'
+                    'message' => 'Politicas asignadas a rol correctamente'
                 ], 200);
             } else {
                 return response()->json([

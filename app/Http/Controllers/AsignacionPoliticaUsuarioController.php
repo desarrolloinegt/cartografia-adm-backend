@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AsignacionPoliticaUsuario;
 use App\Models\AsignacionRolUsuario;
+use App\Models\Politica;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -23,14 +24,13 @@ class AsignacionPoliticaUsuarioController extends Controller
             if(isset($user)){
                 AsignacionPoliticaUsuario::where('usuario_id',$user->id)->delete();
                 foreach ($arrayPoliticas as $politica) {
-                    try{
-                        AsignacionRolUsuario::create([
+                    $policy=Politica::find($politica);
+                    if($policy->politica_sistema==1){
+                        AsignacionPoliticaUsuario::create([
                             "usuario_id"=>$user->id,
                             "politica_id"=>$politica
                         ]);
-                    }catch(\Throwable $th){
-
-                    } 
+                    }
                 }
                 return response()->json([
                     "status"=>true,

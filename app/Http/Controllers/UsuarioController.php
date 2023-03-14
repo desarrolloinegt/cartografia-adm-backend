@@ -136,6 +136,7 @@ class UsuarioController extends Controller
             ->join('permiso','permiso.id','asignacion_permiso_politica.permiso_id')
             ->where('asignacion_politica_usuario.usuario_id',$id)
             ->where('permiso.estado',1)
+            ->where('permiso.permiso_sistema',1)
             ->where('politica.estado',1)
             ->get();
         foreach ($permisosDirectos as $permiso) {
@@ -218,6 +219,8 @@ class UsuarioController extends Controller
                     $permisos = Permiso::select('alias')
                         ->join('asignacion_permiso_politica', 'asignacion_permiso_politica.permiso_id', 'permiso.id')
                         ->where('asignacion_permiso_politica.politica_id', $politica->id)
+                        ->where('permiso.estado',1)
+                        ->where('permiso.permiso_sistema',0)
                         ->get();
                     foreach($permisos as $permiso){
                         array_push($permisosList,$permiso->alias);

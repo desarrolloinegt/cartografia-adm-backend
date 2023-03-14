@@ -76,7 +76,8 @@ class AsignacionUpmProyectoController extends Controller
     public function obtenerUpmsProyecto($id)
     {
         try {
-            $asginaciones = AsignacionUpmProyecto::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id')
+            $asginaciones = AsignacionUpmProyecto::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id',
+            'estado_upm.cod_estado')
                 ->join('upm', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                 ->join('municipio', 'upm.municipio_id', 'municipio.id')
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')

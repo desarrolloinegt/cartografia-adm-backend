@@ -21,10 +21,12 @@ class PoliticaController extends Controller
     public function createPolicy(Request $request)
     {
         $validateData = $request->validate([
-            'nombre' => 'required|string|unique:politica'
+            'nombre' => 'required|string|unique:politica',
+            'politica_sistema' => 'required|min:1|max:1'
         ]);
         $politica = Politica::create([
             "nombre" => $validateData['nombre'],
+            "politica_sistema" => $validateData['politica_sistema'],
             "estado" => 1
         ]);
         return response()->json([
@@ -42,10 +44,50 @@ class PoliticaController extends Controller
      */
     public function obtenerPoliticas()
     {
-        $politicas = Politica::select("id", "nombre")
-            ->where("estado", 1)
-            ->get();
-        return response()->json($politicas);
+        try {
+            $politicas = Politica::select("id", "nombre", "politica_sistema")
+                ->where("estado", 1)
+                ->get();
+            return response()->json($politicas, 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+
+    }
+
+    public function obtenerPoliticasSistema()
+    {
+        try {
+            $politicas = Politica::select("id", "nombre", "politica_sistema")
+                ->where("estado", 1)
+                ->where("politica_sistema",1)
+                ->get();
+            return response()->json($politicas, 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerPoliticasProyecto()
+    {
+        try {
+            $politicas = Politica::select("id", "nombre", "politica_sistema")
+                ->where("estado", 1)
+                ->where("politica_sistema",0)
+                ->get();
+            return response()->json($politicas, 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -63,7 +105,7 @@ class PoliticaController extends Controller
 
     public function modificarPolitica(Request $request)
     {
-        try{
+        try {
             $validateData = $request->validate([
                 'id' => 'required|int',
                 'nombre' => 'required|string',
@@ -82,13 +124,13 @@ class PoliticaController extends Controller
                     'message' => 'Dato no encontrado'
                 ], 404);
             }
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
         }
-        
+
     }
 
     /**
@@ -112,7 +154,7 @@ class PoliticaController extends Controller
                         'status' => true,
                         'message' => 'Politica desactivada correctamente'
                     ], 200);
-                }else{
+                } else {
                     return response()->json([
                         'status' => false,
                         'message' => 'La politica de administrador no se puede desactivar'
