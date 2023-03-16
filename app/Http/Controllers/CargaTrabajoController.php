@@ -499,10 +499,11 @@ class CargaTrabajoController extends Controller
                     $matchThese=["upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
                     AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>2]);
                     ControlProgreso::create([
-                        "fecha_inicio"=>$fecha,
+                        "fecha"=>$fecha,
                         "proyecto_id"=>$validateData['proyecto_id'],
                         "usuario_id"=>$assignment->usuario_id,
-                        "upm_id"=>$upm->id
+                        "upm_id"=>$upm->id,
+                        "estado_upm"=>2
                     ]);
                     return response()->json([
                         "status" => true,
@@ -534,8 +535,13 @@ class CargaTrabajoController extends Controller
                 if(isset($assignment)){
                     $matchThese=["upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
                     AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>3]);
-                    $matchThese=["usuario_id"=>$idUser,"upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
-                    ControlProgreso::where($matchThese)->update(['fecha_final'=>$fecha]);
+                    ControlProgreso::create([
+                        "fecha"=>$fecha,
+                        "proyecto_id"=>$validateData['proyecto_id'],
+                        "usuario_id"=>$assignment->usuario_id,
+                        "upm_id"=>$upm->id,
+                        "estado_upm"=>3
+                    ]);
                     return response()->json([
                         "status" => true,
                         "message" => "Actualizacion de upm Finalizada"

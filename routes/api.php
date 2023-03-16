@@ -7,6 +7,7 @@ use App\Http\Controllers\AsignacionRolPoliticaController;
 use App\Http\Controllers\AsignacionRolUsuarioController;
 use App\Http\Controllers\AsignacionUpmProyectoController;
 use App\Http\Controllers\CargaTrabajoController;
+use App\Http\Controllers\ControlProgresoController;
 use App\Http\Controllers\EquipoCampoController;
 use App\Http\Controllers\OrganizacionController;
 use App\Http\Controllers\PoliticaController;
@@ -166,6 +167,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/obtenerUpmSupervisor',[CargaTrabajoController::class,'getUpmSupervisor']);
     //Obtener cartografos del supervisor
     Route::post('/obtenerCartografosSupervisor',[CargaTrabajoController::class,'getCartographerSupervisor']);
+    
+
+    //Control de progreso
+    Route::post('/bitacoraUpm',[ControlProgresoController::class,'getLogUpm']);
     
     //Equipos
     Route::post('/equipo',[EquipoCampoController::class,'createTeams']);

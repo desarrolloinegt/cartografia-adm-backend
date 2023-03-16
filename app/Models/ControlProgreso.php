@@ -11,9 +11,10 @@ class ControlProgreso extends Model
     protected $table="control_de_progreso";
     public $timestamps = false;
     protected $fillable = [
-        'fecha_inicio',
+        'fecha',
         'upm_id',
         'usuario_id',
-        'proyecto_id'
+        'proyecto_id',
+        'estado_upm'
     ];
 }
