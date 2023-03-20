@@ -17,7 +17,7 @@ use App\Models\AsignacionGrupo;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use DateTimeInterface;
 class UsuarioController extends Controller
 {
 
@@ -93,7 +93,8 @@ class UsuarioController extends Controller
                 if ($user->estado_usuario == 1) {
                     if (Hash::check($validateData['password'], $user->password)) { //comparacion de contraseñas
                         Auth::login($user);
-                        $token = $user->createToken('auth_token')->plainTextToken; //Creacion del token Bearer
+                        $timeStamps= DateTimeInterface::RSS;
+                        $token = $user->createToken('auth_token',['*'])->plainTextToken; //Creacion del token Bearer
                         return response()->json([
                             "status" => true,
                             "token" => $token,
