@@ -220,6 +220,7 @@ class CargaTrabajoController extends Controller
                     ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.usuario_id', 'usuario.id')
                     ->join('rol','rol.id','asignacion_rol_usuario.rol_id')
                     ->where('asignacion_upm_usuario.proyecto_id',$validateData['proyecto_id'])
+                    ->where('asignacion_rol_usuario.proyecto_id',$validateData['proyecto_id'])
                     ->where('asignacion_upm_usuario.usuario_asignador',$idUser)
                     ->where('rol.proyecto_id',$validateData['proyecto_id'])
                     ->get();

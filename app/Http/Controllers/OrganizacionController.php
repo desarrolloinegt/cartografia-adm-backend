@@ -301,7 +301,9 @@ class OrganizacionController extends Controller
                     ->join('rol AS rs', 'rs.id', 'ars.rol_id')
                     ->join('rol AS ri', 'ri.id', 'ari.rol_id')
                     ->where('rs.proyecto_id', $validateData['proyecto_id'])
-                    ->where('ri.proyecto_id',$validateData['proyecto_id']    )
+                    ->where('ri.proyecto_id',$validateData['proyecto_id'])
+                    ->where('ars.proyecto_id',$validateData['proyecto_id'])
+                    ->where('ari.proyecto_id',$validateData['proyecto_id'])
                     ->where('organizacion.proyecto_id',$validateData['proyecto_id'])
                     ->where('organizacion.usuario_asignador', $idUser)
                     ->get();
@@ -366,6 +368,7 @@ class OrganizacionController extends Controller
                 ->join('usuario', 'asignacion_rol_usuario.usuario_id', 'usuario.id')
                 ->join('rol', 'asignacion_rol_usuario.rol_id', 'rol.id')
                 ->where('rol.proyecto_id', $proyecto)
+                ->where('asignacion_rol_usuario.proyecto_id',$proyecto)
                 ->where('rol.id', $rol)
                 ->where('usuario.estado_usuario', 1)
                 ->where('rol.estado', 1)
@@ -389,6 +392,7 @@ class OrganizacionController extends Controller
                 ->where('organizacion.usuario_superior', $usuario)
                 ->where('rol.proyecto_id', $proyecto)
                 ->where('organizacion.proyecto_id',$proyecto)
+                ->where('asignacion_rol_usuario.proyecto_id',$proyecto)
                 ->where('rol.id', $rol)
                 ->where('usuario.estado_usuario', 1)
                 ->get();

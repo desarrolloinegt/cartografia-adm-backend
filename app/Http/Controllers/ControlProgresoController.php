@@ -64,7 +64,6 @@ class ControlProgresoController extends Controller
             if($rolUser->jerarquia == $rolMayor->jerarquia){
                 $total=UPM::selectRaw('COUNT(upm.nombre)')
                     ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
-                    ->join('asignacion_upm_usuario','asignacion_upm_usuario.upm_id','upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
                     ->get();
                 $inProgress=UPM::selectRaw('COUNT(upm.nombre)')
@@ -133,20 +132,23 @@ class ControlProgresoController extends Controller
                 ->first();
             $data="";
             if($rolUser->jerarquia == $rolMayor->jerarquia){
-                $data=Departamento::select('departamento.id','departamento.nombre')
+                $data=Departamento::selectRaw('departamento.id,departamento.nombre')
                     ->join('municipio','municipio.departamento_id','departamento.id')
                     ->join('upm','upm.municipio_id','municipio.id')
                     ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
+                    ->groupBy('departamento.id')
                     ->get();
             } else {
-                $data=Departamento::select('departamento.id','departamento.nombre')
+                $data=Departamento::selectRaw('departamento.id,departamento.nombre')
                     ->join('municipio','municipio.departamento_id','departamento.id')
                     ->join('upm','upm.municipio_id','municipio.id')
                     ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
                     ->join('asignacion_upm_usuario','asignacion_upm_usuario.upm_id','upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
                     ->where('asignacion_upm_usuario.usuario_id',$user)
+                    ->where('asignacion_upm_usuario.proyecto_id',$validateData['proyecto_id'])
+                    ->groupBy('departamento.id')
                     ->get();
             } 
             return response()->json($data,200);

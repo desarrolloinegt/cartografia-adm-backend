@@ -93,7 +93,9 @@ class UsuarioController extends Controller
                 if ($user->estado_usuario == 1) {
                     if (Hash::check($validateData['password'], $user->password)) { //comparacion de contraseñas
                         Auth::login($user);
-                        $timeStamps= DateTimeInterface::RSS;
+                        /*if($user->tokens()->where('tokenable_id',$user->id)->exists()){
+                            $user->tokens()->delete();
+                        }*/
                         $token = $user->createToken('auth_token',['*'])->plainTextToken; //Creacion del token Bearer
                         return response()->json([
                             "status" => true,
