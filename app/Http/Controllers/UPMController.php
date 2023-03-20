@@ -51,7 +51,8 @@ class UPMController extends Controller
                     UPM::create([
                         'municipio_id'=>$value['municipio_id'],
                         'nombre'=>$value['nombre'],
-                        'estado'=>1
+                        'estado'=>1,
+                        'departamento_id'=>$value['departamento_id']
                     ]);
 
                 }catch(\Throwable $th){

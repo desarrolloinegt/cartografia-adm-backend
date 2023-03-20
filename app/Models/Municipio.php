@@ -16,6 +16,7 @@ class Municipio extends Model
     public $timestamps = false;
     protected $fillable = [
         "nombre",
-        "departamento_id"
+        "departamento_id",
+        "id"
     ];
 }

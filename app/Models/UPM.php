@@ -17,6 +17,7 @@ class UPM extends Model
     protected $fillable = [
         'municipio_id',
         'estado',
-        'nombre'
+        'nombre',
+        'departamento_id'
     ];
 }

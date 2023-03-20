@@ -29,7 +29,8 @@ class MunicipioController extends Controller
                 try{
                     Municipio::create([
                         "nombre"=>$value['nombre'],
-                        "departamento_id"=>$value['departamento_id']
+                        "departamento_id"=>$value['departamento_id'],
+                        "id"=>$value['id']
                     ]);
                 }catch(\Throwable $th){
                     array_push($errores,$th->getMessage());

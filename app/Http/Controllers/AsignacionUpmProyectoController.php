@@ -51,7 +51,7 @@ class AsignacionUpmProyectoController extends Controller
 
                 return response()->json([
                     'status' => true,
-                    'message' => '  ',
+                    'message' => 'Upm asignada',
                     'errores' => $errores
                 ], 200);
             } else {
@@ -78,7 +78,7 @@ class AsignacionUpmProyectoController extends Controller
         try {
             $asginaciones = AsignacionUpmProyecto::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id',
             'estado_upm.cod_estado')
-                ->join('upm', 'asignacion_upm_proyecto.upm_id', 'upm.id')
+                ->join('upm','upm.id', 'asignacion_upm_proyecto.upm_id' )
                 ->join('municipio', 'upm.municipio_id', 'municipio.id')
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
