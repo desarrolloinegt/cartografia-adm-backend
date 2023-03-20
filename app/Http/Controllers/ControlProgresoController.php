@@ -65,6 +65,7 @@ class ControlProgresoController extends Controller
                 $total=UPM::selectRaw('COUNT(upm.nombre)')
                     ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
+                    ->where('asignacion_upm_proyecto.estado_upm','!=','4')
                     ->get();
                 $inProgress=UPM::selectRaw('COUNT(upm.nombre)')
                     ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
@@ -133,16 +134,14 @@ class ControlProgresoController extends Controller
             $data="";
             if($rolUser->jerarquia == $rolMayor->jerarquia){
                 $data=Departamento::selectRaw('departamento.id,departamento.nombre')
-                    ->join('municipio','municipio.departamento_id','departamento.id')
-                    ->join('upm','upm.municipio_id','municipio.id')
+                    ->join('upm','upm.departamento_id','departamento.id')
                     ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
                     ->groupBy('departamento.id')
                     ->get();
             } else {
                 $data=Departamento::selectRaw('departamento.id,departamento.nombre')
-                    ->join('municipio','municipio.departamento_id','departamento.id')
-                    ->join('upm','upm.municipio_id','municipio.id')
+                ->join('upm','upm.departamento_id','departamento.id')
                     ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
                     ->join('asignacion_upm_usuario','asignacion_upm_usuario.upm_id','upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
