@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
     ["asignar-upms-personal",0],["ver-upms-cartografo",0],["inicializar-actualizacion",0],["finalizar-actualizacion",0],
     ["ver-equipo-campo",0],["ver-usuarios-equipo-campo",0],["editar-equipo-campo",0],["agregar-vehiculo-equipo-campo",0],["crear-equipo-campo",0],
     ["editar-cartografo-upm",0],["ver-mapa",0],["supervisar",0],["asignar-usuario-politica",1],["asignar-rol-politica-proyecto",0],["asignar-usuario-rol-proyecto",0],
-    ["ver-usuario-rol-proyecto",0],["eliminar-usuario-rol-proyecto",0]];
+    ["ver-usuario-rol-proyecto",0],["eliminar-usuario-rol-proyecto",0],["configuracion-proyecto",0]];
 
     private $policyAdmin = "Administrador";
     /**
