@@ -78,6 +78,19 @@ class AsignacionUpmProyectoController extends Controller
     public function obtenerUpmsProyecto($id)
     {
         try {
+            /*$data=[];
+            $upms=AsignacionUpmProyecto::select('upm.nombre','upm.id','upm.departamento_id','upm.municipio_id','estado_upm.cod_estado','estado_upm.nombre as estado')
+                ->join('upm','upm.id','asignacion_upm_proyecto.upm_id')
+                ->join('estado_upm','estado_upm.cod_estado','asignacion_upm_proyecto.estado_upm')
+                ->where('asignacion_upm_proyecto.proyecto_id',$id)
+                ->where('upm.estado',1)
+                ->get();
+            foreach ($upms as $value) {
+                $dep=Departamento::where('id',$value->departamento_id)->first();
+                $matchThese=['id'=>$value->municipio_id,"departamento_id"=>$value->departamento_id];
+                $mun=Municipio::where($matchThese)->first();
+                array_push($data,["upm"=>$value->nombre,"id"=>$value->id,"departamento"=>$dep->nombre,"municipio"=>$mun->nombre,"cod_estado"=>$value->cod_estado,"estado"=>$value->estado]);
+            }*/
             $asginaciones = AsignacionUpmProyecto::selectRaw('departamento.nombre as departamento,municipio.nombre as municipio,
             upm.nombre as upm,estado_upm.nombre as estado,upm.id,estado_upm.cod_estado')
                 ->join('upm','upm.id', 'asignacion_upm_proyecto.upm_id' )

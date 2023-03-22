@@ -173,6 +173,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/bitacoraUpm',[ControlProgresoController::class,'getLogUpm']);
     Route::post('/progresoUpms',[ControlProgresoController::class,'getProgressDashboard']);
     Route::post('/departamentosProyecto',[ControlProgresoController::class,'getDepartmentsProject']);
+    Route::post('/dataDepartamentosProyecto',[ControlProgresoController::class,'getDataDeparments']);
 
     //Equipos
     Route::post('/equipo',[EquipoCampoController::class,'createTeams']);
