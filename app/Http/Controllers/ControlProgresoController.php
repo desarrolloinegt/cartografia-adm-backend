@@ -21,7 +21,35 @@ class ControlProgresoController extends Controller
                 "upm" => 'required|string'
             ]);
             $idUser = $request->user()->id;
-            $progress = ControlProgreso::select('upm.nombre as upm', 'control_de_progreso.fecha', 'estado_upm.nombre as tipo', 'estado_upm.cod_estado', 'usuario.nombres', 'usuario.apellidos')
+            $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+            ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
+            ->where('rol.proyecto_id', $validateData['proyecto_id'])
+            ->orderBy('rol.jerarquia', 'DESC')
+            ->first();
+
+            $rol = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+            ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
+            ->where('rol.proyecto_id', $validateData['proyecto_id'])
+            ->where('asignacion_rol_usuario.usuario_id',$idUser)
+            ->where('rol.estado', 1)
+            ->first();
+            $upm=UPM::where('nombre',$validateData['upm'])->first();
+            if ($rol->jerarquia == $rolMayor->jerarquia) {
+                $progress = ControlProgreso::select('upm.nombre as upm', 'control_de_progreso.fecha', 'estado_upm.nombre as tipo', 'estado_upm.cod_estado', 'usuario.nombres', 'usuario.apellidos')
+                ->join('upm', 'upm.id', 'control_de_progreso.upm_id')
+                ->join('asignacion_upm_usuario', 'asignacion_upm_usuario.upm_id', 'control_de_progreso.upm_id')
+                ->join('estado_upm', 'estado_upm.cod_estado', 'control_de_progreso.estado_upm')
+                ->join('usuario',function ($join){
+                    $join->on('usuario.id','control_de_progreso.usuario_id')->on('usuario.id','asignacion_upm_usuario.usuario_id');
+                })
+                ->where('control_de_progreso.upm_id',$upm->id)
+                ->where('usuario.estado_usuario', 1)
+                ->where('control_de_progreso.proyecto_id', $validateData['proyecto_id'])
+                ->where('asignacion_upm_usuario.proyecto_id', $validateData['proyecto_id'])
+                ->orderBy('control_de_progreso.fecha', 'DESC')->get();
+
+            } else {
+                $progress = ControlProgreso::select('upm.nombre as upm', 'control_de_progreso.fecha', 'estado_upm.nombre as tipo', 'estado_upm.cod_estado', 'usuario.nombres', 'usuario.apellidos')
                 ->join('upm', 'upm.id', 'control_de_progreso.upm_id')
                 ->join('asignacion_upm_usuario', 'asignacion_upm_usuario.upm_id', 'control_de_progreso.upm_id')
                 ->join('estado_upm', 'estado_upm.cod_estado', 'control_de_progreso.estado_upm')
@@ -34,6 +62,7 @@ class ControlProgresoController extends Controller
                 ->where('asignacion_upm_usuario.proyecto_id', $validateData['proyecto_id'])
                 ->orderBy('control_de_progreso.fecha', 'DESC')->get();
 
+            }
             return response()->json($progress, 200);
         } catch (\Throwable $th) {
             return response()->json([
