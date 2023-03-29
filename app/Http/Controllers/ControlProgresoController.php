@@ -125,7 +125,7 @@ class ControlProgresoController extends Controller
                     ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
                     ->where('asignacion_upm_proyecto.estado_upm', 3)
                     ->first();  
-                $finishedTotal=$finishedT->Cant;    
+                $finishedTotal=$finishedT->cant;    
                 $total = UPM::selectRaw('COUNT(upm.nombre) as cant')
                     ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                     ->join('asignacion_upm_usuario', 'asignacion_upm_usuario.upm_id', 'upm.id')
