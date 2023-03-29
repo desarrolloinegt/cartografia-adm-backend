@@ -289,7 +289,9 @@ class CargaTrabajoController extends Controller
         try {
             $upms = AsignacionUpmProyecto::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id')
                 ->join('upm', 'asignacion_upm_proyecto.upm_id', 'upm.id')
-                ->join('municipio', 'upm.municipio_id', 'municipio.id')
+                ->join('municipio',function ($join){
+                    $join->on('municipio.id','upm.municipio_id')->on('municipio.departamento_id','upm.departamento_id');
+                })
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
                 ->where('asignacion_upm_proyecto.proyecto_id', $id)
@@ -310,7 +312,9 @@ class CargaTrabajoController extends Controller
         try {
             $upms = AsignacionUpmUsuario::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id')
                 ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
-                ->join('municipio', 'upm.municipio_id', 'municipio.id')
+                ->join('municipio',function ($join){
+                    $join->on('municipio.id','upm.municipio_id')->on('municipio.departamento_id','upm.departamento_id');
+                })
                 ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')
