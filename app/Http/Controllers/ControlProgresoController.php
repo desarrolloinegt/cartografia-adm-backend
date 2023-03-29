@@ -92,13 +92,16 @@ class ControlProgresoController extends Controller
                 ->first();
             $inProgress = "";
             $finished = "";
+            $finishedTotal="";
             $total = "";
+            $totalProject="";
             if ($rolUser->jerarquia == $rolMayor->jerarquia) {
                 $total = UPM::selectRaw('COUNT(upm.nombre) as cant')
                     ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
                     ->where('asignacion_upm_proyecto.estado_upm', '!=', '4')
                     ->first();
+                    $totalProject =$total->cant;   
                 $inProgress = UPM::selectRaw('COUNT(upm.nombre) as cant')
                     ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
@@ -109,7 +112,20 @@ class ControlProgresoController extends Controller
                     ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
                     ->where('asignacion_upm_proyecto.estado_upm', 3)
                     ->first();
+                $finishedTotal=$finished->cant;    
             } else {
+                $totalProjectUser = UPM::selectRaw('COUNT(upm.nombre) as cant')
+                    ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
+                    ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
+                    ->where('asignacion_upm_proyecto.estado_upm', '!=', '4')
+                    ->first();
+                $totalProject= $totalProjectUser->cant; 
+                $finishedT = UPM::selectRaw('COUNT(upm.nombre) as cant')
+                    ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
+                    ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
+                    ->where('asignacion_upm_proyecto.estado_upm', 3)
+                    ->first();  
+                $finishedTotal=$finishedT->Cant;    
                 $total = UPM::selectRaw('COUNT(upm.nombre) as cant')
                     ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                     ->join('asignacion_upm_usuario', 'asignacion_upm_usuario.upm_id', 'upm.id')
@@ -137,7 +153,9 @@ class ControlProgresoController extends Controller
             return response()->json([
                 "total" => $total->cant,
                 "finalizados" => $finished->cant,
-                "progreso" => $inProgress->cant
+                "progreso" => $inProgress->cant,
+                "total_proyecto"=>$totalProject,
+                "total_finalizados"=>$finishedTotal
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
