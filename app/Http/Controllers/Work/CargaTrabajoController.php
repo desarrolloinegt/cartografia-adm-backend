@@ -1,16 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Work;
 
-use App\Models\AsginacionUpmEncargado;
-use App\Models\AsignacionGrupo;
+use App\Http\Controllers\Controller;
 use App\Models\AsignacionRolUsuario;
-use App\Models\AsignacionUpm;
-use App\Models\AsignacionUpmEncargado;
 use App\Models\AsignacionUpmProyecto;
 use App\Models\AsignacionUpmUsuario;
 use App\Models\ControlProgreso;
-use App\Models\Grupo;
 use App\Models\Organizacion;
 use App\Models\Rol;
 use App\Models\UPM;
@@ -21,25 +17,30 @@ use Illuminate\Support\Facades\DB;
 
 class CargaTrabajoController extends Controller
 {
-    public function asignarUpmsAPersonal(Request $request)
+    /**
+     * @param $request datos enviados del frontend en formato json
+     * Function para asignar upms a usuarios
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function assignn(Request $request)
     {
-        $idUser = $request->user()->id;
+        $idUser = $request->user()->id; //Id del usuario autenticado
         $errors = [];
         try {
-            $array = $request->all();
-            $idProject = $array[0]['proyecto_id'];
+            $array = $request->all(); //Convertir el json en un array
+            $idProject = $array[0]['proyecto_id'];//Obtener el id del proyecto
             $errors = $this->verifiUpmAndUserExists($array);
             if (empty($errors)) {
                 $errors = $this->verifyUserUpmProject($array); //Verificar si hay errores en que los usuarios y upms si existan en el proyecto
                 if (empty($errors)) {
                     $errors = $this->verifyNotAssignmet($array);
                     if (empty($errors)) {
-                        $rolUser = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+                        $rolUser = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')//busca el rol del usuario
                             ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
                             ->where('asignacion_rol_usuario.usuario_id', $idUser)
                             ->where('rol.estado', 1)
                             ->first();
-                        $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+                        $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')//busca el rol mayor del proyecto
                             ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                             ->where('rol.proyecto_id', $idProject)
                             ->orderBy('rol.jerarquia', 'DESC')
@@ -204,15 +205,20 @@ class CargaTrabajoController extends Controller
         }
     }
 
-    public function obtenerUpmsPersonal(Request $request)
+    /**
+     * @param $request obtiene los datos enviados desde el frontend en formato JSON
+     * function para obtener la lista de upms y su personal
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getUpmsPersonal(Request $request)
     {
         try {
-            $idUser = $request->user()->id;
+            $idUser = $request->user()->id;//id del usuario autenticado
             $validateData = $request->validate([
                 "proyecto_id" => "int|required"
             ]);
-            $user = User::find($idUser);
-            if (isset($user)) {
+            $user = User::find($idUser);//busca el usuario por su id
+            if (isset($user)) { //Verifica que el usuario exista
                 $upms=AsignacionUpmUsuario::selectRaw('rol.nombre as rol,usuario.id ,CONCAT(usuario.codigo_usuario,\' \',
                 usuario.nombres,\' \',usuario.apellidos) AS encargado,upm.nombre as upm')
                     ->join('upm','upm.id','asignacion_upm_usuario.upm_id')
@@ -224,17 +230,6 @@ class CargaTrabajoController extends Controller
                     ->where('asignacion_upm_usuario.usuario_asignador',$idUser)
                     ->where('rol.proyecto_id',$validateData['proyecto_id'])
                     ->get();
-                /*$upms = AsignacionUpmUsuario::selectRaw('rol.nombre as rol,u.id ,CONCAT(u.codigo_usuario,\' \',
-                u.nombres,\' \',u.apellidos) AS encargado,upm.nombre as upm')
-                    ->join('upm', 'upm.id', 'asignacion_upm_usuario.upm_id')
-                    ->join('usuario AS u', 'u.id', 'asignacion_upm_usuario.usuario_id')
-                    ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.usuario_id', 'u.id')
-                    ->join('usuario AS as', 'as.id', 'asignacion_upm_usuario.usuario_asignador')
-                    ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
-                    ->join('proyecto','proyecto.id','rol.proyecto_id')
-                    ->where('proyecto.id', $validateData['proyecto_id'])
-                    ->where('asignacion_upm_usuario.usuario_asignador', $idUser)
-                    ->get();*/
                 return response()->json($upms, 200);
             } else {
                 return response()->json([
@@ -250,30 +245,35 @@ class CargaTrabajoController extends Controller
         }
     }
 
-    public function obtenerUpmsAsignados(Request $request)
+    /**
+     * @param $request obtiene los datos enviados por el frontend el formato JSON
+     * function para obtener los upms asignados a un usuario
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getUpmsAssigned(Request $request)
     {
         try {
             $validateData = $request->validate([
-                "usuario_id" => "int|required",
                 "proyecto_id" => "int|required"
             ]);
-            $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+            $userId=$request->user()->id;
+            $rolMayor = AsignacionRolUsuario::select('rol.id', 'rol.nombre', 'rol.jerarquia')//Busca el rol mayor del proyecto
                 ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                 ->where('rol.proyecto_id', $validateData['proyecto_id'])
                 ->orderBy('rol.jerarquia', 'DESC')
                 ->first();
 
-            $rol = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia')
+            $rol = Rol::select('rol.id', 'rol.nombre', 'rol.jerarquia') //Busca el rol del proyecto
                 ->join('asignacion_rol_usuario', 'asignacion_rol_usuario.rol_id', 'rol.id')
                 ->where('rol.proyecto_id', $validateData['proyecto_id'])
-                ->where('asignacion_rol_usuario.usuario_id', $validateData['usuario_id'])
+                ->where('asignacion_rol_usuario.usuario_id', $userId)
                 ->where('rol.estado', 1)
                 ->first();
             if ($rol->jerarquia == $rolMayor->jerarquia) {
-                $upms = $this->obtenerUpmsJefe($validateData['proyecto_id']);
+                $upms = $this->getUpmsChief($validateData['proyecto_id']);
                 return response()->json($upms, 200);
             } else {
-                $upmss = $this->obtenerUpmsEmpleados($validateData['usuario_id'], $validateData['proyecto_id']);
+                $upmss = $this->getUpmsEmployee($userId, $validateData['proyecto_id']);
                 return response()->json($upmss, 200);
             }
         } catch (\Throwable $th) {
@@ -284,7 +284,11 @@ class CargaTrabajoController extends Controller
         }
     }
 
-    public function obtenerUpmsJefe($id)
+    /**
+     * @param $id obtiene el id del proyecto
+     * Function para obtener los upm siendo parte del rol mas alto del proyecto
+     */
+    public function getUpmsChief($id)
     {
         try {
             $upms = AsignacionUpmProyecto::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id')
@@ -307,7 +311,12 @@ class CargaTrabajoController extends Controller
         }
     }
 
-    public function obtenerUpmsEmpleados($usuario, $proyecto)
+    /**
+     * @param $usuario id del usuario
+     * @param $proyecto id del proyecto
+     * Function para obtener los upms asignados siendo parte de los roles superiores al mayor
+     */
+    public function getUpmsEmployee($userId, $projectId)
     {
         try {
             $upms = AsignacionUpmUsuario::select('departamento.nombre as departamento', 'municipio.nombre as municipio', 'upm.nombre as upm', 'estado_upm.nombre as estado', 'upm.id')
@@ -318,9 +327,9 @@ class CargaTrabajoController extends Controller
                 ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
                 ->join('departamento', 'departamento.id', 'municipio.departamento_id')
-                ->where('asignacion_upm_usuario.usuario_id', $usuario)
-                ->where('asignacion_upm_usuario.proyecto_id', $proyecto)
-                ->where('asignacion_upm_proyecto.proyecto_id', $proyecto)
+                ->where('asignacion_upm_usuario.usuario_id', $userId)
+                ->where('asignacion_upm_usuario.proyecto_id', $projectId)
+                ->where('asignacion_upm_proyecto.proyecto_id', $projectId)
                 ->where('estado_upm.cod_estado', 1)
                 ->get();
             return $upms;
@@ -332,10 +341,15 @@ class CargaTrabajoController extends Controller
         }
     }
 
-    public function obtenerUpmCartografos(Request $request)
+    /**
+     * @param $request obtiene los datos enviados por el frontend el formato JSON
+     * function para obtener los upms asignados a el cartografo
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getUpmCartographer(Request $request)
     {
         try {
-            $usuario = $request->user()->id;
+            $userId = $request->user()->id;//Id del usuario autenticado
             $validateData = $request->validate([
                 "proyecto_id" => "int|required"
             ]);
@@ -348,7 +362,7 @@ class CargaTrabajoController extends Controller
                 ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
                 ->join('departamento', 'departamento.id', 'upm.departamento_id')
-                ->where('asignacion_upm_usuario.usuario_id', $usuario)
+                ->where('asignacion_upm_usuario.usuario_id', $userId)
                 ->where('asignacion_upm_usuario.proyecto_id', $validateData['proyecto_id'])
                 ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
                 ->where('upm.estado', 1)
@@ -362,9 +376,14 @@ class CargaTrabajoController extends Controller
         }
     }
 
+    /**
+     * @param $request obtiene los datos enviados por el frontend el formato JSON
+     * function para obtener los upms asignados a el supervisor
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getUpmSupervisor(Request $request){
         try{
-            $idUser = $request->user()->id;
+            $idUser = $request->user()->id; //id del usuario autenticado
             $validateData = $request->validate([
                 "proyecto_id" => "int|required"
             ]);
@@ -406,12 +425,18 @@ class CargaTrabajoController extends Controller
         }
     }
 
+
+    /**
+     * @param $request obtiene los datos enviados por el frontend el formato JSON
+     * function para obtener los usuarios asignados al superisor
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getCartographerSupervisor(Request $request){
         try{
             $validateData=$request->validate([
                 "proyecto_id"=>"required|int"
             ]);
-            $idUser=$request->user()->id;
+            $idUser=$request->user()->id; // id del usuario autenticado
             $users=Organizacion::select()
                 ->join('usuario','usuario.id','organizacion.usuario_inferior')
                 ->where('organizacion.usuario_superior',$idUser)
@@ -425,31 +450,37 @@ class CargaTrabajoController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * @param $request obtiene los datos enviados por el frontend el formato JSON
+     * function para modificar el cartografo encargado de upms
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function modifyUpmCartographer(Request $request){
         try{
-            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
+            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));//Fecha para guardar logs
             $validateData = $request->validate([
                 "proyecto_id" => "int|required",
                 "usuario_nuevo"=>"required|int",
                 "upm"=>"required|string"
             ]);
-            $idUser=$request->user()->id;
-            $upm=UPM::where("nombre",$validateData['upm'])->first();
-            $cartographer=User::where("codigo_usuario",$validateData['usuario_nuevo'])->first();
-            $project=Proyecto::find($validateData['proyecto_id']);
-            if(isset($upm) && isset($cartographer) && isset($project)){
+            $idUser=$request->user()->id; //id del usuario autenticado
+            $upm=UPM::where("nombre",$validateData['upm'])->first(); //Busca el upm por su id
+            $cartographer=User::where("codigo_usuario",$validateData['usuario_nuevo'])->first(); //busca el cartografo por su codigo
+            $project=Proyecto::find($validateData['proyecto_id']); //Busca el proyecto por su id
+            if(isset($upm) && isset($cartographer) && isset($project)){ 
                 $matchThese=["usuario_superior"=>$idUser,"usuario_inferior"=>$cartographer->id];
-                $assignmentUser=Organizacion::where($matchThese)->first();
+                $assignmentUser=Organizacion::where($matchThese)->first();//Verifica que el usuario autenticado sea superior 
                 if(isset($assignmentUser)){
                     $matchThese=["proyecto_id"=>$project->id,"upm_id"=>$upm->id,"usuario_asignador"=>$idUser];
-                    $assignment=AsignacionUpmUsuario::where($matchThese)->first();
+                    $assignment=AsignacionUpmUsuario::where($matchThese)->first(); //Verifica si el upm ya esta asignado a un usuario
                     if(isset($assignment)){
                         AsignacionUpmUsuario::where($matchThese)->update(["usuario_id"=>$cartographer->id,"fecha_asignacion"=>$fecha]);
                         return response()->json([
                             "status" => true,
                             "message" => "Modificacion correcta"
                         ], 200);
-                    } else{
+                    } else{ //Si no es el caso crea un asignacion nueva
                         $matchThese=["proyecto_id"=>$project->id,"upm_id"=>$upm->id];
                         $assignment=AsignacionUpmUsuario::where($matchThese)->first();
                         if(isset($assignment)){
@@ -490,22 +521,27 @@ class CargaTrabajoController extends Controller
         }
     }
 
+    /**
+     * @param $request obtiene los datos enviados por el frontend el formato JSON
+     * function para inicializar la actualizacion de un upm
+     * 
+     */
     public function initActualization(Request $request){
         try{
-            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
+            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));//fecha para logs
             $validateData=$request->validate([
                 "upm"=>"required|string",
                 "proyecto_id"=>"required|int"
             ]);
-            $upm=UPM::where("nombre",$validateData['upm'])->first();
-            $idUser=$request->user()->id;
-            if(isset($upm)){
+            $upm=UPM::where("nombre",$validateData['upm'])->first(); //Busca el upm por su id
+            $idUser=$request->user()->id; //id del usuario autenticado
+            if(isset($upm)){ //Verifica que el upm exista
                 $matchThese=["usuario_id"=>$idUser,"upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
-                $assignment=AsignacionUpmUsuario::where($matchThese)->first();
+                $assignment=AsignacionUpmUsuario::where($matchThese)->first(); //Verifica que la asignacion exista
                 if(isset($assignment)){
                     $matchThese=["upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
-                    AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>2]);
-                    ControlProgreso::create([
+                    AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>2]); //Actualiza el estado a 2:Iniciado
+                    ControlProgreso::create([ //Se guarda el log en la tabla progreso
                         "fecha"=>$fecha,
                         "proyecto_id"=>$validateData['proyecto_id'],
                         "usuario_id"=>$assignment->usuario_id,
@@ -517,8 +553,7 @@ class CargaTrabajoController extends Controller
                         "message" => "Actualizacion de upm iniciada"
                     ], 200);
                 }
-            }
-           
+            } 
         } catch (\Throwable $th) {
             return response()->json([
                 "status" => false,
@@ -527,22 +562,28 @@ class CargaTrabajoController extends Controller
         }
     }
 
+
+    /**
+     * @param $request obtiene los datos enviados por el frontend el formato JSON
+     * function para finalizar la actualizacion de un upm
+     * 
+     */
     public function finishActualization(Request $request){
         try{
-            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
+            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala')); //Fecha para logs
             $validateData=$request->validate([
                 "upm"=>"required|string",
                 "proyecto_id"=>"required|int"
             ]);
-            $upm=UPM::where("nombre",$validateData['upm'])->first();
-            $idUser=$request->user()->id;
-            if(isset($upm)){
+            $upm=UPM::where("nombre",$validateData['upm'])->first(); //Busca el upm por su id
+            $idUser=$request->user()->id; //id del usuario autenticado
+            if(isset($upm)){ //Verifica que el upm exista
                 $matchThese=["usuario_id"=>$idUser,"upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
-                $assignment=AsignacionUpmUsuario::where($matchThese)->first();
+                $assignment=AsignacionUpmUsuario::where($matchThese)->first(); //Verifica que la asignacion exista
                 if(isset($assignment)){
                     $matchThese=["upm_id"=>$upm->id,"proyecto_id"=>$validateData['proyecto_id']];
-                    AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>3]);
-                    ControlProgreso::create([
+                    AsignacionUpmProyecto::where($matchThese)->update(['estado_upm'=>3]); //Actualiza el estado a 3: Finalizado
+                    ControlProgreso::create([ //Crea un nuevo log en la tabla progreso
                         "fecha"=>$fecha,
                         "proyecto_id"=>$validateData['proyecto_id'],
                         "usuario_id"=>$assignment->usuario_id,

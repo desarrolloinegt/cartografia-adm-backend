@@ -1,17 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\UPM;
 
+use App\Http\Controllers\Controller;
 use App\Models\ReemplazoUpm;
-use Illuminate\Http\Request;
 
 class ReemplazoUpmController extends Controller
 {
-    public function verDetalle($id)
+    /**
+     * @param $id obtiene el id del upm
+     * Function para ver detalle de sustitucion de un upm
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function seeDetails($id)
     {
         try{
-            $reemplazo=ReemplazoUpm::where('upm_anterior',$id);
-            if(isset($reemplazo)){
+            $replace=ReemplazoUpm::where('upm_anterior',$id);//buscar que dicho reemplazo exista
+            if(isset($replace)){ //Vericia que si exista
                 $response=ReemplazoUpm::select('usuario.codigo_usuario','upm.nombre','reemplazo_upm.fecha','reemplazo_upm.descripcion')
                     ->join('usuario','usuario.id','reemplazo_upm.usuario_id')
                     ->join('upm','upm.id','reemplazo_upm.upm_nuevo')

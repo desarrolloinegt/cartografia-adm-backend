@@ -1,29 +1,23 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\UPM;
 
+use App\Http\Controllers\Controller;
 use App\Models\AsignacionUpmProyecto;
-use App\Models\Departamento;
-use App\Models\Municipio;
 use App\Models\ReemplazoUpm;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\UPM;
 use App\Models\Proyecto;
-use App\Models\AsignacionUpm;
-use Illuminate\Support\Facades\DB;
 
 class AsignacionUpmProyectoController extends Controller
 {
     /**
-     * @param $request recibe la peticion del frontend
+     * @param $request recibe los datos enviados desde el frontend en format JSON
+     * Function para asignar upms a un proyecto
      * $validateData valida los campos, es decir require que la peticion contenga un campo entero y un array de enteros
-     * Foreach para recorrer el array que es un array de ids de upms
-     * $asignacion hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
-     * ELOQUENT se hara cargo de insertar en la DB
      * @return \Illuminate\Http\JsonResponse
      */
-    public function asignacionMasiva(Request $request)
+    public function assign(Request $request)
     {
         $errores = [];
         try {
@@ -32,15 +26,14 @@ class AsignacionUpmProyectoController extends Controller
                 'umps.*' => 'string',
                 'proyecto_id' => 'required|int'
             ]);
-            $proyecto = Proyecto::find($validateData['proyecto_id']);
+            $proyecto = Proyecto::find($validateData['proyecto_id']);//Buscar el proyecto en la db
             $arrayUpms = $validateData['upms'];
-            if (isset($proyecto)) {
-
+            if (isset($proyecto)) { //Verificar que el proyecto exista
                 foreach ($arrayUpms as $upms) {
                     try {
                         $upm = UPM::where('nombre', $upms)->first();
                         if (isset($upm)) {
-                            $asignacion = AsignacionUpmProyecto::create([
+                            $asignacion = AsignacionUpmProyecto::create([ //Metodo create de eloquent que hacer referencia a insert de sql
                                 "upm_id" => $upm->id,
                                 "proyecto_id" => $proyecto->id,
                                 "estado_upm" => 1
@@ -71,33 +64,21 @@ class AsignacionUpmProyectoController extends Controller
     }
 
     /**
-     * Con esta funcion se obtine una tabla con el proyecto y los upms que tiene ese proyecto
+     * @param $id id del proyecto que se desea obtener los upms
+     * Funcion se obtine una tabla con el proyecto y los upms que tiene ese proyecto
      * siempre que el proyetco y upm esten activos y se agrupa los upms por el proyecto
      * @return \Illuminate\Http\JsonResponse
      */
-    public function obtenerUpmsProyecto($id)
+    public function getUpmsProject($id)
     {
         try {
-            /*$data=[];
-            $upms=AsignacionUpmProyecto::select('upm.nombre','upm.id','upm.departamento_id','upm.municipio_id','estado_upm.cod_estado','estado_upm.nombre as estado')
-                ->join('upm','upm.id','asignacion_upm_proyecto.upm_id')
-                ->join('estado_upm','estado_upm.cod_estado','asignacion_upm_proyecto.estado_upm')
-                ->where('asignacion_upm_proyecto.proyecto_id',$id)
-                ->where('upm.estado',1)
-                ->get();
-            foreach ($upms as $value) {
-                $dep=Departamento::where('id',$value->departamento_id)->first();
-                $matchThese=['id'=>$value->municipio_id,"departamento_id"=>$value->departamento_id];
-                $mun=Municipio::where($matchThese)->first();
-                array_push($data,["upm"=>$value->nombre,"id"=>$value->id,"departamento"=>$dep->nombre,"municipio"=>$mun->nombre,"cod_estado"=>$value->cod_estado,"estado"=>$value->estado]);
-            }*/
             $asginaciones = AsignacionUpmProyecto::selectRaw('departamento.nombre as departamento,municipio.nombre as municipio,
             upm.nombre as upm,estado_upm.nombre as estado,upm.id,estado_upm.cod_estado')
                 ->join('upm','upm.id', 'asignacion_upm_proyecto.upm_id' )
                 ->join('departamento', 'departamento.id', 'upm.departamento_id')
                 ->join('municipio',function ($join){
                     $join->on('municipio.id','upm.municipio_id')->on('municipio.departamento_id','upm.departamento_id');
-                })
+                }) //Join con doble condicion para evitar union de municipios con departamentos
                 ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
                 ->where('asignacion_upm_proyecto.proyecto_id', $id)
                 ->where('upm.estado', 1)
@@ -113,45 +94,48 @@ class AsignacionUpmProyectoController extends Controller
     }
 
 
-
-    public function sustituirUpm(Request $request)
+    /**
+    * @param $request obtiene los datos enviados por el frontend en formato JSON
+    * Function para sustituir upm, requisoto el proyecto, upm anterior, upm nuevo, motivo
+    *@return \Illuminate\Http\JsonResponse
+    */
+    public function replaceUpm(Request $request)
     {
         try {
-            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));
+            $fecha=new \DateTime("now",new \DateTimeZone('America/Guatemala'));//Fecha cuando se realiza la susticion
+            $user=$request->user()->id; //se obtiene el id del usuario que esta realizando las acciones por medio de su antenticacion
             $validateData = $request->validate([
                 'proyecto_id' => 'int|required',
                 'upm_anterior' => 'required|int',
                 'upm_nuevo' => 'required|string',
-                'usuario_id'=>'int|required',
                 'descripcion'=>'required|string'
             ]);
             $matchTheseAnterior = ['proyecto_id' => $validateData['proyecto_id'], 'upm_id' => $validateData['upm_anterior']];
-            $asignacionAnterior = AsignacionUpmProyecto::where($matchTheseAnterior)->first();
-            $user=User::find($validateData["usuario_id"]);
-            if (isset($asignacionAnterior) && isset($user)) {
-                $upm = UPM::where('upm.nombre', $validateData['upm_nuevo'])->first();
-                if (isset($upm)) {
+            $asignacionAnterior = AsignacionUpmProyecto::where($matchTheseAnterior)->first();//Verifica que si exista la asignacion anterior
+            if (isset($asignacionAnterior)) {
+                $upm = UPM::where('upm.nombre', $validateData['upm_nuevo'])->first();//Obtener informacion del ump nuevo
+                if (isset($upm)) { //Se verifica que si exista el nuevo upm
                     $matchThese = ['proyecto_id' => $validateData['proyecto_id'], 'upm_id' => $upm->id];
-                    $asignacionNueva = AsignacionUpmProyecto::where($matchThese)->first();
-                    if (isset($asignacionNueva)) {
+                    $asignacionNueva = AsignacionUpmProyecto::where($matchThese)->first();//Obtener informacion si el upm nuevo ya esta asignado
+                    if (isset($asignacionNueva)) { //Si ya esta asignado, devolvera error 400
                         return response()->json([
                             'status' => true,
                             'message' => 'Error, la UPM escrita ya existe en este proyecto'
-                        ], 404);
+                        ], 400);
                     }else{
                         $asignacion = AsignacionUpmProyecto::create([
                             'upm_id' => $upm->id,
                             'proyecto_id' => $validateData['proyecto_id'],
                             "estado_upm" => 1
-                        ]);
-                        $asignacionAnterior = AsignacionUpmProyecto::where($matchTheseAnterior)->update(['estado_upm'=>4]);
+                        ]); //Reqliza la nuevo asigancion
+                        $asignacionAnterior = AsignacionUpmProyecto::where($matchTheseAnterior)->update(['estado_upm'=>4]);//cambia el estado a sustituido
                         ReemplazoUpm::create([
-                            "usuario_id"=>$user->id,
+                            "usuario_id"=>$user,
                             "descripcion"=>$validateData['descripcion'],
                             "upm_anterior"=>$validateData['upm_anterior'],
                             "upm_nuevo"=>$upm->id,
                             "fecha"=>$fecha
-                        ]);
+                        ]); //Guardamos el log de la sustitucion
                         return response()->json([
                             'status' => true,
                             'message' => 'UPM sustituido'

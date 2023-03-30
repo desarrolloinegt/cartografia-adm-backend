@@ -1,29 +1,25 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Permiso;
 
+use App\Http\Controllers\Controller;
 use App\Models\AsignacionPoliticaPermiso;
 use App\Models\Politica;
 use Illuminate\Http\Request;
-use App\Models\AsignacionPermiso;
-use App\Models\Role;
-use App\Models\Permiso;
 
 class AsignacionPermisoPoliticaController extends Controller
 {
-
-
     /**
      * @param $request recibe la peticion del frontend
-     * $validateData valida los campos, es decir require que la peticion contenga un campo y un array de numeros\
-     * $rol busca que el rol si exista
+     * Function para asignar permisos a una politica
+     * $validateData valida los campos, es decir require que la peticion contenga un campo y un array de numeros
      * Foreach para recorrer el array de permisos y pasarlos al metodo create
      * $asignacion hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
      * ELOQUENT se hara cargo de insertar en la DB
      * @return \Illuminate\Http\JsonResponse
      */
 
-    public function asignacionMasiva(Request $request)
+    public function asignnment(Request $request)
     {
         try {
             $validateData = $request->validate([
@@ -31,7 +27,7 @@ class AsignacionPermisoPoliticaController extends Controller
                 'permisos' => 'array|required',
                 'permisos.*' => 'int'
             ]);
-            $politica = Politica::find($validateData['id']);
+            $politica = Politica::find($validateData['id']);  // busca que la politica  si exista
             $arrayPermisos = $validateData['permisos'];
             if (isset($politica)) {
                 AsignacionPoliticaPermiso::where('politica_id',$politica->id)->delete();
@@ -60,11 +56,11 @@ class AsignacionPermisoPoliticaController extends Controller
     }
 
     /**
-     *Funcion para obtener los roles con los permisos asignados, siempre que el permiso este activo
-     *y el rol este activo, agrupados por el rol 
+     *Funcion para obtener las politicas con los permisos asignados, siempre que el permiso este activo
+     *y la politica este activa, agrupados por la politica
      *@return \Illuminate\Http\JsonResponse 
      */
-    public function obtenerPoliticaPermisos($id)
+    public function getPolicyPermission($id)
     {
         try {
             $asginaciones = AsignacionPoliticaPermiso::select('permiso.alias')

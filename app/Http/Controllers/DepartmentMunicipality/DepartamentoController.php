@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
+namespace App\Http\Controllers\DepartmentMunicipality;
+use App\Http\Controllers\Controller;
 use App\Models\Departamento;
 
 class DepartamentoController extends Controller
@@ -12,13 +11,20 @@ class DepartamentoController extends Controller
      * funcion que devuelve todos los departamentos guardados en la DB
      * @return \Illuminate\Http\JsonResponse
      */
-    public function obtenerDepartamentos()
+    public function getDepartaments()
     {
         $departamentos = Departamento::all();
-        return response()->json($departamentos);
+        return response()->json($departamentos,200);
     }
 
-    public function cargarDepartamentos(Request $request){
+    
+    /**
+     * @param $request obteiene los datos del frontend en formato json
+     * Function para cargar los departamentos a la DB
+     *------------------ Function desactivada, usada solo para desarrollo------------------
+     */
+    /*
+    public function chargeDepartments(Request $request){
         try{
             $errores=[];
             $array=$request->all();
@@ -42,5 +48,5 @@ class DepartamentoController extends Controller
                 "message"=>$th->getMessage()
            ],500);
         }
-    }
+    }*/
 }

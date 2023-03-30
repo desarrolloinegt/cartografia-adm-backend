@@ -1,26 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\Grupo;
+namespace App\Http\Controllers\Project;
+use App\Http\Controllers\Controller;
 use App\Models\Rol;
 use Illuminate\Http\Request;
 use App\Models\Proyecto;
 use App\Models\Encuesta;
-use App\Models\AsignacionUpm;
-use App\Http\Controllers\AsignacionUpmController;
 
 class ProyectoController extends Controller
 {
     /**
-     * @param $request recibe la peticion del frontend
+     * @param $request recibe la peticion con los datos enviados desde el frontend
+     * Function para crear un proyecto
      * $validateData valida los campos, es decir require que la peticion contenga un campos, la inidicacion unique
      * hace una consulta a la db y se asegura de que no exista de lo contrario hara uso de  excepciones.
-     * $encuesta hace uso de ELOQUENT de laravel con el metodo create y solo es necesario pasarle los campos validados
-     * ELOQUENT se hara cargo de insertar en la DB
      * @return \Illuminate\Http\JsonResponse
      */
-    public function crearProyecto(Request $request)
+    public function createProject(Request $request)
     {
         try {
             $validateData = $request->validate([
@@ -29,9 +25,9 @@ class ProyectoController extends Controller
                 'descripcion'=>'',
                 'encuesta_id' => 'required|int'
             ]);
-            $encuesta = Encuesta::find($validateData['encuesta_id']);
-            if (isset($encuesta)) {
-                if ($encuesta->estado) {
+            $encuesta = Encuesta::find($validateData['encuesta_id']); //busca la encuesta por su id
+            if (isset($encuesta)) { //Veririca que la encueseta exista
+                if ($encuesta->estado==1) {//Verifica que la encuesta este activa
                     $proyecto = Proyecto::create([
                         "nombre" => $validateData['nombre'],
                         "year" => $validateData['year'],
@@ -66,12 +62,12 @@ class ProyectoController extends Controller
     }
 
     /**
-     * @param $request recibe la peticion del frontend
+     * Function para obtener todos los proyectos
      * A traves de ELOQUENT podemos usar el metodo select y seleccionar los campos con la condicion de que el estado
      * sea 1, es decir este activo      
      * @return \Illuminate\Http\JsonResponse
      */
-    public function obtenerProyectos()
+    public function getProjects()
     {
         $proyectos = Proyecto::select("proyecto.id", "proyecto.nombre", "proyecto.year", "encuesta.nombre AS encuesta", "proyecto.progreso","proyecto.descripcion")
             ->join('encuesta', 'proyecto.encuesta_id', 'encuesta.id')
@@ -81,16 +77,12 @@ class ProyectoController extends Controller
     }
 
     /**
-     * @param $request recibe la peticion del frontend
+     * @param $request recibe los datos enviados del  frontend
+     * Function para modificar un proyecto
      * $validateData valida los campos, es decir requiee que la peticion contenga cuatro campos 
-     * A traves de ELOQUENT podemos usar el metodo find y seleccionar la encuesta que corresponde el id
-     * 
-     * Al obtener el proyecto podemos hacer uso de sus variables y asignarle el valor obtenido en el validateData
-     * Con el metodo save() de ELOQUENT se hace referencia al UPDATE de SQL     
      * @return \Illuminate\Http\JsonResponse 
      */
-
-    public function modificarProyecto(Request $request)
+    public function editProject(Request $request)
     {
         try{
             $validateData = $request->validate([
@@ -100,8 +92,8 @@ class ProyectoController extends Controller
                 'encuesta_id' => 'required|int',
                 'descripcion' => '',
             ]);
-            $proyecto = Proyecto::find($validateData['proyecto_id']);
-            if (isset($proyecto)) {
+            $proyecto = Proyecto::find($validateData['proyecto_id']); //busca el proyecto por su id
+            if (isset($proyecto)) { //Verifica que el proyecto exista
                     $proyecto->nombre = $validateData['nombre'];
                     $proyecto->year = $validateData['year'];
                     $proyecto->encuesta_id = $validateData['encuesta_id'];
@@ -128,20 +120,16 @@ class ProyectoController extends Controller
 
     /**
      * @param $id recibe el id en la peticion GET
-     * A traves de ELOQUENT podemos usar el metodo find y seleccionar el proyecto que corresponde el id
-     * 
-     * Al obtener el proyecto podemos hacer uso de ELOQUENT y obtener su variable estado_proyecto y asignarle 0
-     * El metodo save() de ELOQUENT es equivalente al UPDATE de SQL
+     * Function para desactivar un proyecto
      * @return \Illuminate\Http\JsonResponse
      */
-
-    public function desactivarProyecto(int $id)
+    public function desactiveProject(int $id)
     {
         try {
-            $proyecto = Proyecto::find($id);
-            if (isset($proyecto)) {
-                $proyecto->estado_proyecto = 0;
-                $proyecto->save();
+            $proyecto = Proyecto::find($id); //Busca el proyecto por su id
+            if (isset($proyecto)) { //Verifica que el proyecto exista
+                $proyecto->estado_proyecto = 0; //Cambia de estado
+                $proyecto->save(); //Metodo save equivalente al UPDATE de sql
                 return response()->json([
                     'status' => true,
                     'message' => 'Proyecto desactivado correctamente'
@@ -162,20 +150,16 @@ class ProyectoController extends Controller
 
     /**
      * @param $id recibe el id en la peticion GET
-     * A traves de ELOQUENT podemos usar el metodo find y seleccionar el proyecto que corresponde el id
-     * 
-     * Al obtener el proyecto podemos hacer uso de ELOQUENT y obtener su variable progreso y asignarle 1
-     * que significa que esta finalizado
-     * El metodo save() de ELOQUENT es equivalente al UPDATE de SQL
+     * Function para finalizar un proyecto
      * @return \Illuminate\Http\JsonResponse  
      */
-    public function finalizarProyecto(int $id)
+    public function finishProject(int $id)
     {
         try {
-            $proyecto = Proyecto::find($id);
-            if (isset($proyecto)) {
-                $proyecto->progreso = 1;
-                $proyecto->save();
+            $proyecto = Proyecto::find($id);//Busca el proyecto por su id
+            if (isset($proyecto)) { //Verifica que el proyecto exista
+                $proyecto->progreso = 1; //Cambiar a 1 el progres
+                $proyecto->save(); //Metodo save equivalente a UPDATE de sql
                 return response()->json([
                     'status' => true,
                     'message' => 'Proyecto Finalizado'
@@ -194,16 +178,21 @@ class ProyectoController extends Controller
         }
     }
 
-    public function obtenerGruposPorProyecto($proyecto){
+    /**
+     * @param $proyecto obtieene el nombre del proyecto
+     * function para obtener roles por proyecto
+     * @return \Illuminate\Http\JsonResponse  
+     */
+    public function getRolesProject($proyecto){
         try{
-            $asignaciones = Rol::select('rol.id','rol.nombre', 'jerarquia','rol.descripcion','rol.proyecto_id')
+            $asignments = Rol::select('rol.id','rol.nombre', 'jerarquia','rol.descripcion','rol.proyecto_id')
                 ->join('proyecto','proyecto.id','rol.proyecto_id')
                 ->where('proyecto.nombre',$proyecto)
                 ->where('proyecto.estado_proyecto',1)
                 ->where('rol.estado',1)
                 ->orderBy('rol.jerarquia','DESC')
                 ->get();
-            return response()->json($asignaciones,200); 
+            return response()->json($asignments,200); 
         }catch(\Throwable $th){
             return response()->json([
                 'status' => false,
@@ -211,13 +200,19 @@ class ProyectoController extends Controller
             ], 500);
         }
     }
-    public function obtenerProyectoId($project){
+
+     /**
+     * @param $project obtiene el nombre del proyecto
+     * function para obtener el id del proyecto
+     * @return \Illuminate\Http\JsonResponse  
+     */
+    public function getProjectId($project){
         try{
-            $id = Proyecto::select('id')
+            $result = Proyecto::select('id')
                 ->where('proyecto.nombre',$project)
                 ->where('proyecto.estado_proyecto',1)
                 ->first();
-            return response()->json($id->id,200);
+            return response()->json($result->id,200);
         }catch(\Throwable $th){
             return response()->json([
                 'status' => false,
