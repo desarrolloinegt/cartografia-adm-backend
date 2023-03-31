@@ -205,7 +205,8 @@ class UsuarioController extends Controller
                 'proyecto' => 'required|string'
             ]);
             $project = Proyecto::where('nombre', $validateData['proyecto'])->first();
-            $permission = AsignacionRolUsuario::select('permiso.alias')
+            if(isset($project)){
+                $permission = AsignacionRolUsuario::select('permiso.alias')
                 ->join('rol', 'rol.id', 'asignacion_rol_usuario.rol_id')
                 ->join('asignacion_rol_politica', 'asignacion_rol_politica.rol_id', 'rol.id')
                 ->join('politica', 'politica.id', 'asignacion_rol_politica.politica_id')
@@ -220,10 +221,17 @@ class UsuarioController extends Controller
                 ->where('asignacion_rol_usuario.proyecto_id', $project->id)
                 ->groupBy('permiso.id')
                 ->get();
-            foreach ($permission as $permiso) {
-                array_push($permisosList, $permiso->alias);
+                foreach ($permission as $permiso) {
+                    array_push($permisosList, $permiso->alias);
+                }
+                return response()->json($permisosList, 200);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Proyecto no encontrado"
+                ], 404);
             }
-            return response()->json($permisosList, 200);
+           
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,

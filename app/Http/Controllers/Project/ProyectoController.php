@@ -212,7 +212,15 @@ class ProyectoController extends Controller
                 ->where('proyecto.nombre',$project)
                 ->where('proyecto.estado_proyecto',1)
                 ->first();
-            return response()->json($result->id,200);
+            if(isset($result)){
+                return response()->json($result->id,200);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Proyecto no encontrado"
+                ], 404);
+            }
+            
         }catch(\Throwable $th){
             return response()->json([
                 'status' => false,
