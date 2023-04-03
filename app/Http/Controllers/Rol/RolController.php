@@ -45,6 +45,28 @@ class RolController extends Controller
         }
     }
 
+    /** 
+     * @param $nombre nombre del rol
+     * @param $project_id id del  proyecto que pertenece el rol
+     * Function para crear un rol, creada para la automatizacion de un proyecto.
+     * @return
+    */
+    public function createRolSimple(string $nombre, int $project_id,int $jerarquia)
+    {
+        try {
+            $rol=Rol::create([
+                "nombre" => $nombre,
+                "estado" => 1,
+                "proyecto_id" => $project_id,
+                'jerarquia' => $jerarquia,
+                "descripcion" => ''
+            ]);
+            return $rol;
+        } catch (\Throwable $th) {
+           return '';
+        }
+    }
+
     /**
      * @param $request recibe la peticion del frontend
      * Function para obtener todos los roles
