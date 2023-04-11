@@ -180,6 +180,7 @@ class UsuarioController extends Controller
                 ->join('rol', 'asignacion_rol_usuario.rol_id', 'rol.id')
                 ->join('proyecto', 'proyecto.id', 'rol.proyecto_id')
                 ->where('usuario.id', $id)
+                ->where('proyecto.estado_proyecto',1)
                 ->groupBy('proyecto.nombre')
                 ->get();
             return response()->json($projects, 200);
