@@ -56,15 +56,20 @@ class ControlProgresoController extends Controller
             } else { //Si no es el rol mas alto ingresa en el else
                 $progress = ControlProgreso::select('upm.nombre as upm', 'control_de_progreso.fecha', 'estado_upm.nombre as tipo', 'estado_upm.cod_estado', 'usuario.nombres', 'usuario.apellidos')
                     ->join('upm', 'upm.id', 'control_de_progreso.upm_id')
-                    ->join('asignacion_upm_usuario', 'asignacion_upm_usuario.upm_id', 'control_de_progreso.upm_id')
+                    ->join('asignacion_upm_usuario', function ($join){
+                        $join->on('asignacion_upm_usuario.usuario_id', 'control_de_progreso.usuario_id')->on('asignacion_upm_usuario.upm_id', 'control_de_progreso.upm_id');
+                    } )
                     ->join('estado_upm', 'estado_upm.cod_estado', 'control_de_progreso.estado_upm')
-                    ->join('usuario', 'usuario.id', 'asignacion_upm_usuario.usuario_id')
+                    ->join('usuario', function ($join) {
+                        $join->on('usuario.id', 'control_de_progreso.usuario_id')->on('usuario.id', 'asignacion_upm_usuario.usuario_id');
+                    })
                     ->join('organizacion', 'organizacion.usuario_inferior', 'usuario.id')
-                    ->where('upm.nombre', $validateData['upm'])
+                    ->where('control_de_progreso.upm_id', $upm->id)
                     ->where('organizacion.usuario_superior', $idUser)
                     ->where('usuario.estado_usuario', 1)
                     ->where('control_de_progreso.proyecto_id', $validateData['proyecto_id'])
                     ->where('asignacion_upm_usuario.proyecto_id', $validateData['proyecto_id'])
+                    ->where('organizacion.proyecto_id', $validateData['proyecto_id'])
                     ->orderBy('control_de_progreso.fecha', 'DESC')->get();
             }
             return response()->json($progress, 200);
@@ -226,7 +231,7 @@ class ControlProgresoController extends Controller
 
     /**
      * @param $request obtiene los datos enviados del frontend en formato JSON
-     * Function para obtener los datos especifiso de un proyecto
+     * Function para obtener los datos especifico de un proyecto
      * @return \Illuminate\Http\JsonResponse
      */
     public function getDataDeparments(Request $request)
@@ -257,7 +262,7 @@ class ControlProgresoController extends Controller
                     ->first();
                 if (isset($assignment)) {
                     $dto = $this->getProgressDepartments($validateData['departamento_id'], $validateData['proyecto_id'], 0);
-                    $log = $this->getLogDepartment($validateData['departamento_id'], $validateData['proyecto_id'], 0);
+                    $log = $this->getLogDepartment($validateData['departamento_id'], $validateData['proyecto_id'],0);
                     $data = ["nombre" => $assignment->nombre, "total" => $dto['total'], "progreso" => $dto['progress'], "finished" => $dto['finished'], "data" => $log];
                 } else {
                     return response()->json([
@@ -278,7 +283,7 @@ class ControlProgresoController extends Controller
                 if (isset($assignment)) {
                     $dto = $this->getProgressDepartments($validateData['departamento_id'], $validateData['proyecto_id'], 1, $user);
                     $log = $this->getLogDepartment($validateData['departamento_id'], $validateData['proyecto_id'], 1, $user);
-                    $data = ["nombre" => $assignment->nombre, "total" => $dto['total'], "progress" => $dto['progress'], "finished" => $dto['finished'], "data" => $log];
+                    $data = ["nombre" => $assignment->nombre, "total" => $dto['total'], "progreso" => $dto['progress'], "finished" => $dto['finished'], "data" => $log];
                 } else {
                     return response()->json([
                         "status" => false,
