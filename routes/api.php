@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Permiso\AsignacionPermisoPoliticaController;
 use App\Http\Controllers\Politica\AsignacionPoliticaUsuarioController;
+use App\Http\Controllers\ResetPassowordController;
 use App\Http\Controllers\Rol\AsignacionRolPoliticaController;
 use App\Http\Controllers\Rol\AsignacionRolUsuarioController;
 use App\Http\Controllers\UPM\AsignacionUpmProyectoController;
@@ -34,7 +35,7 @@ use App\Http\Controllers\Vehicle\VehiculoController;
 |
 */
 Route::post('/login', [UsuarioController::class, 'login']);
-
+Route::post('/forgetPassword', [ResetPassowordController::class, 'forgetPassword']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user()->id;
 });
