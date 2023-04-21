@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('id', true);
             $table->tinyInteger('estado');
             $table->string('alias', 100)->unique('alias_UNIQUE');
+            $table->tinyInteger('permiso_sistema');
         });
     }
 

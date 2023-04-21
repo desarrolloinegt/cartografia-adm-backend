@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::table('control_de_progreso', function (Blueprint $table) {
             $table->foreign(['upm_id', 'usuario_id', 'proyecto_id'], 'fk_control_de_progreso_asginacion_upm_usuario1')->references(['upm_id', 'usuario_id', 'proyecto_id'])->on('asignacion_upm_usuario')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+            $table->foreign(['estado_upm'], 'fk_control_de_progreso_estado_upm')->references(['cod_estado'])->on('estado_upm')->onUpdate('NO ACTION')->onDelete('NO ACTION');
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('control_de_progreso', function (Blueprint $table) {
             $table->dropForeign('fk_control_de_progreso_asginacion_upm_usuario1');
+            $table->dropForeign('fk_control_de_progreso_estado_upm');
         });
     }
 };

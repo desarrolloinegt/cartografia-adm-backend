@@ -13,10 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('departamento', function (Blueprint $table) {
+        Schema::create('upm', function (Blueprint $table) {
             $table->comment('');
             $table->integer('id', true);
-            $table->string('nombre', 50)->unique('Nombre_UNIQUE');
+            $table->tinyInteger('estado');
+            $table->string('nombre', 100)->unique('nombre_UNIQUE');
+            $table->integer('municipio_id');
+            $table->integer('departamento_id');
+
+            $table->index(['municipio_id', 'departamento_id'], 'fk_municipio_id_idx');
         });
     }
 
@@ -27,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('departamento');
+        Schema::dropIfExists('upm');
     }
 };

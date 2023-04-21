@@ -203,14 +203,14 @@ class ControlProgresoController extends Controller
                 ->first();
             $data = "";
             if ($rolUser->jerarquia == $rolMayor->jerarquia) { //Verificar si el usuario pertenece al rol mas alto del proyecto
-                $data = Departamento::selectRaw('departamento.id,departamento.nombre')
+                $data = Departamento::selectRaw('departamento.id,departamento.nombre,departamento.url AS image')
                     ->join('upm', 'upm.departamento_id', 'departamento.id')
                     ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                     ->where('asignacion_upm_proyecto.proyecto_id', $validateData['proyecto_id'])
                     ->groupBy('departamento.id')
                     ->get();
             } else {
-                $data = Departamento::selectRaw('departamento.id,departamento.nombre')
+                $data = Departamento::selectRaw('departamento.id,departamento.nombre,departamento.url AS image')
                     ->join('upm', 'upm.departamento_id', 'departamento.id')
                     ->join('asignacion_upm_proyecto', 'asignacion_upm_proyecto.upm_id', 'upm.id')
                     ->join('asignacion_upm_usuario', 'asignacion_upm_usuario.upm_id', 'upm.id')

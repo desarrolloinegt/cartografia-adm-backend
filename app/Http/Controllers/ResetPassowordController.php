@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\ResetPassword;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use League\CommonMark\Extension\CommonMark\Node\Block\HtmlBlock;
 use Mail;
@@ -14,7 +15,7 @@ use Symfony\Component\Mime\Part\TextPart;
 
 class ResetPassowordController extends Controller
 {
-    public function forgetPassword(Request $request)
+    public function generateTokenReset(Request $request)
     {
         try {
             $validateData = $request->validate([
@@ -23,24 +24,15 @@ class ResetPassowordController extends Controller
 
             $user = User::where("email", $validateData['email'])->first();
             if (isset($user) && $user->estado_usuario == 1) {
-                $email = $validateData['email'];
                 $token = Str::random(50);
                 $date = new \DateTime("now", new \DateTimeZone('America/Guatemala'));
                
-                /*ForgotPassword::create([
-                'email'=>$user->email,
-                'token'=>$token,
-                'created_at'=>$date
+                ResetPassword::create([
+                    'email'=>$user->email,
+                    'token'=>$token,
+                    'fecha'=>$date
                 ]);
-                $body = 'Correo para recuperar tu contraseña.<h1>';
-                $textPart = new TextPart($body);
-                Mail::send([],[],function ($message) use($request,$textPart){
-                $message->to($request->email);
-                $message->subject('Recuperacion de contraseña');
-                $message->html("Instituto Nacional de Estadistica");
-                $message->htmlVersion(5);
-                $message->setBody($textPart);
-                });*/
+               
                 Mail::to($request->email)->send(new ResetPassword($user->email, $token));
                 return response()->json([
                     'status' => true,
@@ -59,6 +51,68 @@ class ResetPassowordController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
 
+    public function validateToken(Request $request){
+        try{
+            $validateData=$request->validate([
+                "email"=>'required|email',
+                "token"=>"required|string"
+            ]);
+            $matchThese=["email"=>$validateData['email'],"token"=>$validateData['token']];
+            $data=ResetPassword::where($matchThese)->first();
+            if(isset($data)){
+                $date = new \DateTime("now", new \DateTimeZone('America/Guatemala'));
+                $diff=$data->fecha->diffInMinutes($date);
+                if($diff<=10){
+                    return response()->json([
+                        'status' => true,
+                        'message' => "Token valido",
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'status' => false,
+                        'message' => "Token expirado",
+                    ], 400);
+                }
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Token incorrecto",
+                ], 404);
+            }
+        } catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function resetPassword(Request $request){
+        try{
+            $validateData=$request->validate([
+                "email"=>'required|email',
+                "token"=>'required|string',
+                "password"=>'required|min:8'
+            ]);
+            $matchThese=["email"=>$validateData['email'],"token"=>$validateData['token']];
+            $data=ResetPassword::where($matchThese)->first();
+            if(isset($data)){
+                $user=User::where('email',$validateData['email'])->first();
+                $user->password = Hash::make($validateData['password']); //Hashea la nueva contraseña
+                $user->save();//Metodo update de SQL
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Datos incorrectos",
+                ], 404);
+            }
+        }catch(\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 }

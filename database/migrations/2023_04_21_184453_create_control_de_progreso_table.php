@@ -15,14 +15,14 @@ return new class extends Migration
     {
         Schema::create('control_de_progreso', function (Blueprint $table) {
             $table->comment('');
-            $table->dateTime('fecha_inicio');
-            $table->dateTime('fecha_final')->nullable();
+            $table->dateTime('fecha');
             $table->integer('upm_id');
             $table->integer('usuario_id');
             $table->integer('proyecto_id');
+            $table->integer('estado_upm')->index('fk_control_de_progreso_estado_upm_idx');
 
             $table->index(['upm_id', 'usuario_id', 'proyecto_id'], 'fk_control_de_progreso_asginacion_upm_usuario1_idx');
-            $table->primary(['usuario_id', 'proyecto_id', 'upm_id']);
+            $table->primary(['usuario_id', 'proyecto_id', 'upm_id', 'estado_upm']);
         });
     }
 

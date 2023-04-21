@@ -13,8 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('upm', function (Blueprint $table) {
-            $table->foreign(['municipio_id'], 'fk_UPM_Municipio1')->references(['id'])->on('municipio')->onUpdate('NO ACTION')->onDelete('NO ACTION');
+        Schema::create('politica', function (Blueprint $table) {
+            $table->comment('');
+            $table->integer('id', true);
+            $table->string('nombre', 100)->unique('Nombre_UNIQUE');
+            $table->tinyInteger('estado');
+            $table->tinyInteger('politica_sistema');
         });
     }
 
@@ -25,8 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('upm', function (Blueprint $table) {
-            $table->dropForeign('fk_UPM_Municipio1');
-        });
+        Schema::dropIfExists('politica');
     }
 };
