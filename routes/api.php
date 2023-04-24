@@ -36,6 +36,8 @@ use App\Http\Controllers\Vehicle\VehiculoController;
 */
 Route::post('/login', [UsuarioController::class, 'login']);
 Route::post('/generateTokenReset', [ResetPassowordController::class, 'generateTokenReset']);
+Route::post('/verifyToken', [ResetPassowordController::class, 'validateToken']);
+Route::post('/resetPassword',[ResetPassowordController::class, 'resetPassword']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user()->id;
 });
