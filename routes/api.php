@@ -9,6 +9,7 @@ use App\Http\Controllers\UPM\AsignacionUpmProyectoController;
 use App\Http\Controllers\Work\CargaTrabajoController;
 use App\Http\Controllers\Work\ControlProgresoController;
 use App\Http\Controllers\Work\EquipoCampoController;
+use App\Http\Controllers\Work\OfficeWork;
 use App\Http\Controllers\Work\OrganizacionController;
 use App\Http\Controllers\Politica\PoliticaController;
 use App\Http\Controllers\UPM\ReemplazoUpmController;
@@ -175,4 +176,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/equipos', [EquipoCampoController::class, 'getTeams']);
     Route::post('/addEquipo', [EquipoCampoController::class, 'addTeam']);
     Route::post('/miembrosEquipo', [EquipoCampoController::class, 'getUsersTeam']);
+
+    //Work office
+    Route::post('/upmFinishedCartographer', [OfficeWork::class, 'getUpmFinishedCartographer']);
 });
