@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Work;
 use App\Http\Controllers\Controller;
 use App\Models\AsignacionRolUsuario;
 use App\Models\AsignacionUpmProyecto;
+use App\Models\AsignacionUpmUsuario;
 use App\Models\ControlProgreso;
 use App\Models\Departamento;
 use App\Models\Rol;
@@ -40,7 +41,21 @@ class ControlProgresoController extends Controller
                 ->first();
             $upm = UPM::where('nombre', $validateData['upm'])->first(); ///obtener informacion del upm 
             if ($rol->jerarquia == $rolMayor->jerarquia) { //Verificar que el rol del usuario sea el mas alto 
-                $progress = ControlProgreso::select('upm.nombre as upm', 'control_de_progreso.fecha', 'estado_upm.nombre as tipo', 'estado_upm.cod_estado', 'usuario.nombres', 'usuario.apellidos')
+                $assignments=AsignacionUpmUsuario::select('upm.nombre as upm','asignacion_upm_usuario.fecha_asignacion as fecha','estado_upm.nombre as tipo','estado_upm.cod_estado','usuario.nombres', 'usuario.apellidos')
+                    ->join('upm','upm.id','asignacion_upm_usuario.upm_id')
+                    ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
+                    ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
+                    ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_asignador')
+                    ->where('asignacion_upm_usuario.proyecto_id',$validateData['proyecto_id'])
+                    ->where('upm.id',$upm->id)
+                    ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
+                    ->orderBy('asignacion_upm_usuario.fecha_asignacion','ASC')
+                    ->get(); 
+                foreach($assignments as $progr){
+                    $progr->tipo="Asignada";
+                    $progr->cod_estado=1;
+                }    
+                $log = ControlProgreso::select('upm.nombre as upm', 'control_de_progreso.fecha', 'estado_upm.nombre as tipo', 'estado_upm.cod_estado', 'usuario.nombres', 'usuario.apellidos')
                     ->join('upm', 'upm.id', 'control_de_progreso.upm_id')
                     ->join('asignacion_upm_usuario', 'asignacion_upm_usuario.upm_id', 'control_de_progreso.upm_id')
                     ->join('estado_upm', 'estado_upm.cod_estado', 'control_de_progreso.estado_upm')
@@ -52,9 +67,26 @@ class ControlProgresoController extends Controller
                     ->where('control_de_progreso.proyecto_id', $validateData['proyecto_id'])
                     ->where('asignacion_upm_usuario.proyecto_id', $validateData['proyecto_id'])
                     ->orderBy('control_de_progreso.fecha', 'DESC')->get();
-
+                $progress=$assignments->concat($log);     
             } else { //Si no es el rol mas alto ingresa en el else
-                $progress = ControlProgreso::select('upm.nombre as upm', 'control_de_progreso.fecha', 'estado_upm.nombre as tipo', 'estado_upm.cod_estado', 'usuario.nombres', 'usuario.apellidos')
+                $assignments=AsignacionUpmUsuario::select('upm.nombre as upm','asignacion_upm_usuario.fecha_asignacion as fecha','estado_upm.nombre as tipo','estado_upm.cod_estado','usuario.nombres', 'usuario.apellidos')
+                    ->join('upm','upm.id','asignacion_upm_usuario.upm_id')
+                    ->join('asignacion_upm_proyecto','asignacion_upm_proyecto.upm_id','upm.id')
+                    ->join('estado_upm', 'estado_upm.cod_estado', 'asignacion_upm_proyecto.estado_upm')
+                    ->join('usuario','usuario.id','asignacion_upm_usuario.usuario_asignador')
+                    ->join('organizacion', 'organizacion.usuario_inferior', 'usuario.id')
+                    ->where('organizacion.usuario_superior', $idUser)
+                    ->where('organizacion.proyecto_id', $validateData['proyecto_id'])
+                    ->where('asignacion_upm_usuario.proyecto_id',$validateData['proyecto_id'])
+                    ->where('upm.id',$upm->id)
+                    ->where('asignacion_upm_proyecto.proyecto_id',$validateData['proyecto_id'])
+                    ->orderBy('asignacion_upm_usuario.fecha_asignacion','ASC')
+                    ->get(); 
+                foreach($assignments as $progr){
+                    $progr->tipo="Asignada";
+                    $progr->cod_estado=1;
+                }    
+                $log = ControlProgreso::select('upm.nombre as upm', 'control_de_progreso.fecha', 'estado_upm.nombre as tipo', 'estado_upm.cod_estado', 'usuario.nombres', 'usuario.apellidos')
                     ->join('upm', 'upm.id', 'control_de_progreso.upm_id')
                     ->join('asignacion_upm_usuario', function ($join){
                         $join->on('asignacion_upm_usuario.usuario_id', 'control_de_progreso.usuario_id')->on('asignacion_upm_usuario.upm_id', 'control_de_progreso.upm_id');
@@ -71,6 +103,7 @@ class ControlProgresoController extends Controller
                     ->where('asignacion_upm_usuario.proyecto_id', $validateData['proyecto_id'])
                     ->where('organizacion.proyecto_id', $validateData['proyecto_id'])
                     ->orderBy('control_de_progreso.fecha', 'DESC')->get();
+                $progress=$assignments->concat($log);    
             }
             return response()->json($progress, 200);
         } catch (\Throwable $th) {
